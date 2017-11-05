@@ -1,0 +1,92 @@
+/*
+ * styles.css
+ * Author: Michael Friedman
+ *
+ * Custom styles for all pages in the app.
+ */
+
+/* Set color scheme */
+.background-color-main {
+  background-color: white;
+}
+
+.background-color-accent {
+  /*background-color: #3b9bdb;*/
+  background-color: #03a9f4;
+}
+
+.text-color-main {
+  /*background-color: #680100;*/ /* dark maroon */
+  color: white;
+}
+
+.text-color-invert {
+  color: black;
+}
+
+.text-color-accent {
+  /*background-color: white;*/
+  color: #03a9f4;
+}
+
+/*---------------------------------------------------*/
+
+/* Styles for all pages */
+
+#navbar {
+  font-weight: normal;
+}
+
+.z-depth-1-half {
+   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.btn-link {
+  color: white;
+}
+
+/*---------------------------------------------------*/
+
+/* Profile page styles */
+
+#profile-jumbotron {
+  background-image: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20%28131%29.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#profile-username {
+  font-weight: bold;
+}
+
+#profile-quote {
+  font-weight: normal;
+}
+
+/* Small-medium devices */
+@media (max-width: 767px) {
+  #profile-username {
+    text-align: center;
+  }
+
+  #profile-quote {
+    text-align: center;
+  }
+}
+
+/*---------------------------------------------------------*/
+
+/* For reference */
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {  }
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {  }
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {  }
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {  }
