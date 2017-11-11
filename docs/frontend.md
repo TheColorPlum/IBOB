@@ -24,7 +24,7 @@ CSS:
 
 JavaScript:
 
-- As of now we do not have any JavaScript files that were not auto-generated.
+- scripts.js contains code controlling the behavior of all pages.
 
 ## Libraries We Use
 
