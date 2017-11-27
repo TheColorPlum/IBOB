@@ -7,7 +7,19 @@
 
 // Get/read operations
 
-function getUserInfo(user) {}
+function getUserInfo(user) {
+
+  const blockstack = this.blockstack;
+  const decrypt = true;
+
+  var userInfo = JSON.parse(blockstack.getFile(USER_FILE, decrypt));
+
+  return userInfo;
+}
+
+function getUserPosts(user, startIndex, count) {}
+
+function getUserNotifications(user) {}
 
 /******************************************************************************/
 
