@@ -10,6 +10,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mysql = require('mysql');
 
 // Import route for API
 var index = require('./routes/api');
@@ -18,6 +19,13 @@ var app = express();
 
 // Link API route to app
 app.use('/api', api);
+
+// Connect to database
+var con = mysql.createConnection({
+    host: "localhost",
+    user: "user",
+    password: "password"
+});
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -50,3 +58,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+module.exports = con;
