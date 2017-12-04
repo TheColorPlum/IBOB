@@ -15,16 +15,20 @@ $ cd ../user-server
 $ npm install
 ```
 
-You should be all set! You can verify that it works by running the `start` scripts in each component. For the app (again, from the root):
+You should be all set! You can verify that it works by running the `test.sh` and/or `start.sh` scripts in each component. For the app (again, from the root):
 
 ```bash
 $ cd app
-$ ./start
+$ ./test.sh
+$ ./start.sh
 ```
 
 or for the user-server:
 
 ```bash
 $ cd user-server
-$ ./start
+$ ./test.sh
+$ ./start.sh
 ```
+
+**Note**: The tests for the app do not yet work, so you can expect failures if you run them now.
