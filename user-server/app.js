@@ -13,7 +13,7 @@ var bodyParser = require('body-parser');
 var mysql = require('mysql');
 
 // Import route for API
-var index = require('./routes/api');
+var api = require('./routes/api');
 
 var app = express();
 
@@ -58,4 +58,3 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-module.exports = con;
