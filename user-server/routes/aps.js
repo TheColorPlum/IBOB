@@ -6,8 +6,8 @@
  * (see documentation for details).
  */
 
-import { TokenVerifier, decodeToken } from 'jsontokens'
-const axios = require("axios");
+var axios = require("axios");
+var jsontokens = require("jsontokens");
 
 // Permission levels
 const permissions = {
@@ -29,7 +29,7 @@ const zonefileRegex = "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profi
  * Helper function to test whether a user is the owner. Returns boolean
  * indicator.
  */
-function isOwner(user) {
+var isOwner= function(user) {
     // TODO: Implement isOwner() (need to get owner from the database and compare)
     return user === "alice.id";
 }
@@ -47,15 +47,15 @@ function isOwner(user) {
  *
  * See documentation for more details.
  */
-function verifyRequest(encData, requester, reqPermission) {
+var verifyRequest = function(encData, requester, reqPermission) {
     //-----------------------------
     // Step 1: Authenticate user
     //-----------------------------
 
     // Get user's public key from blockstack. First, get
     // their profile.
-    var requesterUrl = blockstackBaseUrl + blockstackProfileExt + requester;
-    return axios.get(requesterUrl).then(response => {
+    var profileUrl = blockstackBaseUrl + blockstackProfileExt + requester;
+    return axios.get(profileUrl).then(response => {
 
         var json = response.data;
 
@@ -69,10 +69,10 @@ function verifyRequest(encData, requester, reqPermission) {
         return axios.get(zonefileUrl).then(response => {
 
             var json = response.data;
-            var publicKey = json[0].payload.subject.publicKey;
+            var publicKey = json[0].decodedToken.payload.subject.publicKey;
 
             // Check signature on request
-            var verified = new TokenVerifier(encAlg, publicKey).verify(encData);
+            var verified = new jsontokens.TokenVerifier(encAlg, publicKey).verify(encData);
             if (!verified) {
                 return {ok: false, decodedData: "", errorMsg: "Denied: Signature is invalid"};
             }
@@ -91,7 +91,7 @@ function verifyRequest(encData, requester, reqPermission) {
             // permission. Decode the token and return
             //-------------------------------------------------
 
-            decodedData = decodeToken(encData);
+            decodedData = jsontokens.decodeToken(encData);
             return {ok: true, decodedData: decodedData, errorMsg: ""}; // success!
 
 
@@ -103,4 +103,11 @@ function verifyRequest(encData, requester, reqPermission) {
         return {ok: false, decodedData: "", errorMsg: "Error: Request to Blockstack for " + requester + "'s profile failed."};
     });
 
+}
+
+
+module.exports = {
+    permissions,
+    encAlg,
+    verifyRequest
 }
