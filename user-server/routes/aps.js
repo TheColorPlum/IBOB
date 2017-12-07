@@ -25,6 +25,10 @@ const blockstackProfileExt = "/v1/names/";
 // Regex for Blockstack zonefiles
 const zonefileRegex = "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profile.json";
 
+// Time delta (ms) allowed between a request's send time and receive time to
+// consider it valid.
+const timeDelta = 5000;
+
 /*
  * Helper function to test whether a user is the owner. Returns boolean
  * indicator.
@@ -88,11 +92,25 @@ var verifyRequest = function(encData, requester, reqPermission) {
 
             //-------------------------------------------------
             // Step 3: Requester is authenticated and granted
-            // permission. Decode the token and return
+            // permission. Decode the token
             //-------------------------------------------------
 
-            decodedData = jsontokens.decodeToken(encData);
-            return {ok: true, decodedData: decodedData, errorMsg: ""}; // success!
+            var decodedData = jsontokens.decodeToken(encData);
+
+            //-------------------------------------------------
+            // Step 4: Check that timestamp in token is
+            // roughly now.
+            //-------------------------------------------------
+
+            var data = JSON.parse(decodedData);
+            var timestamp = new Date(data.timestamp);
+            var now = new Date();
+            if (Math.abs(now.getTime() - timestamp.getTime()) > timeDelta) {
+                return {ok: false, decodedData: "", errorMsg: "Denied: Request expired (timestamp is too early)"}
+            }
+
+            // Success!
+            return {ok: true, decodedData: decodedDataStr, errorMsg: ""};
 
 
         }).catch(error => { // failed to get requester's zonefile
