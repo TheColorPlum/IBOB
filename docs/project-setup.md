@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/get-npm), and [Docker/docker-compose](https://docs.docker.com/) installed. Before proceeding, make sure to have those installed.
+This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/get-npm), [Docker/docker-compose](https://docs.docker.com/), and [MySQL Server](https://www.mysql.com/downloads/) installed. Before proceeding, make sure to have those installed.
 
 
 ## How to set up the project
@@ -64,7 +64,15 @@ $ ./start.sh
 
 ### Our project
 
-Now, to set up our project, change into the `setup-scripts/` directory and run the `setup-project.sh` script:
+To set up our project, you will first need to configure MySQL a little bit (unfortunately we cannot yet automate this...). For our development version of the project, add a user named "root" with the password "TuringP_lumRubik$9". Then open the MySQL command line and enter the following statement:
+
+```bash
+$ mysql --user=root --password
+Enter password:
+mysql> CREATE DATABASE The_Feed;
+```
+
+Once you have created the database, the rest can be automated! Change into the `setup-scripts/` directory and run the `setup-project.sh` script:
 
 ```bash
 $ cd setup-scripts
