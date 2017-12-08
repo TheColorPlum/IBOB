@@ -6,6 +6,7 @@
  * (see documentation for details).
  */
 
+
 var axios = require("axios");
 var jsontokens = require("jsontokens");
 
@@ -38,6 +39,7 @@ var isOwner= function(user) {
     // TODO: Implement isOwner() (need to get owner from the database and compare)
     return user === "alice.id";
 }
+
 
 /*
  * Authenticates the requester (requester, their Blockstack ID) as the one who

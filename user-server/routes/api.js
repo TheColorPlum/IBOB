@@ -29,6 +29,7 @@ const urls = {
  * Returns a specified number of posts from the user's feed.
  */
 router.post(urls.getFeed, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -49,6 +50,7 @@ router.post(urls.getProfileInfo, function(req, res, next) {
         var profileInfo = dal.getProfileInfo();
         res.send(JSON.stringify(profileInfo));
     });
+
 });
 
 
@@ -56,6 +58,7 @@ router.post(urls.getProfileInfo, function(req, res, next) {
  * Returns a specified number of posts made by this user.
  */
 router.post(urls.getPosts, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -68,6 +71,7 @@ router.post(urls.getPosts, function(req, res, next) {
  * Updates this user's profile info.
  */
 router.post(urls.postProfileInfo, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -77,6 +81,7 @@ router.post(urls.postProfileInfo, function(req, res, next) {
  * Makes this user start following another specified user.
  */
 router.post(urls.postFollow, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -84,7 +89,10 @@ router.post(urls.postFollow, function(req, res, next) {
 /*
  * Uploads a photo to this user's account.
  */
+
+
 router.post(urls.postPhoto, function(req, res, next) {
+
     // TODO: Implement
 });
 

@@ -18,18 +18,12 @@ var api = require('./routes/api');
 var app = express();
 
 // Link API route to app
+
 app.use('/api', api.router);
 
-// Connect to database
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "user",
-    password: "password"
-});
-
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
