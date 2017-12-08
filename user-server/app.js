@@ -18,22 +18,8 @@ var api = require('./routes/api');
 var app = express();
 
 // Link API route to app
-app.use('/api', api);
 
-// Connect to database
-var con = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : 'TuringP_lumRubik$9',
-    database : 'The_Feed'
-});
-
-con.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
-});
-
-con.end();
+app.use('/api', api.router);
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -62,7 +48,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send('error');
 });
 
 module.exports = app;

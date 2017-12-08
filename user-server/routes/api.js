@@ -6,17 +6,30 @@
  */
 
 var aps = require('./aps');
+var dal = require('../dal');
 var express = require('express');
 var router = express.Router();
 
 /******************************************************************************/
 
-// GET requests
+const urls = {
+    getFeed: "/feed",
+    getProfileInfo: "/profile-info",
+    getPosts: "/posts",
+    postProfileInfo: "/profile-info",
+    postFollow: "/follow",
+    postPhoto: "/photo"
+}
+
+
+// GET requests (implemented as POST requests so they can receive request
+// body)
 
 /*
  * Returns a specified number of posts from the user's feed.
  */
-router.get('/feed', function(req, res, next) {
+router.post(urls.getFeed, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -25,22 +38,27 @@ router.get('/feed', function(req, res, next) {
 /*
  * Returns this user's profile info.
  */
-router.get('/profile-info', function(req, res, next) {
+router.post(urls.getProfileInfo, function(req, res, next) {
     // Verify
-    var verification = aps.verifyRequest(req.body, req.params.requester, aps.permissions.regular);
-    if (!verification.ok) {
-        res.send(verification.errorMsg);
-    }
-    var data = verification.decodedData;
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
 
-    // Process request
+        // Process request
+        var profileInfo = dal.getProfileInfo();
+        res.send(JSON.stringify(profileInfo));
+    });
+
 });
 
 
 /*
  * Returns a specified number of posts made by this user.
  */
-router.get('/posts', function(req, res, next) {
+router.post(urls.getPosts, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -52,7 +70,8 @@ router.get('/posts', function(req, res, next) {
 /*
  * Updates this user's profile info.
  */
-router.post('/profile-info', function(req, res, next) {
+router.post(urls.postProfileInfo, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -61,7 +80,8 @@ router.post('/profile-info', function(req, res, next) {
 /*
  * Makes this user start following another specified user.
  */
-router.post('/follow', function(req, res, next) {
+router.post(urls.postFollow, function(req, res, next) {
+
     // TODO: Implement
 });
 
@@ -69,9 +89,15 @@ router.post('/follow', function(req, res, next) {
 /*
  * Uploads a photo to this user's account.
  */
-router.post('/photo', function(req, res, next) {
+
+
+router.post(urls.postPhoto, function(req, res, next) {
+
     // TODO: Implement
 });
 
 
-module.exports = router;
+module.exports = {
+    router,
+    urls
+};
