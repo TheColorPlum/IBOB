@@ -1,0 +1,15 @@
+{
+  "name": "dummy-blockstack-core",
+  "version": "1.0.0",
+  "description": "Our project depends on the Blockstack Core API. We have a local, development version of it, but we are having trouble configuring it properly so we can use it (in particular, we cannot find a user's public/private key pair). Until we get this working, we have set up this directory with a *super* simple server that mimics one of Blockstack's API calls, and serves dummy zonefiles for users.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}

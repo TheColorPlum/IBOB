@@ -18,9 +18,9 @@ describe("Authenticating and granting permission to users", function() {
     var mallory = "mallory.id";
 
     // TODO: Get actual private keys from Blockstack browser. These are just fillers.
-    var alicePrivateKey   = "278a5de700e29faae8e40e366ec5012b5ec63d36ec77e8a2417154cc1d25383f";
-    var bobPrivateKey     = "278a5de700e29faae8e40e366ec5012b5ec63d36ec77e8a2417154cc1d25383f";
-    var malloryPrivateKey = "278a5de700e29faae8e40e366ec5012b5ec63d36ec77e8a2417154cc1d25383f";
+    var alicePrivateKey   = "86fc2fd6b25e089ed7e277224d810a186e52305d105f95f23fd0e10c1f15854501";
+    var bobPrivateKey     = "3548b2141ac92ada2aa7bc8391f15b8d70881956f7c0094fdde72313d06393b601";
+    var malloryPrivateKey = "af8d0f959ab8bed4399d60b7d5c568d9ec7eecf0da10bedeec3247eb5fcca1be01";
 
     // TODO: Before tests, set up database with Alice as owner.
 

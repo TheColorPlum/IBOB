@@ -19,11 +19,12 @@ const permissions = {
 const encAlg = "ES256k";
 
 // Blockstack core API url
-const blockstackBaseUrl = "http://localhost:6270";
+const blockstackBaseUrl = "http://localhost:6000"; // dummy-blockstack-core
 const blockstackProfileExt = "/v1/names/";
 
 // Regex for Blockstack zonefiles
-const zonefileRegex = "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profile.json";
+// const zonefileRegex = "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profile.json"; // real one
+const zonefileRegex = "http://localhost:6000/zonefile/[A-za-z]+.id"; // dummy-blockstack-core
 
 // Time delta (ms) allowed between a request's send time and receive time to
 // consider it valid.
@@ -95,22 +96,21 @@ var verifyRequest = function(encData, requester, reqPermission) {
             // permission. Decode the token
             //-------------------------------------------------
 
-            var decodedData = jsontokens.decodeToken(encData);
+            var decodedData = jsontokens.decodeToken(encData).payload;
 
             //-------------------------------------------------
             // Step 4: Check that timestamp in token is
             // roughly now.
             //-------------------------------------------------
 
-            var data = JSON.parse(decodedData);
-            var timestamp = new Date(data.timestamp);
+            var timestamp = new Date(decodedData.timestamp);
             var now = new Date();
-            if (Math.abs(now.getTime() - timestamp.getTime()) > timeDelta) {
+            if (now.getTime() - timestamp.getTime() > timeDelta) {
                 return {ok: false, decodedData: "", errorMsg: "Denied: Request expired (timestamp is too early)"}
             }
 
             // Success!
-            return {ok: true, decodedData: decodedDataStr, errorMsg: ""};
+            return {ok: true, decodedData: JSON.stringify(decodedData), errorMsg: ""};
 
 
         }).catch(error => { // failed to get requester's zonefile

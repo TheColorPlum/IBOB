@@ -9,7 +9,9 @@ This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www
 
 We have scripts that automate some of this setup (at least, the parts that *can* be automated) in the `setup-scripts/` directory. Any scripts mentioned below can be found in there.
 
-### Blockstack development environment
+### Blockstack development environment (NOT READY YET)
+
+> This Blockstack setup does not yet work. Refer to the next section for setting up a dummy version of Blockstack instead.
 
 Before you can set up our project, you will first need to set up Blockstack on your machine. The easiest way to do this is to download Blockstack's Docker containers, which create a mini Blockstack network that runs locally.
 
@@ -48,6 +50,17 @@ Before you can set up our project, you will first need to set up Blockstack on y
     - Navigate to the settings (cogwheel) tab.
     - Click "Remove Account".
     - Repeat this entire process (sad) from the beginning to recreate the account.
+
+### Dummy Blockstack network
+
+The project depends on the Blockstack Core API to get information about Blockstack users. For the sake of development, we are not using the real Blockstack API, and instead we tried to use the Docker-based development version of Blockstack. But we could not get this to work for our purposes either, so we created a simple server that mimics the API calls that our project needs.
+
+**TL;DR** Before running anything in our project, make sure to start the "Dummy Blockstack Core" server, located in `dummy-blockstack-core/`:
+
+```bash
+$ cd dummy-blockstack-core
+$ ./start.sh
+```
 
 ### Our project
 
