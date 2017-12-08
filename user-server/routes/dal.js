@@ -14,6 +14,16 @@ var connection = mysql.createConnection({
     database : 'The_Feed'
 });
 
+var response;
+var user_id = "mike.id";
+
+follow_user(user_id, function(result) {
+    if(result) {
+        response = result;
+        console.log(response);
+    }
+});
+
 /***********************************************************
  * Put requests interface to the database
  **********************************************************/
@@ -23,7 +33,7 @@ function follow_user(user_id, callback) {
         console.log("Connected!");
     });
 
-    var sql = "Insert INTO following (bsid) values " + user_id;
+    var sql = "Insert INTO following (bsid) values ('" + user_id + "')";
 
     connection.query(sql, function (err, result) {
         if (err) throw err;
@@ -31,9 +41,9 @@ function follow_user(user_id, callback) {
         console.log("1 follower added.");
 
         callback(result);
-    });
 
-    connection.end();
+        connection.end();
+    });
 }
 
 function add_follower(user_id, callback) {
@@ -42,7 +52,7 @@ function add_follower(user_id, callback) {
         console.log("Connected!");
     });
 
-    var sql = "Insert INTO followers (bsid) values " + user_id;
+    var sql = "Insert INTO followers (bsid) values ('" + user_id + "')";
 
     connection.query(sql, function (err, result) {
         if (err) throw err;

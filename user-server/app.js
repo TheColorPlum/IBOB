@@ -13,7 +13,7 @@ var bodyParser = require('body-parser');
 var mysql = require('mysql');
 
 // Import route for API
-var index = require('./routes/api');
+var api = require('./routes/api');
 
 var app = express();
 
@@ -22,10 +22,18 @@ app.use('/api', api);
 
 // Connect to database
 var con = mysql.createConnection({
-    host: "localhost",
-    user: "user",
-    password: "password"
+    host     : 'localhost',
+    user     : 'root',
+    password : 'TuringP_lumRubik$9',
+    database : 'The_Feed'
 });
+
+con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!");
+});
+
+con.end();
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -58,4 +66,3 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-module.exports = con;
