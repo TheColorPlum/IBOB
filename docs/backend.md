@@ -41,3 +41,5 @@ Tests for the back end are written using the Mocha testing framework. They are p
 To keep the organization simple, we use a simple convention that all tests for a file (e.g. `routes/api.js`) are written in a file with the same name under `tests/` (e.g. `tests/api.js`).
 
 You can run all tests with our shortcut `test.sh` scripts (one in each component, app and user-server).
+
+Also, we have a small library of functions to help with debugging defined in `debug.js`. Check them out and see their usage in current tests.
