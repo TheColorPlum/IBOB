@@ -7,6 +7,7 @@
 
 var aps = require('./aps');
 var dal = require('../dal');
+var debug = require('../debug');
 var express = require('express');
 var router = express.Router();
 
@@ -40,7 +41,7 @@ router.post(urls.getFeed, function(req, res, next) {
  */
 router.post(urls.getProfileInfo, function(req, res, next) {
     // Verify
-    console.log("Token = " + req.body);
+    debug.log("Token = " + req.body);
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
         if (!verification.ok) {
             res.send(verification.errorMsg);

@@ -39,21 +39,21 @@ const timeDelta = 5000;
  * (Even though this is a simple true/false check, it unfortunately has to
  * return a Promise because the database query is asynchronous :| )
  */
-// var checkIsOwner = function(user) {
-//     return new Promise((resolve, reject) => {
-//         dal.getProfileInfo(user, profileInfo => {
-//             resolve(user === profileInfo.bsid);
-//         });
-//     });
-// }
+var checkIsOwner = function(user) {
+    return new Promise((resolve, reject) => {
+        dal.getProfileInfo(profileInfo => {
+            resolve(user === profileInfo.bsid);
+        });
+    });
+}
 
 // Dummy version that does not use the database. For testing purposes only
 // before we had the database set up.
-var checkIsOwner = function(user) {
-    return new Promise((resolve, reject) => {
-        resolve(user === "alice.id");
-    });
-}
+// var checkIsOwner = function(user) {
+//     return new Promise((resolve, reject) => {
+//         resolve(user === "alice.id");
+//     });
+// }
 
 
 /*
