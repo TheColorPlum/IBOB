@@ -26,13 +26,16 @@ describe("GET /api" + api.urls.getProfileInfo, function() {
             coverPhoto: 21
         };
 
-        var following = ["bob.id", "mallory.id"];
+        var bob = "bob.id";
+        var mallory = "mallory.id";
+        var following = [bob, mallory];
 
         // Insert profile info into the database
         dal.updateProfileInfo(profileInfo);
-        following.forEach(user => {
-            dal.addFollowing(user);
-        });
+
+        // Add users Alice is following
+        dal.followUser(bob, () => {
+        dal.followUser(mallory, () => {
 
         // Make request
         var reqBody = {"timestamp": (new Date()).toJSON()};
@@ -40,6 +43,7 @@ describe("GET /api" + api.urls.getProfileInfo, function() {
         .then(resp => {
             // Check that response has all attributes
             var json = resp.data;
+            console.log(json);
             for (attr in profileInfo) {
                 assert(json.hasOwnProperty(attr), "Response is missing attribute: " + attr);
                 assert.strictEqual(json[attr], profileInfo[attr], "Response has wrong value for attribute: " + attr);
@@ -53,7 +57,8 @@ describe("GET /api" + api.urls.getProfileInfo, function() {
 
             // Check that "following" lists match
             assert.deepStrictEqual(json.following, following, "Response's 'following' list is incorrect. Response: " + json.following + "; actual: " + following);
-        });
+
+        })})});
     });
 });
 

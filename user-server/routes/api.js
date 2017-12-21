@@ -14,9 +14,9 @@ var router = express.Router();
 
 const urls = {
     getFeed: "/feed",
-    getProfileInfo: "/profile-info",
+    getProfileInfo: "/get-profile-info",
     getPosts: "/posts",
-    postProfileInfo: "/profile-info",
+    postProfileInfo: "/update-profile-info",
     postFollow: "/follow",
     postPhoto: "/photo"
 }
@@ -40,6 +40,7 @@ router.post(urls.getFeed, function(req, res, next) {
  */
 router.post(urls.getProfileInfo, function(req, res, next) {
     // Verify
+    console.log("Token = " + req.body);
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
         if (!verification.ok) {
             res.send(verification.errorMsg);
@@ -47,10 +48,10 @@ router.post(urls.getProfileInfo, function(req, res, next) {
         }
 
         // Process request
-        var profileInfo = dal.getProfileInfo();
-        res.send(JSON.stringify(profileInfo));
+        dal.getProfileInfo(profileInfo => {
+            res.send(JSON.stringify(profileInfo));
+        });
     });
-
 });
 
 

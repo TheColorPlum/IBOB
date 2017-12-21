@@ -7,6 +7,7 @@
 
 var assert = require("assert");
 var aps = require("../routes/aps");
+var dal = require('../dal');
 var jsontokens = require("jsontokens");
 
 // Tests here
@@ -17,13 +18,14 @@ describe("Authenticating and granting permission to users", function() {
     var bob     = "bob.id";
     var mallory = "mallory.id";
 
-    // TODO: Get actual private keys from Blockstack browser. These are just fillers.
+    // Private keys from dummy blockstack core
     var alicePrivateKey   = "86fc2fd6b25e089ed7e277224d810a186e52305d105f95f23fd0e10c1f15854501";
     var bobPrivateKey     = "3548b2141ac92ada2aa7bc8391f15b8d70881956f7c0094fdde72313d06393b601";
     var malloryPrivateKey = "af8d0f959ab8bed4399d60b7d5c568d9ec7eecf0da10bedeec3247eb5fcca1be01";
 
-    // TODO: Before tests, set up database with Alice as owner.
-
+    // Set up database with Alice as owner
+    // dal.clearDatabase(() => {
+    // dal.setOwner(alice, () => {
 
     // Test normal use
     it("Verifies owner requesting owner-level permissions", function() {
@@ -101,4 +103,8 @@ describe("Authenticating and granting permission to users", function() {
             assert(verification.errorMsg.match("[E,e]xpire"), 'Failed for the wrong reason. Error message "' + verification.errorMsg + '"');
         });
     });
+
+    // }); // end of callback for dal.setOwner()
+
+    // }); // end of callback for dal.clearDatabase()
 });
