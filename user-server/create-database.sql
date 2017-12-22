@@ -3,36 +3,45 @@
 #
 # Creates the database for the user-server.
 
+# Photos
+CREATE TABLE IF NOT EXISTS photos (
+  id int NOT NULL auto_increment,
+  path varchar(255),
+  PRIMARY KEY (id)
+);
+
+# Posts
+CREATE TABLE IF NOT EXISTS posts (
+  id int NOT NULL auto_increment,
+  timestamp timestamp,
+  photoId int,
+  PRIMARY KEY (id),
+  FOREIGN KEY (photoId) REFERENCES photos(id)
+);
+
 # Profile info
-CREATE TABLE IF NOT EXISTS users_profile_info (
+CREATE TABLE IF NOT EXISTS profile_info (
   id int NOT NULL auto_increment,
   bsid varchar(255),
-  display_name varchar(255),
+  displayName varchar(255),
   bio varchar(255),
-  profile_photo_path varchar(255),
-  cover_photo_path varchar(255),
-  PRIMARY KEY (ID)
+  profilePhotoId int,
+  coverPhotoId int,
+  PRIMARY KEY (id),
+  FOREIGN KEY (profilePhotoId) REFERENCES photos(id),
+  FOREIGN KEY (coverPhotoId) REFERENCES photos(id)
 );
 
 # Followers
 CREATE TABLE IF NOT EXISTS followers (
   id int NOT NULL auto_increment,
-    bsid varchar(255),
-    primary key (id)
+  bsid varchar(255),
+  PRIMARY KEY (id)
 );
-
 
 # Following
 CREATE TABLE IF NOT EXISTS following (
   id int NOT NULL auto_increment,
-    bsid varchar(255),
-    primary key (id)
-);
-
-# Posts
-CREATE TABLE IF NOT EXISTS posts (
-  post_id int not null auto_increment,
-  times_tamp timestamp,
-  path varchar(255),
-  primary key (post_id)
+  bsid varchar(255),
+  PRIMARY KEY (id)
 );

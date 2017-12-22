@@ -55,51 +55,83 @@ var query = function(sql, msg, callback) {
 // Clears all data in the database tables. Call this, for instance, between
 // tests to start with a clean slate.
 var clearDatabase = function(callback) {
-    var clearUserProfileInfo = "TRUNCATE TABLE users_profile_info";
+    var clearUserProfileInfo = "TRUNCATE TABLE profile_info";
     var clearFollowers       = "TRUNCATE TABLE followers";
     var clearFollowing       = "TRUNCATE TABLE following";
     var clearPosts           = "TRUNCATE TABLE posts";
+    var clearPhotos          = "TRUNCATE TABLE photos";
 
     query(clearUserProfileInfo, "Cleared user profile info", function() {
     query(clearFollowers, "Cleared followers", function() {
     query(clearFollowing, "Cleared following", function() {
-    query(clearPosts, "Cleared posts", function(result) {
+    query(clearPosts, "Cleared posts", function() {
+    query(clearPhotos, "Cleared photos", function(result) {
         callback(result);
-    })})})});
+    })})})})});
 }
 
 /***********************************************************
  * Put requests interface to the database
  **********************************************************/
 
-var followUser = function(user_id, callback) {
-    var sql = "Insert INTO following (bsid) values ('" + user_id + "')";
-    var msg = "Successfully started following " + user_id;
+var followUser = function(bsid, callback) {
+    var sql = "Insert INTO following (bsid) values ('" + bsid + "')";
+    var msg = "Successfully started following " + bsid;
     query(sql, msg, callback);
 }
 
-var addFollower = function(user_id, callback) {
-    var sql = "Insert INTO followers (bsid) values ('" + user_id + "')";
-    var msg = "Successfully added " + user_id + " to followers";
+var addFollower = function(bsid, callback) {
+    var sql = "Insert INTO followers (bsid) values ('" + bsid + "')";
+    var msg = "Successfully added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
-var addPost = function(path, timestamp, callback) {
-    var sql = "INSERT INTO posts (path, time_stamp) values ('" + path + "', '" + timestamp + "')";
+var addPhoto = function(path, callback) {
+    var sql = "INSERT INTO photos (path) values ('" + path + "')";
+    var msg = "Photo added";
+    query(sql, msg, callback);
+}
+
+var addPost = function(timestamp, photoId, callback) {
+    var sql = "INSERT INTO posts (timestamp, photoId) values ('" + timestamp + "', '" + photoId + "')";
     var msg = "Post added";
     query(sql, msg, callback);
 }
 
-var updateProfileInfo = function(profile, callback) {
-    var sql = "UPDATE users_profile_info SET display_name = '" + profile.display_name + "', bio = '" + profile.bio + "', profile_photo_path = '" +
-        profile.profile_photo_path + "', cover_photo_path = '" + profile.cover_photo_path + "' WHERE bsid = '" + profile.bsid + "'";
+var updateProfileInfo = function(profile, bsid, callback) {
+    var values = "";
+    if (profile.displayName) {
+        values += "displayName = '" + profile.displayName + "',";
+    }
+    if (profile.bio) {
+        values += "bio = '" + profile.bio + "',";
+    }
+    if (profile.profilePhotoId) {
+        values += "profilePhotoId = '" + profile.profilePhotoId + "',";
+    }
+    if (profile.coverPhotoId) {
+        values += "coverPhotoId = '" + profile.coverPhotoId + "',";
+    }
+
+    if (values === "") {
+        // Nothing to update
+        callback();
+        return;
+    }
+
+    // Cut off trailing comma
+    values = values.substring(0, sql.length - 1);
+
+    // Construct complete SQL statement
+    sql = "UPDATE profile_info SET " + values + " WHERE bsid = " + bsid;
+
     var msg = "Profile updated";
     query(sql, msg, callback);
 }
 
-var setOwner = function(owner, callback) {
-    var sql = "INSERT INTO users_profile_info (bsid) values ('" + owner + "')";
-    var msg = "Owner set to " + owner;
+var setOwner = function(bsid, callback) {
+    var sql = "INSERT INTO profile_info (bsid) values ('" + bsid + "')";
+    var msg = "Owner set to " + bsid;
     query(sql, msg, callback);
 }
 
@@ -108,20 +140,38 @@ var setOwner = function(owner, callback) {
  * Get requests interface to the database
  **********************************************************/
 
-var retrievePosts = function(callback) {
-    var sql = "SELECT post_id, path, time_stamp from posts";
+var getPhotos = function(callback) {
+    var sql = "SELECT id, path FROM photos";
+    var msg = "Retrieved all photos";
+    query(sql, msg, callback);
+}
+
+var getPosts = function(callback) {
+    var sql = "SELECT id, path, timestamp from posts";
     var msg = "Retrieved all posts";
     query(sql, msg, callback);
 }
 
 var getProfileInfo = function(callback) {
-    var sql = "SELECT bsid, display_name, bio, profile_photo_path, cover_photo_path FROM users_profile_info";
+    var sql = "SELECT bsid, displayName, bio, profilePhotoId, coverPhotoId FROM profile_info";
     var msg = "Got profile info";
     query(sql, msg, function(rows) {
         // Parse result into a single JSON object before calling callback,
         // since it comes back as an array of rows.
         callback(rows[0]);
     });
+}
+
+var getFollowing = function(callback) {
+    var sql = "SELECT * FROM following";
+    var msg = "Got list of people I'm following";
+    query(sql, msg, callback);
+}
+
+var getFollowers = function(callback) {
+    var sql = "SELECT * FROM followers";
+    var msg = "Got list of my followers";
+    query(sql, msg, callback);
 }
 
 /***********************************************************
@@ -144,9 +194,13 @@ module.exports = {
     clearDatabase,
     followUser,
     addFollower,
+    addPhoto,
     addPost,
     updateProfileInfo,
     setOwner,
-    retrievePosts,
-    getProfileInfo
+    getPhotos,
+    getPosts,
+    getProfileInfo,
+    getFollowing,
+    getFollowers
 };
