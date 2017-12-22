@@ -109,8 +109,8 @@ var addPhoto = function(path, callback) {
     query(sql, msg, callback);
 }
 
-var addPost = function(timestamp, photoId, callback) {
-    var sql = "INSERT INTO posts (timestamp, photoId) values ('" + timestamp + "', '" + photoId + "')";
+var addPost = function(photoId, timestamp, callback) {
+    var sql = "INSERT INTO posts (photoId, timestamp) values ('" + photoId + "', '" + timestamp + "')";
     var msg = "Post added";
     query(sql, msg, callback);
 }
@@ -158,19 +158,20 @@ var setOwner = function(bsid, callback) {
  **********************************************************/
 
 var getPhotos = function(callback) {
-    var sql = "SELECT id, path FROM photos";
+    var sql = "SELECT * FROM photos";
     var msg = "Retrieved all photos";
     query(sql, msg, callback);
 }
 
 var getPosts = function(callback) {
-    var sql = "SELECT id, path, timestamp from posts";
+    var sql = "SELECT * FROM posts JOIN photos ON posts.photoId = photos.id"
+               + " ORDER BY timestamp";
     var msg = "Retrieved all posts";
     query(sql, msg, callback);
 }
 
 var getProfileInfo = function(callback) {
-    var sql = "SELECT bsid, displayName, bio, profilePhotoId, coverPhotoId FROM profile_info";
+    var sql = "SELECT * FROM profile_info";
     var msg = "Got profile info";
     query(sql, msg, function(rows) {
         // Parse result into a single JSON object before calling callback,

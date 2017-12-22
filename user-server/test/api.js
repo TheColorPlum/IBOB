@@ -42,7 +42,7 @@ var setup = function(callback) {
 
 // Tests here
 
-describe("GET /api" + api.urls.getProfileInfo, function() {
+describe("/api" + api.urls.getProfileInfo, function() {
 
     it("Returns correct profile info", function(done) {
         setup(() => {
@@ -119,14 +119,56 @@ describe("GET /api" + api.urls.getProfileInfo, function() {
 });
 
 
-describe("GET /api" + api.urls.getPosts, function() {
+describe("/api" + api.urls.getPosts, function() {
 
-    it.skip("Returns correct posts", function() {
+    it("Returns correct posts", function(done) {
+        setup(() => {
 
+        // Add a few posts
+        var post1 = {id: 1, photoPath: "https://s3.amazon.com/1.png", timestamp: (new Date()).toJSON()};
+        var post2 = {id: 2, photoPath: "https://s3.amazon.com/2.png", timestamp: (new Date()).toJSON()};
+        var post3 = {id: 3, photoPath: "https://s3.amazon.com/3.png", timestamp: (new Date()).toJSON()};
+
+        dal.addPhoto(post1.photoPath, () => {
+        dal.addPhoto(post2.photoPath, () => {
+        dal.addPhoto(post3.photoPath, () => {
+
+        dal.addPost(post1.id, post1.timestamp, () => {
+        dal.addPost(post2.id, post2.timestamp, () => {
+        dal.addPost(post3.id, post3.timestamp, () => {
+
+        // Define expected response
+        var correctResponse = [
+            {id: post2.id, timestamp: post2.timestamp, path: post2.photoPath},
+            {id: post3.id, timestamp: post3.timestamp, path: post3.photoPath}
+        ];
+
+        // Make request
+        var data = {count: 2, offset: 1, timestamp: (new Date()).toJSON()};
+        var reqBody = new jsontokens.TokenSigner(aps.encAlg, alicePrivateKey).sign(data);
+        axios.post(baseUrl + "/api" + api.urls.getPosts + "?requester=" + alice, reqBody)
+        .then(resp => {
+
+            try {
+                // Check that response is the same as expected response
+                var json = resp.data;
+                assert.deepStrictEqual(json, correctResponse, "Response is incorrect");
+                done();
+            } catch (err) {
+                done(err);
+            }
+
+        }); // end of axios.post()
+
+        })})}); // end of dal.addPost()'s
+
+        })})}); // end of dal.addPhoto()'s
+
+        });
     });
 });
 
 
-describe("GET /api" + api.urls.getFeed, function() {
+describe("/api" + api.urls.getFeed, function() {
 
 });

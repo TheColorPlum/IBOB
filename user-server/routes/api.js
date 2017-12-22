@@ -14,12 +14,13 @@ var router = express.Router();
 /******************************************************************************/
 
 const urls = {
-    getFeed: "/feed",
+    getFeed: "/get-feed",
     getProfileInfo: "/get-profile-info",
-    getPosts: "/posts",
+    getPosts: "/get-posts",
+    getPhotos: "/get-photos",
     postProfileInfo: "/update-profile-info",
-    postFollow: "/follow",
-    postPhoto: "/photo"
+    postFollow: "/follow-user",
+    postPhoto: "/add-photo"
 }
 
 
@@ -41,7 +42,6 @@ router.post(urls.getFeed, function(req, res, next) {
  */
 router.post(urls.getProfileInfo, function(req, res, next) {
     // Verify
-    debug.log("Token = " + req.body);
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
         if (!verification.ok) {
             res.send(verification.errorMsg);
@@ -51,6 +51,9 @@ router.post(urls.getProfileInfo, function(req, res, next) {
         // Process request
         dal.getProfileInfo(profileInfo => {
         dal.getFollowing(following => {
+
+            // Delete SQL id
+            delete profileInfo.id;
 
             // Format "following" list to have just bsids ["alice.id", "bob.id", ...]
             profileInfo.following = [];
@@ -68,8 +71,37 @@ router.post(urls.getProfileInfo, function(req, res, next) {
  * Returns a specified number of posts made by this user.
  */
 router.post(urls.getPosts, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
 
-    // TODO: Implement
+        // Get posts
+        dal.getPosts(posts => {
+
+            // Check that parameters are valid
+            var body = JSON.parse(verification.decodedData);
+            var count = body.count;
+            var offset = body.offset;
+
+            var min = offset;
+            var max = offset + count - 1;
+            if (min < 0 || max < 0 || min > posts.length - 1 || max > posts.length - 1) {
+                res.send("Error: Invalid values for offset/count");
+                return;
+            }
+
+            // Only return `count` posts, starting from `offset`. Format to have
+            // id, timestamp, and path
+            var json = [];
+            for (var i = offset; i < offset + count; i++) {
+                json.push({id: posts[i].id, timestamp: posts[i].timestamp, path: posts[i].path});
+            }
+            res.json(json);
+        });
+    });
 });
 
 

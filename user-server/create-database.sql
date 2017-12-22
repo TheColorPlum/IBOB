@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS photos (
 # Posts
 CREATE TABLE IF NOT EXISTS posts (
   id int NOT NULL auto_increment,
-  timestamp timestamp,
   photoId int,
+  timestamp varchar(255),
   PRIMARY KEY (id),
   FOREIGN KEY (photoId) REFERENCES photos(id)
 );
