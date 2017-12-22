@@ -92,25 +92,26 @@ var clearDatabase = function(callback) {
  **********************************************************/
 
 var followUser = function(bsid, callback) {
-    var sql = "Insert INTO following (bsid) values ('" + bsid + "')";
+    var sql = "Insert INTO following (bsid) values (" + connection.escape(bsid) + ")";
     var msg = "Started following " + bsid;
     query(sql, msg, callback);
 }
 
 var addFollower = function(bsid, callback) {
-    var sql = "Insert INTO followers (bsid) values ('" + bsid + "')";
+    var sql = "Insert INTO followers (bsid) values (" + connection.escape(bsid) + ")";
     var msg = "Added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
 var addPhoto = function(path, callback) {
-    var sql = "INSERT INTO photos (path) values ('" + path + "')";
+    var sql = "INSERT INTO photos (path) values (" + connection.escape(path) + ")";
     var msg = "Photo added";
     query(sql, msg, callback);
 }
 
 var addPost = function(photoId, timestamp, callback) {
-    var sql = "INSERT INTO posts (photoId, timestamp) values ('" + photoId + "', '" + timestamp + "')";
+    var sql = "INSERT INTO posts (photoId, timestamp) values ("
+      + connection.escape(photoId) + ", " + connection.escape(timestamp) + ")";
     var msg = "Post added";
     query(sql, msg, callback);
 }
@@ -118,16 +119,16 @@ var addPost = function(photoId, timestamp, callback) {
 var updateProfileInfo = function(bsid, profile, callback) {
     var values = "";
     if (profile.displayName) {
-        values += "displayName = '" + profile.displayName + "',";
+        values += "displayName = " + connection.escape(profile.displayName) + ",";
     }
     if (profile.bio) {
-        values += "bio = '" + profile.bio + "',";
+        values += "bio = " + connection.escape(profile.bio) + ",";
     }
     if (profile.profilePhotoId) {
-        values += "profilePhotoId = '" + profile.profilePhotoId + "',";
+        values += "profilePhotoId = " + connection.escape(profile.profilePhotoId) + ",";
     }
     if (profile.coverPhotoId) {
-        values += "coverPhotoId = '" + profile.coverPhotoId + "',";
+        values += "coverPhotoId = " + connection.escape(profile.coverPhotoId) + ",";
     }
 
     if (values === "") {
@@ -140,14 +141,16 @@ var updateProfileInfo = function(bsid, profile, callback) {
     values = values.substring(0, values.length - 1);
 
     // Construct complete SQL statement
-    sql = "UPDATE profile_info SET " + values + " WHERE bsid = '" + bsid + "'";
+    sql = "UPDATE profile_info SET " + values + " WHERE bsid = "
+      + connection.escape(bsid);
 
     var msg = "Profile updated";
     query(sql, msg, callback);
 }
 
 var setOwner = function(bsid, callback) {
-    var sql = "INSERT INTO profile_info (bsid) values ('" + bsid + "')";
+    var sql = "INSERT INTO profile_info (bsid) values ("
+      + connection.escape(bsid) + ")";
     var msg = "Owner set to " + bsid;
     query(sql, msg, callback);
 }
