@@ -50,8 +50,16 @@ router.post(urls.getProfileInfo, function(req, res, next) {
 
         // Process request
         dal.getProfileInfo(profileInfo => {
+        dal.getFollowing(following => {
+
+            // Format "following" list to have just bsids ["alice.id", "bob.id", ...]
+            profileInfo.following = [];
+            following.forEach(user => {
+                profileInfo.following.push(user.bsid);
+            });
             res.json(profileInfo);
-        });
+
+        })});
     });
 });
 

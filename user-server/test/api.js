@@ -29,6 +29,7 @@ const alicePrivateKey = "86fc2fd6b25e089ed7e277224d810a186e52305d105f95f23fd0e10
 //   });
 var setup = function(callback) {
     // Set up database with Alice as owner
+    debug.log("Resetting database");
     dal.clearDatabase(() => {
         dal.setOwner(alice, () => {
             // Run test
@@ -47,20 +48,43 @@ describe("GET /api" + api.urls.getProfileInfo, function() {
         setup(() => {
 
         // Define profile info
+        var profilePhoto = {
+            id: 1,
+            path: "profile.png"
+        };
+
+        var coverPhoto = {
+            id: 2,
+            path: "cover.png"
+        };
+
         var profileInfo = {
-            id: alice,
-            name: "Alice",
+            displayName: "Alice",
             bio: "Sample bio",
-            profilePhoto: 11,
-            coverPhoto: 21
+            profilePhotoId: profilePhoto.id,
+            coverPhotoId: coverPhoto.id
         };
 
         var bob = "bob.id";
         var mallory = "mallory.id";
         var following = [bob, mallory];
 
+        // Define expected JSON response
+        var correctResponse = {
+            bsid: alice,
+            displayName: profileInfo.displayName,
+            bio: profileInfo.bio,
+            profilePhotoId: profileInfo.profilePhotoId,
+            coverPhotoId: profileInfo.coverPhotoId,
+            following: following
+        }
+
+        // Insert photos
+        dal.addPhoto(profilePhoto.path, () => {
+        dal.addPhoto(coverPhoto.path, () => {
+
         // Insert profile info into the database
-        dal.updateProfileInfo(profileInfo, () => {
+        dal.updateProfileInfo(alice, profileInfo, () => {
 
         // Add users Alice is following
         dal.followUser(bob, () => {
@@ -72,26 +96,25 @@ describe("GET /api" + api.urls.getProfileInfo, function() {
         axios.post(baseUrl + "/api" + api.urls.getProfileInfo + "?requester=" + alice, reqBody)
         .then(resp => {
             try {
-                // Check that response has all attributes
                 var json = resp.data;
-                debug.log(JSON.stringify(json));
-                for (attr in profileInfo) {
-                    assert(json.hasOwnProperty(attr), "Response is missing attribute: " + attr);
-                    assert.strictEqual(json[attr], profileInfo[attr], "Response has wrong value for attribute: " + attr);
+                var jsonStr = JSON.stringify(json);
+
+                // Check that response has all attributes
+                for (attr in correctResponse) {
+                    assert(json.hasOwnProperty(attr), "Response is missing attribute: " + attr + ". Response:\n" + jsonStr);
+                    assert.deepStrictEqual(json[attr], correctResponse[attr], "Response has wrong value for attribute: " + attr + ". Response:\n" + jsonStr);
                 }
-                assert(json.hasOwnProperty("following"), "Response is missing attribute: following");
 
                 // Check that response has only those attributes
                 var numAttrs = Object.keys(json).length;
-                var correctNumAttrs = Object.keys(profileInfo).length + 1;
-                assert.strictEqual(numAttrs, correctNumAttrs, "Response has more attributes than it should. Response:\n" + JSON.stringify(json));
+                var correctNumAttrs = Object.keys(correctResponse).length;
+                assert.strictEqual(numAttrs, correctNumAttrs, "Response has more attributes than it should. Response:\n" + jsonStr);
 
-                // Check that "following" lists match
-                assert.deepStrictEqual(json.following, following, "Response's 'following' list is incorrect. Response: " + json.following + "; actual: " + following);
+                done();
             } catch (err) {
                 done(err);
             }
-        })})})})});
+        })})})})})})});
     });
 });
 

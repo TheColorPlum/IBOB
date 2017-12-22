@@ -47,7 +47,9 @@ var query = function(sql, msg, callback) {
         if (err) throw err;
 
         // Success!
-        debug.log("Success: " + msg);
+        if (msg !== "") {
+            debug.log("Database query successful: " + msg);
+        }
         callback(result);
     });
 }
@@ -55,19 +57,34 @@ var query = function(sql, msg, callback) {
 // Clears all data in the database tables. Call this, for instance, between
 // tests to start with a clean slate.
 var clearDatabase = function(callback) {
-    var clearUserProfileInfo = "TRUNCATE TABLE profile_info";
-    var clearFollowers       = "TRUNCATE TABLE followers";
-    var clearFollowing       = "TRUNCATE TABLE following";
-    var clearPosts           = "TRUNCATE TABLE posts";
-    var clearPhotos          = "TRUNCATE TABLE photos";
+    var clearTable = "DELETE FROM ";
+    var resetTable1 = "ALTER TABLE ";
+    var resetTable2 = " AUTO_INCREMENT = 1";
 
-    query(clearUserProfileInfo, "Cleared user profile info", function() {
-    query(clearFollowers, "Cleared followers", function() {
-    query(clearFollowing, "Cleared following", function() {
-    query(clearPosts, "Cleared posts", function() {
-    query(clearPhotos, "Cleared photos", function(result) {
-        callback(result);
-    })})})})});
+    // Clear profile info
+    query(clearTable + "profile_info", "", function() {
+    query(resetTable1 + "profile_info" + resetTable2, "", function() {
+
+    // Clear posts
+    query(clearTable + "posts", "", function() {
+    query(resetTable1 + "posts" + resetTable2, "", function() {
+
+    // Clear photos
+    query(clearTable + "photos", "", function() {
+    query(resetTable1 + "photos" + resetTable2, "", function() {
+
+    // Clear followers
+    query(clearTable + "followers", "", function() {
+    query(resetTable1 + "followers" + resetTable2, "", function() {
+
+    // Clear following
+    query(clearTable + "following", "", function() {
+    query(resetTable1 + "following" + resetTable2, "", function() {
+
+    // Callback
+    callback();
+
+    })})})})})})})})})});
 }
 
 /***********************************************************
@@ -76,13 +93,13 @@ var clearDatabase = function(callback) {
 
 var followUser = function(bsid, callback) {
     var sql = "Insert INTO following (bsid) values ('" + bsid + "')";
-    var msg = "Successfully started following " + bsid;
+    var msg = "Started following " + bsid;
     query(sql, msg, callback);
 }
 
 var addFollower = function(bsid, callback) {
     var sql = "Insert INTO followers (bsid) values ('" + bsid + "')";
-    var msg = "Successfully added " + bsid + " to followers";
+    var msg = "Added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
@@ -98,7 +115,7 @@ var addPost = function(timestamp, photoId, callback) {
     query(sql, msg, callback);
 }
 
-var updateProfileInfo = function(profile, bsid, callback) {
+var updateProfileInfo = function(bsid, profile, callback) {
     var values = "";
     if (profile.displayName) {
         values += "displayName = '" + profile.displayName + "',";
@@ -120,10 +137,10 @@ var updateProfileInfo = function(profile, bsid, callback) {
     }
 
     // Cut off trailing comma
-    values = values.substring(0, sql.length - 1);
+    values = values.substring(0, values.length - 1);
 
     // Construct complete SQL statement
-    sql = "UPDATE profile_info SET " + values + " WHERE bsid = " + bsid;
+    sql = "UPDATE profile_info SET " + values + " WHERE bsid = '" + bsid + "'";
 
     var msg = "Profile updated";
     query(sql, msg, callback);

@@ -30,6 +30,7 @@ var malloryPrivateKey = "af8d0f959ab8bed4399d60b7d5c568d9ec7eecf0da10bedeec3247e
 //   });
 var setup = function(callback) {
     // Set up database with Alice as owner
+    debug.log("Resetting database");
     dal.clearDatabase(() => {
         dal.setOwner(alice, () => {
             // Run test
