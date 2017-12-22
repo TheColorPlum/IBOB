@@ -50,7 +50,7 @@ router.post(urls.getProfileInfo, function(req, res, next) {
 
         // Process request
         dal.getProfileInfo(profileInfo => {
-            res.send(JSON.stringify(profileInfo));
+            res.json(profileInfo);
         });
     });
 });

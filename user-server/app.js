@@ -12,13 +12,29 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 
-// Import route for API
-var api = require('./routes/api');
-
 var app = express();
 
-// Link API route to app
+// Store raw request body in req.body. Needed to access signatures on
+// requests.
+// Ref: https://stackoverflow.com/questions/9920208/expressjs-raw-body/9920700#9920700
+app.use(function(req, res, next) {
+    var data = "";
+    req.setEncoding("utf8");
 
+    // Concatenate request body into `data`
+    req.on("data", function(chunk) {
+        data += chunk;
+    });
+
+    // Store in req.body
+    req.on("end", function() {
+        req.body = data;
+        next();
+    });
+});
+
+// Link API route to app
+var api = require('./routes/api');
 app.use('/api', api.router);
 
 // view engine setup
