@@ -33,6 +33,7 @@ const urls = {
 router.post(urls.getFeed, function(req, res, next) {
 
     // TODO: Implement
+    res.send("Not implemented");
 });
 
 
