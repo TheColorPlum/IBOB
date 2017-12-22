@@ -169,6 +169,52 @@ describe("/api" + api.urls.getPosts, function() {
 });
 
 
+describe("/api" + api.urls.getPhotos, function() {
+
+    it("Returns correct photos", function(done) {
+        setup(() => {
+
+        // Add a few photos
+        var photo1 = {id: 1, path: "https://s3.amazon.com/1.png"};
+        var photo2 = {id: 2, path: "https://s3.amazon.com/2.png"};
+        var photo3 = {id: 3, path: "https://s3.amazon.com/3.png"};
+
+        dal.addPhoto(photo1.path, () => {
+        dal.addPhoto(photo2.path, () => {
+        dal.addPhoto(photo3.path, () => {
+
+        // Define expected response
+        var correctResponse = [photo2, photo3];
+
+        // Make request
+        var data = {count: 2, offset: 1, timestamp: (new Date()).toJSON()};
+        var reqBody = new jsontokens.TokenSigner(aps.encAlg, alicePrivateKey).sign(data);
+        axios.post(baseUrl + "/api" + api.urls.getPhotos + "?requester=" + alice, reqBody)
+        .then(resp => {
+
+            try {
+                // Check that response is the same as expected response
+                var json = resp.data;
+                assert.deepStrictEqual(json, correctResponse, "Response is incorrect");
+                done();
+            } catch (err) {
+                done(err);
+            }
+
+        }); // end of axios.post()
+
+        })})}); // end of dal.addPosts()'s
+
+        });
+    });
+
+});
+
+
 describe("/api" + api.urls.getFeed, function() {
+
+    it.skip("Returns correct feed", function(done) {
+        // TODO: Implement this test
+    });
 
 });

@@ -105,6 +105,42 @@ router.post(urls.getPosts, function(req, res, next) {
 });
 
 
+/*
+ * Returns a specified group of this user's photos.
+ */
+router.post(urls.getPhotos, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
+
+        // Get photos
+        dal.getPhotos(photos => {
+
+            // Check that parameters are valid
+            var body = JSON.parse(verification.decodedData);
+            var count = body.count;
+            var offset = body.offset;
+
+            var min = offset;
+            var max = offset + count - 1;
+            if (min < 0 || max < 0 || min > photos.length - 1 || max > photos.length - 1) {
+                res.send("Error: Invalid values for offset/count");
+                return;
+            }
+
+            // Only return `count` posts, starting from `offset`.
+            res.json(photos.slice(offset, offset + count));
+
+        });
+
+    });
+
+
+});
+
 /******************************************************************************/
 
 // POST requests
