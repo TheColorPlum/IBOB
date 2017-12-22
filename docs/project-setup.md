@@ -2,60 +2,19 @@
 
 ## Prerequisites
 
-This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/get-npm), and [Docker/docker-compose](https://docs.docker.com/) installed. Before proceeding, make sure to have those installed.
+This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/get-npm), and [MySQL Server](https://www.mysql.com/downloads/) installed. Before proceeding, make sure to have those installed.
 
 
 ## How to set up the project
 
-We have scripts that automate some of this setup (at least, the parts that *can* be automated) in the `setup-scripts/` directory. Any scripts mentioned below can be found in there.
+We have scripts that automate some of this setup (at least, the parts that *can* be automated) in the `setup-scripts/` directory. Any scripts we mention in the following sections can be found in there.
 
-### Blockstack development environment (NOT READY YET)
-
-> This Blockstack setup does not yet work. Refer to the next section for setting up a dummy version of Blockstack instead.
-
-Before you can set up our project, you will first need to set up Blockstack on your machine. The easiest way to do this is to download Blockstack's Docker containers, which create a mini Blockstack network that runs locally.
-
-1. Copy `setup-blockstack.sh` into a new directory of your choosing - just make sure it's *outside this repository*. Then run it:
-
-  ```bash
-  $ ./setup-blockstack.sh
-  ```
-
-  This will download the [Blockstack Todo App tutorial](https://github.com/blockstack/blockstack-todos), which includes the Docker containers, and launch the mini Blockstack network. *This will probably take a while to run*, since it needs to download a lot of stuff.
-
-2. *Unfortunately, this part must be done manually - we could not automate it :(*.
-
-  When the script is done, you will need to do a bit more configuration. First, set up a Blockstack account:
-
-    - Open a browser to [localhost:8888](localhost:8888).
-    - This will prompt you to set up a Blockstack account. Walk through the steps: use "password" as your password (it's only used on your local machine so it doesn't matter that this is a terrible password), make sure to copy the *identity key* somewhere, and when it comes up, you can skip entering an email.
-
-  Next, you need to transfer (fake) money into this account so you can create an ID:
-
-    - Go to the wallet tab and copy the address at the bottom (e.g. something like `19WWRiJwkEcqX7HsWUSDFfi8zpTRoMMfx1`).
-    - Open a new tab in your browser to [localhost:8888/wallet/send-core](localhost:8888/wallet/send-core).
-    - Enter your address into the "To" box, and enter `blockstack_integration_test_api_password` into the "Password" box. Then click "Send".
-    - Once the money is transferred, you can close this tab.
-
-  Finally, you have to create three ID names: alice, bob, and mallory (these are used in our project's tests). In your first tab:
-
-    - Go to the profile (person) tab -> "More".
-    - Click "Add username", enter the name, and then enter your password when prompted.
-    - Go to the "More" tab again, click "Create New ID"
-    - Repeat for the rest of the names.
-
-  The Docker system will not retain this information when you turn off your computer, so whenever you reboot, you will have to remove your account and recreate it:
-
-    - Open your browser to [localhost:8888](localhost:8888).
-    - Navigate to the settings (cogwheel) tab.
-    - Click "Remove Account".
-    - Repeat this entire process (sad) from the beginning to recreate the account.
 
 ### Dummy Blockstack network
 
-The project depends on the Blockstack Core API to get information about Blockstack users. For the sake of development, we are not using the real Blockstack API, and instead we tried to use the Docker-based development version of Blockstack. But we could not get this to work for our purposes either, so we created a simple server that mimics the API calls that our project needs.
+The project depends on the Blockstack Core API to get information about Blockstack users. While this project is in developemtn, we are not using the real Blockstack API, and instead we created a simple server that mimics the API calls that our project needs.
 
-**TL;DR** Before running anything in our project, make sure to start the "Dummy Blockstack Core" server, located in `dummy-blockstack-core/`:
+Whenever you go to work on the project, make sure to start the "Dummy Blockstack Core" server *before running anything else*. It's located in `dummy-blockstack-core/`:
 
 ```bash
 $ cd dummy-blockstack-core
@@ -64,15 +23,23 @@ $ ./start.sh
 
 ### Our project
 
-Now, to set up our project, change into the `setup-scripts/` directory and run the `setup-project.sh` script:
+To set up our project, you will first need to configure MySQL a little bit (unfortunately we cannot yet automate this...). Add a user named "root" with the password "TuringP_lumRubik$9". Then open the MySQL command line and enter the following statement:
+
+```bash
+$ mysql --user=root --password
+Enter password:
+mysql> CREATE DATABASE The_Feed;
+```
+
+Once you have created the database, the rest can be automated! Change into the `setup-scripts/` directory and run the `setup-project.sh` script:
 
 ```bash
 $ cd setup-scripts
 $ ./setup-project.sh
 ```
 
-This will install the npm dependencies required for the project and run our tests to ensure that everything is working. The project is divided into two components - the app and the user-server. These are written as separate Node apps, so this script will install npm dependencies for each separately.
+This will install the npm dependencies required for the project, set up the database, and run our tests to ensure that everything is working.
 
-**You should be all set!** You can use the `start.sh` script in each component (app/user-server) to run the server for each.
+> Note: We have not implemented the app tests, so when you run this script, you will get an error saying there are no tests for this part. You can ignore this error.
 
-> **Note**: The tests for the app do not yet work, so you can expect failures if you run them now.
+**You should be all set!** See the [Frontend](frontend.md) and [Backend](backend.md) sections for details on how the project is built and how to work on it.

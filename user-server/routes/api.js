@@ -7,18 +7,20 @@
 
 var aps = require('./aps');
 var dal = require('../dal');
+var debug = require('../debug');
 var express = require('express');
 var router = express.Router();
 
 /******************************************************************************/
 
 const urls = {
-    getFeed: "/feed",
-    getProfileInfo: "/profile-info",
-    getPosts: "/posts",
-    postProfileInfo: "/profile-info",
-    postFollow: "/follow",
-    postPhoto: "/photo"
+    getFeed: "/get-feed",
+    getProfileInfo: "/get-profile-info",
+    getPosts: "/get-posts",
+    getPhotos: "/get-photos",
+    postProfileInfo: "/update-profile-info",
+    postFollow: "/follow-user",
+    postPhoto: "/add-photo"
 }
 
 
@@ -31,6 +33,7 @@ const urls = {
 router.post(urls.getFeed, function(req, res, next) {
 
     // TODO: Implement
+    res.send("Not implemented");
 });
 
 
@@ -47,10 +50,21 @@ router.post(urls.getProfileInfo, function(req, res, next) {
         }
 
         // Process request
-        var profileInfo = dal.getProfileInfo();
-        res.send(JSON.stringify(profileInfo));
-    });
+        dal.getProfileInfo(profileInfo => {
+        dal.getFollowing(following => {
 
+            // Delete SQL id
+            delete profileInfo.id;
+
+            // Format "following" list to have just bsids ["alice.id", "bob.id", ...]
+            profileInfo.following = [];
+            following.forEach(user => {
+                profileInfo.following.push(user.bsid);
+            });
+            res.json(profileInfo);
+
+        })});
+    });
 });
 
 
@@ -58,10 +72,75 @@ router.post(urls.getProfileInfo, function(req, res, next) {
  * Returns a specified number of posts made by this user.
  */
 router.post(urls.getPosts, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
 
-    // TODO: Implement
+        // Get posts
+        dal.getPosts(posts => {
+
+            // Check that parameters are valid
+            var body = JSON.parse(verification.decodedData);
+            var count = body.count;
+            var offset = body.offset;
+
+            var min = offset;
+            var max = offset + count - 1;
+            if (min < 0 || max < 0 || min > posts.length - 1 || max > posts.length - 1) {
+                res.send("Error: Invalid values for offset/count");
+                return;
+            }
+
+            // Only return `count` posts, starting from `offset`. Format to have
+            // id, timestamp, and path
+            var json = [];
+            for (var i = offset; i < offset + count; i++) {
+                json.push({id: posts[i].id, timestamp: posts[i].timestamp, path: posts[i].path});
+            }
+            res.json(json);
+        });
+    });
 });
 
+
+/*
+ * Returns a specified group of this user's photos.
+ */
+router.post(urls.getPhotos, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
+
+        // Get photos
+        dal.getPhotos(photos => {
+
+            // Check that parameters are valid
+            var body = JSON.parse(verification.decodedData);
+            var count = body.count;
+            var offset = body.offset;
+
+            var min = offset;
+            var max = offset + count - 1;
+            if (min < 0 || max < 0 || min > photos.length - 1 || max > photos.length - 1) {
+                res.send("Error: Invalid values for offset/count");
+                return;
+            }
+
+            // Only return `count` posts, starting from `offset`.
+            res.json(photos.slice(offset, offset + count));
+
+        });
+
+    });
+
+
+});
 
 /******************************************************************************/
 

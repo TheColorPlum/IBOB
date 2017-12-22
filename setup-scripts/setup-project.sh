@@ -20,6 +20,10 @@ npm install
 cd ../user-server
 npm install
 
+# Setup database for user-server
+echo 'Setting up the user-server database. You will need to enter the MySQL root password.'
+mysql The_Feed --user=root --password < create-database.sql
+
 
 # Run tests for app
 echo "Running app tests..."
