@@ -18,9 +18,9 @@ const urls = {
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
     getPhotos: "/get-photos",
-    postProfileInfo: "/update-profile-info",
-    postFollow: "/follow-user",
-    postPhoto: "/add-photo"
+    updateProfileInfo: "/update-profile-info",
+    followUser: "/follow-user",
+    addPhoto: "/add-photo"
 }
 
 
@@ -149,9 +149,10 @@ app.post(urls.getPhotos, function(req, res, next) {
 /*
  * Updates this user's profile info.
  */
-app.post(urls.postProfileInfo, function(req, res, next) {
+app.post(urls.updateProfileInfo, function(req, res, next) {
 
     // TODO: Implement
+    res.send("Not implemented");
 });
 
 
@@ -159,9 +160,10 @@ app.post(urls.postProfileInfo, function(req, res, next) {
 /*
  * Makes this user start following another specified user.
  */
-app.post(urls.postFollow, function(req, res, next) {
+app.post(urls.followUser, function(req, res, next) {
 
     // TODO: Implement
+    res.send("Not implemented");
 });
 
 
@@ -170,9 +172,10 @@ app.post(urls.postFollow, function(req, res, next) {
  */
 
 
-app.post(urls.postPhoto, function(req, res, next) {
+app.post(urls.addPhoto, function(req, res, next) {
 
     // TODO: Implement
+    res.send("Not implemented");
 });
 
 

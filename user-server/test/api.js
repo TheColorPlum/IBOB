@@ -40,7 +40,8 @@ var setup = function(callback) {
 
 /******************************************************************************/
 
-// Tests here
+// Get operations
+describe("Get operations", function() {
 
 describe("/api" + api.urls.getProfileInfo, function() {
 
@@ -218,3 +219,99 @@ describe("/api" + api.urls.getFeed, function() {
     });
 
 });
+
+}); // end of "Get operations"
+
+/******************************************************************************/
+
+// Put operations
+
+describe("Put operations", function() {
+
+describe("/api" + api.urls.updateProfileInfo, function() {
+
+    it("Updates correctly when given all profile info attributes", function(done) {
+        setup(() => {
+            // Insert initial profile info
+            var profilePhoto1 = {id: 1, path: "profile1.png"};
+            var coverPhoto1 = {id: 2, path: "cover1.png" };
+            var profileInfo1 = {
+                displayName: "Alice",
+                bio: "Sample bio",
+                profilePhotoId: profilePhoto1.id,
+                coverPhotoId: coverPhoto1.id
+            };
+            dal.addPhoto(profilePhoto1.path, () => {
+            dal.addPhoto(coverPhoto1.path, () => {
+            dal.updateProfileInfo(alice, profileInfo1, () => {
+
+            // Define updates to profile info
+            var profilePhoto2 = {id: 3, path: "profile2.png"};
+            var coverPhoto2 = {id: 4, path: "cover2.png" };
+            var profileInfo2 = {
+                displayName: "Alice 2",
+                bio: "Sample bio 2",
+                profilePhotoId: profilePhoto2.id,
+                coverPhotoId: coverPhoto2.id
+            };
+
+            // Insert new photos before making API call
+            dal.addPhoto(profilePhoto2.path, () => {
+            dal.addPhoto(coverPhoto2.path, () => {
+
+            // Define expected contents in the database after API call
+            var correctProfileInfo = {
+                bsid: alice,
+                displayName: profileInfo2.displayName,
+                bio: profileInfo2.bio,
+                profilePhotoId: profileInfo2.profilePhotoId,
+                coverPhotoId: profileInfo2.coverPhotoId
+            };
+
+            // Make request. Request body must include profileInfo2 and a
+            // timestamp
+            var data = {};
+            for (attr in profileInfo2) {
+                data[attr] = profileInfo2[attr];
+            }
+            data.timestamp = (new Date()).toJSON();
+            var reqBody = new jsontokens.TokenSigner(aps.encAlg, alicePrivateKey).sign(data);
+            axios.post(baseUrl + "/api" + api.urls.updateProfileInfo + "?requester=" + alice, reqBody)
+            .then(resp => {
+
+                try {
+                    // Check that profile info contents in database match the
+                    // expected contents
+
+                    dal.getProfileInfo(testProfileInfo => {
+
+                    debug.log("correctProfileInfo = " + JSON.stringify(correctProfileInfo));
+                    debug.log("testProfileInfo = " + JSON.stringify(testProfileInfo));
+
+                    // TODO: These are not equal, but the assertion is not being
+                    // thrown? I checked with the debug logs above.
+                    assert.deepStrictEqual(testProfileInfo, correctProfileInfo,
+                        "Updated profile info is wrong is the database");
+                    });
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+
+            }); // end of axios.post()
+
+            })}); // end of dal.addPhotos()'s
+
+            }); // end of dal.updateProfileInfo()
+            })}); // end of dal.addPhoto()'s
+        });
+    });
+
+
+    it.skip("Updates correctly when given only some profile info attributes", function(done) {
+
+    });
+});
+
+});
+
