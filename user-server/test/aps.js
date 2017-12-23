@@ -6,9 +6,9 @@
  */
 
 var assert = require("assert");
-var aps = require("../routes/aps");
-var dal = require('../dal');
-var debug = require('../debug');
+var aps = require("../lib/aps");
+var dal = require("../lib/dal");
+var debug = require("../lib/debug");
 var jsontokens = require("jsontokens");
 
 /******************************************************************************/

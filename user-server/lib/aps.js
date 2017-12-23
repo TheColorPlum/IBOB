@@ -7,8 +7,8 @@
  */
 
 var axios = require("axios");
-var dal = require("../dal");
-var debug = require('../debug');
+var dal = require("./dal");
+var debug = require('./debug');
 var jsontokens = require("jsontokens");
 
 // Permission levels
