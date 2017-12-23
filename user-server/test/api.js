@@ -7,10 +7,10 @@
 
 var assert = require("assert");
 var api = require("../routes/api");
-var aps = require("../routes/aps");
+var aps = require("../lib/aps");
 var axios = require("axios");
-var dal = require("../dal");
-var debug = require("../debug");
+var dal = require("../lib/dal");
+var debug = require("../lib/debug");
 var jsontokens = require("jsontokens");
 
 /******************************************************************************/

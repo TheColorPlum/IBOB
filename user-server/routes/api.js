@@ -5,11 +5,11 @@
  * Implements the user-server's web API (see documentation for details).
  */
 
-var aps = require('./aps');
-var dal = require('../dal');
-var debug = require('../debug');
+var aps = require('../lib/aps');
+var dal = require('../lib/dal');
+var debug = require('../lib/debug');
 var express = require('express');
-var router = express.Router();
+var app = express();
 
 /******************************************************************************/
 
@@ -30,7 +30,7 @@ const urls = {
 /*
  * Returns a specified number of posts from the user's feed.
  */
-router.post(urls.getFeed, function(req, res, next) {
+app.post(urls.getFeed, function(req, res, next) {
 
     // TODO: Implement
     res.send("Not implemented");
@@ -41,7 +41,7 @@ router.post(urls.getFeed, function(req, res, next) {
 /*
  * Returns this user's profile info.
  */
-router.post(urls.getProfileInfo, function(req, res, next) {
+app.post(urls.getProfileInfo, function(req, res, next) {
     // Verify
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
         if (!verification.ok) {
@@ -71,7 +71,7 @@ router.post(urls.getProfileInfo, function(req, res, next) {
 /*
  * Returns a specified number of posts made by this user.
  */
-router.post(urls.getPosts, function(req, res, next) {
+app.post(urls.getPosts, function(req, res, next) {
     // Verify
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
         if (!verification.ok) {
@@ -109,7 +109,7 @@ router.post(urls.getPosts, function(req, res, next) {
 /*
  * Returns a specified group of this user's photos.
  */
-router.post(urls.getPhotos, function(req, res, next) {
+app.post(urls.getPhotos, function(req, res, next) {
     // Verify
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
         if (!verification.ok) {
@@ -149,7 +149,7 @@ router.post(urls.getPhotos, function(req, res, next) {
 /*
  * Updates this user's profile info.
  */
-router.post(urls.postProfileInfo, function(req, res, next) {
+app.post(urls.postProfileInfo, function(req, res, next) {
 
     // TODO: Implement
 });
@@ -159,7 +159,7 @@ router.post(urls.postProfileInfo, function(req, res, next) {
 /*
  * Makes this user start following another specified user.
  */
-router.post(urls.postFollow, function(req, res, next) {
+app.post(urls.postFollow, function(req, res, next) {
 
     // TODO: Implement
 });
@@ -170,13 +170,13 @@ router.post(urls.postFollow, function(req, res, next) {
  */
 
 
-router.post(urls.postPhoto, function(req, res, next) {
+app.post(urls.postPhoto, function(req, res, next) {
 
     // TODO: Implement
 });
 
 
 module.exports = {
-    router,
+    app,
     urls
 };

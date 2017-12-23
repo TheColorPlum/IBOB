@@ -3,4 +3,4 @@
 #
 # Shortcut for starting server in dev mode.
 
-DEBUG=ibob2:* npm run devstart
+npm run devstart
