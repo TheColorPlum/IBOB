@@ -29,6 +29,7 @@ To set up our project, you will first need to configure MySQL a little bit (unfo
 $ mysql --user=root --password
 Enter password:
 mysql> CREATE DATABASE The_Feed;
+mysql> CREATE DATABASE User_Server_Directory;
 ```
 
 Once you have created the database, the rest can be automated! Change into the `setup-scripts/` directory and run the `setup-project.sh` script:

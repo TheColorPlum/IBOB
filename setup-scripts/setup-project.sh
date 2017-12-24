@@ -10,33 +10,68 @@ if [ $# -ne 0 ]; then
   echo "Usage: ./setup-project.sh"
 fi
 
+cd ..
+
 #------------------------------------------------------------------------------
 
-# Install npm dependencies for app
-cd ../app
+# App
+
+# Install npm dependencies
+cd app
 npm install
 
-# Install npm dependencies for user-server
-cd ../user-server
+cd ..
+
+#------------------------------------------------------------------------------
+
+# User server
+
+# Install npm dependencies
+cd user-server
 npm install
 
-# Setup database for user-server
+# Setup database
 echo 'Setting up the user-server database. You will need to enter the MySQL root password.'
 mysql The_Feed --user=root --password < create-database.sql
 
+cd ..
 
-# Run tests for app
-echo "Running app tests..."
-cd ../app
+#------------------------------------------------------------------------------
+
+# User server directory
+
+# Install dependencies
+cd directory
+npm install
+
+# Setup database
+echo 'Setting up the directory database. You will need to enter the MySQL root password.'
+mysql User_Server_Directory --user=root --password < create-database.sql
+
+cd ..
+
+#------------------------------------------------------------------------------
+
+echo "Running tests..."
+
+# App
+echo "App tests..."
+cd app
 ./test.sh
 echo "Done with app tests"
 echo
 
-# Run tests for user-server
-echo "Running user-server tests..."
+# User-server
+echo "User-server tests..."
 cd ../user-server
 ./test.sh
 echo "Done with user-server tests"
 echo
+
+# User-server directory
+echo "Directory tests..."
+cd ../directory
+./test.sh
+echo "Done with directory tests"
 
 echo "Done!"
