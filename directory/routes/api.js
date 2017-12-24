@@ -2,7 +2,7 @@
  * api.js
  * Authors: Michael Friedman and Pelumi Odimayo
  *
- * Implements the user-server's web API (see documentation for details).
+ * Implements the directory's web API (see documentation for details).
  */
 
 var express = require("express");
