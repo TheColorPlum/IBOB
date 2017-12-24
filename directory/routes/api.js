@@ -52,9 +52,20 @@ app.post(urls.get, function(req, res, next) {
  * Adds a (bsid, user-server IP address) mapping to the directory.
  */
 app.post(urls.put, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.write)
+    .then(verification => {
+        if (!verification.ok) {
+            res.json({success: false, msg: verification.errorMsg});
+            return;
+        }
 
-    // TODO: Implement
-    res.json({success: false, msg: "Not implemented"});
+        // Insert entry for the request user
+        var data = JSON.parse(verification.decodedData);
+        dal.put(data.bsid, data.ip, () => {
+            res.json({success: true});
+        });
+    });
 });
 
 
