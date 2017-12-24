@@ -13,7 +13,7 @@ const jsontokens = require("jsontokens");
  * you can use directly as the body of a request. Also requires the private
  * key of the requester to sign the data.
  */
-var makeRequestBody = function(data, privateKey) {
+var makeBody = function(data, privateKey) {
     return (new jsontokens.TokenSigner(aps.encAlg, privateKey)).sign(data);
 };
 
@@ -21,11 +21,11 @@ var makeRequestBody = function(data, privateKey) {
 /*
  * Returns a timestamp with the current time, in the format the API accepts.
  */
-var makeRequestTimestamp = function() {
+var makeTimestamp = function() {
     return (new Date()).toJSON();
 }
 
  module.exports = {
-    makeRequestBody,
-    makeRequestTimestamp
+    makeBody,
+    makeTimestamp
  };
