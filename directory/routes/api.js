@@ -5,7 +5,11 @@
  * Implements the directory's web API (see documentation for details).
  */
 
+var aps = require("../lib/aps");
+var dal = require("../lib/dal");
+var debug = require("../lib/debug");
 var express = require("express");
+
 var app = express();
 
 /******************************************************************************/
@@ -13,16 +17,33 @@ var app = express();
 const urls = {
     get: "/get",
     put: "/put"
-}
+};
 
 
 /*
  * Returns the IP address of a user's user-server.
  */
 app.post(urls.get, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.read)
+    .then(verification => {
+        if (!verification.ok) {
+            res.json({success: false, msg: verification.errorMsg});
+            return;
+        }
 
-    // TODO: Implement
-    res.json({success: false, msg: "Not implemented"});
+        // Get entry for the requested user
+        var data = JSON.parse(verification.decodedData);
+        dal.get(data.bsid, result => {
+            if (result.success) {
+                // Entry exists. Return it.
+                res.json({success: true, ip: result.ip});
+            } else {
+                // Entry does not exist.
+                res.json({success: false, msg: "User-server does not exist"});
+            }
+        });
+    });
 });
 
 
