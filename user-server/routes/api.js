@@ -18,9 +18,10 @@ const urls = {
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
     getPhotos: "/get-photos",
-    postProfileInfo: "/update-profile-info",
-    postFollow: "/follow-user",
-    postPhoto: "/add-photo"
+    updateProfileInfo: "/update-profile-info",
+    followUser: "/follow-user",
+    addPost: "/add-post",
+    addPhoto: "/add-photo"
 }
 
 
@@ -149,9 +150,10 @@ app.post(urls.getPhotos, function(req, res, next) {
 /*
  * Updates this user's profile info.
  */
-app.post(urls.postProfileInfo, function(req, res, next) {
+app.post(urls.updateProfileInfo, function(req, res, next) {
 
     // TODO: Implement
+    res.json({success: false});
 });
 
 
@@ -159,20 +161,36 @@ app.post(urls.postProfileInfo, function(req, res, next) {
 /*
  * Makes this user start following another specified user.
  */
-app.post(urls.postFollow, function(req, res, next) {
+app.post(urls.followUser, function(req, res, next) {
 
     // TODO: Implement
+    res.json({success: false});
+});
+
+
+/*
+ * Makes a post on this user's account.
+ */
+app.post(urls.addPost, function(req, res, next) {
+
+    // TODO: Implement
+    res.json(
+        {success: false, post: {id: -1, timestamp: (new Date()).toJSON(), path: ""}}
+    );
 });
 
 
 /*
  * Uploads a photo to this user's account.
  */
-
-
-app.post(urls.postPhoto, function(req, res, next) {
+app.post(urls.addPhoto, function(req, res, next) {
 
     // TODO: Implement
+    // NOTE: You don't need to verify the user in this request. Just upload
+    // the photo to cloud storage.
+    res.json(
+        {success: false, photo: {id: -1, path: ""}}
+    );
 });
 
 
