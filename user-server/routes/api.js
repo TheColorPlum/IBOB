@@ -186,6 +186,8 @@ app.post(urls.addPost, function(req, res, next) {
 app.post(urls.addPhoto, function(req, res, next) {
 
     // TODO: Implement
+    // NOTE: You don't need to verify the user in this request. Just upload
+    // the photo to cloud storage.
     res.json(
         {success: false, photo: {id: -1, path: ""}}
     );

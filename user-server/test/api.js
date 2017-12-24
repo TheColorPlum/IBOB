@@ -470,16 +470,40 @@ describe("/api" + api.urls.addPost, function() {
 });
 
 
-
 describe("/api" + api.urls.addPhoto, function() {
 
     it.skip("Adds a photo correctly", function(done) {
+        setup(() => {
+            // Define expected response
+            var correctResponse = {
+                success: true,
+                photo: {
+                    id: 1,
+                    path: ""  // TODO: Fill in expected path after request is made
+                }
+            };
 
-        // TODO: Implement
+            // TODO: Implement the part that gets the raw photo in the request.
+            // ...
 
+            // Make request
+            var reqBody = "";
+            axios.post(baseUrl + "/api" + api.urls.addPhoto, reqBody)
+            .then(resp => {
+
+                try {
+                    // Check that response matches expected response
+                    var json = resp.data;
+                    assert.deepStrictEqual(json, correctResponse, "Response was incorrect");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+
+            }); // end of axios.post()
+        });
     });
-
 });
 
-});
+}); // end of "Put operations"
 
