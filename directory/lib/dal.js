@@ -48,10 +48,7 @@ var clearDatabase = function(callback) {
 /******************************************************************************/
 
 /*
- * Gets the IP address corresponding to bsid (a user). Calls the callback on
- * a result in the following format:
- *   {success: true, ip: "192.168.0.12"}
- * where success is false if an entry doesn't exist for that user.
+ * Gets the IP address corresponding to bsid (a user)
  */
 var get = function(bsid, callback) {
     var sql = "SELECT bsid, INET_NTOA(ip) AS ip FROM user_servers WHERE bsid = "
@@ -72,9 +69,7 @@ var get = function(bsid, callback) {
 
 /*
  * Adds a mapping from bsid to ip (given in decimal notation as a string),
- * overwriting if there already is one. Calls the callback on a result in the
- * following format:
- *   {success: true}
+ * or overwrites it if there already is one.
  */
 var put = function(bsid, ip, callback) {
     // Check if entry exists for this user
