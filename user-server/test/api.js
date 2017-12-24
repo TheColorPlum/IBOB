@@ -415,7 +415,69 @@ describe("/api" + api.urls.followUser, function() {
             });
         });
     });
+});
 
+
+describe("/api" + api.urls.addPost, function() {
+
+    it("Adds a post correctly", function(done) {
+        setup(() => {
+
+            // Add the post's photo to the database first
+            var photo = {id: 1, path: "profile.png"};
+            dal.addPhoto(photo.path, () => {
+
+            // Define expected response
+            var correctResponse = {
+                success: true,
+                post: {id: 1, timestamp: (new Date()).toJSON(), path: photo.path}
+            };
+
+            // Make request
+            var data = {photoId: photo.id, timestamp: (new Date()).toJSON()};
+            var reqBody = new jsontokens.TokenSigner(aps.encAlg, alicePrivateKey).sign(data);
+            axios.post(baseUrl + "/api" + api.urls.addPost + "?requester=" + alice, reqBody)
+            .then(resp => {
+
+                try {
+                    // Check that response matches expected response, with
+                    // the timestamp being within a small delta of expected
+                    // timestamp
+                    var json = resp.data;
+
+                    var respTimestamp = new Date(json.post.timestamp).getTime();
+                    var correctTimestamp = new Date(correctResponse.post.timestamp).getTime();
+                    var delta = 5000;
+                    assert(Math.abs(respTimestamp - correctTimestamp) <= delta,
+                        "Post's timestamp was not an acceptable value. Response timestamp: " + json.post.timestamp + ", Acceptable timestamp: " + correctResponse.post.timestamp);
+
+                    delete json.post.timestamp;
+                    delete correctResponse.post.timestamp;
+
+                    assert.deepStrictEqual(json, correctResponse, "Response (minus timestamp) was incorrect");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+
+            }); // end of axios.post()
+
+            }); // end of dal.addPhoto()
+
+        });
+    });
+
+});
+
+
+
+describe("/api" + api.urls.addPhoto, function() {
+
+    it.skip("Adds a photo correctly", function(done) {
+
+        // TODO: Implement
+
+    });
 
 });
 

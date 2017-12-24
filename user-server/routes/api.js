@@ -20,7 +20,7 @@ const urls = {
     getPhotos: "/get-photos",
     updateProfileInfo: "/update-profile-info",
     followUser: "/follow-user",
-    addPost: "add-post",
+    addPost: "/add-post",
     addPhoto: "/add-photo"
 }
 
@@ -174,7 +174,9 @@ app.post(urls.followUser, function(req, res, next) {
 app.post(urls.addPost, function(req, res, next) {
 
     // TODO: Implement
-    res.json({success: false, id: -1});
+    res.json(
+        {success: false, post: {id: -1, timestamp: (new Date()).toJSON(), path: ""}}
+    );
 });
 
 
@@ -184,7 +186,9 @@ app.post(urls.addPost, function(req, res, next) {
 app.post(urls.addPhoto, function(req, res, next) {
 
     // TODO: Implement
-    res.json({success: false, id: -1});
+    res.json(
+        {success: false, photo: {id: -1, path: ""}}
+    );
 });
 
 
