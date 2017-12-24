@@ -20,28 +20,6 @@ var connection = mysql.createConnection({
 // Standard function for making a query to the database. Pass SQL query
 // `sql`, a message to print once the query succeeds, and the callback
 // function to process the results from the database (if there are any).
-// var query = function(sql, msg, callback) {
-//     // Connect to database
-//     debug.log("Connecting to database");
-//     connection.connect(err => {
-//         if (err) throw err;
-
-//         // Make query
-//         debug.log("Making query");
-//         connection.query(sql, (err, result) => {
-//             if (err) throw err;
-
-//             // Close connection
-//             debug.log("Closing connection to database");
-//             connection.end();
-
-//             // Success!
-//             debug.log("Success: " + msg);
-//             callback(result);
-//         });
-//     });
-// }
-
 var query = function(sql, msg, callback) {
     connection.query(sql, (err, result) => {
         if (err) throw err;
@@ -174,13 +152,66 @@ var getPosts = function(callback) {
 }
 
 var getProfileInfo = function(callback) {
-    var sql = "SELECT * FROM profile_info";
-    var msg = "Got profile info";
+    // Make query for profile info with profile/cover photos
+    var sql = "SELECT * FROM profile_info JOIN photos ON "
+               + "profile_info.profilePhotoId = photos.id OR "
+               + "profile_info.coverPhotoId = photos.id";
+    var msg = "Got profile info (with profile and cover photos)";
     query(sql, msg, function(rows) {
-        // Parse result into a single JSON object before calling callback,
-        // since it comes back as an array of rows.
-        callback(rows[0]);
-    });
+
+    if (rows.length == 0) {
+        // There is no profile photo or cover photo, so this JOIN returned
+        // nothing. Query for the regular profile info instead.
+        var sql2 = "SELECT * FROM profile_info";
+        query(sql2, "No profile/cover photo. Made normal request for profile info instead", function(rows) {
+            // Format result
+            var info = rows[0];
+            delete info.id;
+            delete info.profilePhotoId;
+            delete info.coverPhotoId;
+            info.profilePhoto = null;
+            info.coverPhoto = null;
+            callback(info);
+        });
+    } else if (rows.length == 1) {
+        // User has only one of the photos (either profile or cover). Format
+        // and return result based on which one it is.
+        var info = rows[0];
+        if (info.profilePhotoId !== null) {
+            // User has profile photo
+            info.profilePhoto = {id: info.profilePhotoId, path: info.path};
+            info.coverPhoto = null;
+        } else {
+            // User has cover photo
+            info.coverPhoto = {id: info.coverPhotoId, path: info.path};
+            info.profilePhoto = null;
+        }
+
+        delete info.id;
+        delete info.profilePhotoId;
+        delete info.coverPhotoId;
+        callback(info);
+    } else {
+        // This came back as two rows: one for the JOIN on profilePhotoId, and
+        // one for coverPhotoId. Merge the two rows, and pass that to callback.
+        var info = rows[0];  // arbitrary choice; either row will work
+        var result = {
+            bsid: info.bsid,
+            displayName: info.displayName,
+            bio: info.bio,
+            profilePhoto: {
+                id: info.profilePhotoId,
+                path: rows[0].path
+            },
+            coverPhoto: {
+                id: info.coverPhotoId,
+                path: rows[1].path
+            }
+        };
+        callback(result);
+    }
+
+    }); // end original query()
 }
 
 var getFollowing = function(callback) {
