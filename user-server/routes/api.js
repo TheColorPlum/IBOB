@@ -20,6 +20,7 @@ const urls = {
     getPhotos: "/get-photos",
     updateProfileInfo: "/update-profile-info",
     followUser: "/follow-user",
+    addPost: "add-post",
     addPhoto: "/add-photo"
 }
 
@@ -152,7 +153,7 @@ app.post(urls.getPhotos, function(req, res, next) {
 app.post(urls.updateProfileInfo, function(req, res, next) {
 
     // TODO: Implement
-    res.send("Not implemented");
+    res.json({success: false});
 });
 
 
@@ -163,19 +164,27 @@ app.post(urls.updateProfileInfo, function(req, res, next) {
 app.post(urls.followUser, function(req, res, next) {
 
     // TODO: Implement
-    res.send("Not implemented");
+    res.json({success: false});
+});
+
+
+/*
+ * Makes a post on this user's account.
+ */
+app.post(urls.addPost, function(req, res, next) {
+
+    // TODO: Implement
+    res.json({success: false, id: -1});
 });
 
 
 /*
  * Uploads a photo to this user's account.
  */
-
-
 app.post(urls.addPhoto, function(req, res, next) {
 
     // TODO: Implement
-    res.send("Not implemented");
+    res.json({success: false, id: -1});
 });
 
 

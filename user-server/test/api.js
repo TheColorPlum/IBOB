@@ -280,6 +280,10 @@ describe("/api" + api.urls.updateProfileInfo, function() {
             .then(resp => {
 
                 try {
+                    // Make sure request was successful
+                    json = resp.data;
+                    assert.strictEqual(json.success, true, "Response claimed that request was unsuccessful");
+
                     // Check that profile info contents in database match the
                     // expected contents
                     dal.getProfileInfo(dbProfileInfo => {
@@ -347,6 +351,10 @@ describe("/api" + api.urls.updateProfileInfo, function() {
             .then(resp => {
 
                 try {
+                    // Make sure request was successful
+                    json = resp.data;
+                    assert.strictEqual(json.success, true, "Response claimed that request was unsuccessful");
+
                     // Check that profile info contents in database match the
                     // expected contents
                     dal.getProfileInfo(dbProfileInfo => {
@@ -366,6 +374,49 @@ describe("/api" + api.urls.updateProfileInfo, function() {
             })}); // end of dal.addPhoto()'s
         });
     });
+});
+
+
+describe("/api" + api.urls.followUser, function() {
+
+    it("Adds a user to my following list correctly", function(done) {
+        setup(() => {
+
+            // Define expected following list after request is made
+            var bob = "bob.id";
+            var correctFollowing = [bob];
+
+            // Make request
+            var data = {bsid: bob, timestamp: (new Date()).toJSON()};
+            var reqBody = new jsontokens.TokenSigner(aps.encAlg, alicePrivateKey).sign(data);
+            axios.post(baseUrl + "/api" + api.urls.followUser + "?requester=" + alice, reqBody)
+            .then(resp => {
+
+                try {
+                    // Make sure request was successful
+                    json = resp.data;
+                    assert.strictEqual(json.success, true, "Response claimed that request was unsuccessful");
+
+                    // Check that following list is correct in the database
+                    dal.getFollowing(result => {
+                        // Transfer bsids into a list
+                        var dbFollowing = [];
+                        result.forEach(row => {
+                            dbFollowing.push(row.bsid);
+                        });
+
+                        assert.deepStrictEqual(dbFollowing, correctFollowing, "Following list is incorrect after making request");
+                        done();
+                    });
+                } catch (err) {
+                    done(err);
+                }
+
+            });
+        });
+    });
+
+
 });
 
 });
