@@ -2,7 +2,7 @@
 
 ## Frontend code
 
-Below is the directory structure that makes up the front end (key files highlighted).
+Below is the directory structure that makes up the front end, under the `app/` directory (key files highlighted).
 
 ```
 - public/

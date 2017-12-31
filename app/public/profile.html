@@ -36,7 +36,7 @@
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <a class="navbar-brand" href="#">IBOB</a>
+  <a class="navbar-brand" href="#">The Feed</a>
 
   <!-- Navigation menu -->
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -55,20 +55,16 @@
         <a class="nav-link" href="#"><i class="fa fa-plus"> </i></a>
       </li>
 
-      <!-- Notifications -->
-      <li class="nav-item active">
-        <a class="nav-link" href="#"><i class="fa fa-bell"> </i></a>
-      </li>
-
       <!-- User menu -->
       <li class="nav-item active dropdown">
-        <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" role="button" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-user"> </i>
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           <a class="dropdown-item" href="#">Feed</a>
           <a class="dropdown-item" href="#">Profile</a>
-          <a class="dropdown-item" href="#">Settings</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Log out</a>
         </div>
       </li>
     </ul>
@@ -105,60 +101,52 @@
 <!-- /Profile cover -->
 
 
-<!-- Posts -->
-<div class="container">
-<div class="row">
+<!-- Posts will be populated here -->
+<div class="container"></div>
 
-  <!-- Card -->
-  <div class="col-md">
-    <div class="card background-color-main z-depth-1-half">
-      <!-- Card photo -->
-      <img class="img-fluid" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).jpg" alt="Post photo">
 
-      <!-- Card body -->
-      <div class="card-block">
-        <!-- Caption -->
-        <p class="card-text text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+<!-- HTML template for posts. Processed and populated in scripts.js -->
+<script type="text/html" id="post-row-template">
+  <div class="row">
 
-        <!-- Date posted -->
-        <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> October 28, 2017</p>
+    <!--Card 1 -->
+    <div class="col-md">
+      <div class="card background-color-main z-depth-1-half">
+        <!-- Card photo -->
+        <img class="img-fluid" src="{{photoSrc1}}" alt="Post photo">
 
-        <!-- Stats -->
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-thumbs-o-up"> </i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-comments-o"></i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-share"></i> 1234</a>
+        <!-- Card body -->
+        <div class="card-block">
+          <!-- Caption -->
+          <p class="card-text text-center">{{caption1}}</p>
+
+          <!-- Date posted -->
+          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp1}}</p>
+        </div>
+
       </div>
-
     </div>
-  </div>
 
+    <!--Card 2 -->
+    <div class="col-md">
+      <div class="card background-color-main z-depth-1-half">
+        <!-- Card photo -->
+        <img class="img-fluid" src="{{photoSrc2}}" alt="Post photo">
 
-  <!--Card-->
-  <div class="col-md">
-    <div class="card background-color-main z-depth-1-half">
-      <!-- Card photo -->
-      <img class="img-fluid" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).jpg" alt="Post photo">
+        <!-- Card body -->
+        <div class="card-block">
+          <!-- Caption -->
+          <p class="card-text text-center">{{caption2}}</p>
 
-      <!-- Card body -->
-      <div class="card-block">
-        <!-- Caption -->
-        <p class="card-text text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          <!-- Date posted -->
+          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp2}}</p>
+        </div>
 
-        <!-- Date posted -->
-        <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> October 28, 2017</p>
-
-        <!-- Stats -->
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-thumbs-o-up"> </i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-comments-o"></i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-share"></i> 1234</a>
       </div>
-
     </div>
-  </div>
 
-</div>
-</div>
-<!-- /Posts -->
+  </div>
+</script>
 
 </body>
 </html>
