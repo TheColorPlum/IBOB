@@ -7,6 +7,7 @@ Below is the directory structure that makes up the front end, under the `app/` d
 ```
 - public/
   - index.html
+  - feed.html
   - profile.html
   - styles.css
   - scripts.js
@@ -16,7 +17,8 @@ The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework
 
 HTML:
 
-- index.html is our landing/login page
+- index.html is our landing/login page.
+- feed.html is the page with the user's feed.
 - profile.html is a user profile page.
 
 CSS:
