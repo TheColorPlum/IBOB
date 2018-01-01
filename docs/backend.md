@@ -11,6 +11,10 @@ This section describes the back end for the user-facing application. It is very 
 Code for the app is located in `app/`. The general layout of this directory is shown below:
 
 ```
+- initialization/
+  - server.js
+  - start.sh
+  - ...
 - public/
   - ...
 - views/
@@ -19,9 +23,9 @@ Code for the app is located in `app/`. The general layout of this directory is s
 - start.sh
 ```
 
-The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
+The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server. Lastly, `initialization/` contains a server that we use in development only, to help configure the app before use (see the section on this below for more details).
 
-### Server
+### Main Web Server
 
 There is *one* server that provides the pages of the app to all users. These pages are just templates; they are populated with user data on the *client side* via requests to the user's user-server.
 
@@ -38,6 +42,15 @@ All of these are implemented in `server.js`.
 
 Additionally, `server.js` serves static files (i.e. CSS/JS) located in the `app/public/` directory. It is configured to serve these at the URL endpoint `/public/<file>` (e.g. `/public/styles.css`).
 
+
+### Initialization
+
+In production, user-servers are spun up automatically when users sign in for the first time, and the app stores some information required to contact the user-server in the user's Blockstack storage. Namely, it stores the user-server's IP address and the user's private key (for signatures).
+
+However, in development, we cannot simulate this because we do not use the cloud infrastructure to spin up servers. But we still need to store this information in Blockstack storage so the app can make requests to the development user-server.
+
+This is what the code in `initialization/` is for. Unfortunately, we cannot simply run a script to place the info in the user's storage, since Blockstack does not allow us to log into a user's account outside the browser. So instead, we serve a page with `server.js` that lets you log into a Blockstack account, type in the info manually, and then save it to Blockstack storage. This server's usage is described in the [Frontend](frontend.md) section.
+
 ## User-server
 
 When a user signs in for the first time, a server is created for them on the network - this is their *user-server*. This server is private to this particular user (the *owner*), and its role is to host all of its owner's data and expose it to the network. Through the app (running in their browser) the owner has read/write access to their data, while other users have restricted permissions (mostly read-only).
@@ -49,6 +62,9 @@ The user-server has three major components: *storage*, the *web API*, and an *au
 The user-server code is located in the `user-server/` directory. We show the structure of this directory below (we only show the main pieces here):
 
 ```
+- initialization/
+  - main.sh
+  - ...
 - lib/
   - ...
   - ...
@@ -63,7 +79,7 @@ The user-server code is located in the `user-server/` directory. We show the str
 - test.sh
 ```
 
-In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
+In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `initialization/` contains the scripts for automating the initialization of the user-server, when it is first spun up. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
 
 ### Storage
 
@@ -78,6 +94,16 @@ The API is implemented as a set of HTTP request handlers in `routes/api.js`. We 
 ### APS
 
 The APS is also implemented as one of our libraries in `lib/aps.js`. Like the API, we wrote the spec of the APS in the same [Google doc](https://docs.google.com/document/d/1wykWWzwd8LasOF8lJKZEpNwXCW-B3se33YUEtK8M2OY), and we will move it to these docs when it is finalized.
+
+### Initialization upon spinning up
+
+There are a collection of scripts in the `initialization/` folder that configure the user-server when it first spins up. The only one we explicitly run is `main.sh`, which in turn runs the other scripts. It takes two arguments: the Blockstack ID of the user-server's owner, and their private key.
+
+```bash
+$ ./main.sh BSID PRIVATE-KEY
+```
+
+> We understand that storing the private key of the owner in this user-server is a security vulnerability. This is temporary until we implement proper security around the private key.
 
 
 ## Directory

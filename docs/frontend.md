@@ -14,9 +14,11 @@ Below is the directory structure that makes up the front end, under the `app/` d
   - index.html
   - feed.html
   - profile.html
+- server.js
+- start.sh
 ```
 
-The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory.
+The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory. `server.js` is the web server that servers the pages, and `start.sh` is a shortcut script that runs the server.
 
 HTML:
 
@@ -35,6 +37,47 @@ JavaScript:
 - scripts.js contains code controlling the behavior of all pages.
 
 **Important note**: To use any static files in the HTML pages, you must place them in the `public/` directory, and then reference them from the HTML as `/public/<file>`. (This is how the app server is configured to load static files.) For example, `public/styles.css` must be imported as `/public/styles.css`.
+
+## Running the server
+
+You can run the web server with:
+
+```bash
+$ ./start.sh
+```
+
+**But note**: Before using the app in the browser, *you must (semi)manually "spin up" the local user-server*. (In production, this would be handled for you. A user requires a Blockstack ID before using the app, and when they log into our app for the first time, we automatically spin up a user-server for them in the cloud.)
+
+First, some prerequisites:
+
+- **Start the dummy Blockstack core.**
+  ```bash
+  $ cd dummy-blockstack-core
+  $ ./start.sh
+  ```
+- **Create a Blockstack ID alice.id** in the Blockstack Docker environment. This process is kind of long (sorry! can't be automated), so we document it in a separate page: [The Blockstack Docker Environment](blockstack.md).
+  > Although this environment technically simluates Blockstack, we only use it to simulate a login in the browser. We do *not* use it in the user-server to get alice.id's public key when it needs to verify signatures. This is because we do not know what the Blockstack Docker environment's private key for alice.id is (we have not been able to figure out where it's stored.) So instead, we just made up a sample private key that we sign requests with, the dummy Blockstack core knows the corresponding public key, and the user-server asks the dummy Blockstack core for this public key when it needs to verify signatures.
+- **Start the user-server directory.**
+  ```bash
+  $ cd directory
+  $ ./start.sh
+  ```
+
+Now the actual initialization:
+
+- **Initialize alice.id's user-server.** We have a script you can run that automates this for the most part. You will need to pass the arguments: Alice's ID (alice.id) and private key (find this in `dummy-blockstack-core/private-keys.txt`).
+  ```bash
+  $ cd user-server/initialization
+  $ ./main.sh BSID PRIVATE-KEY
+  ```
+- **Store some info in alice.id's Blockstack storage.** This part must be done in the browser, since Blockstack does not allow us to log in and read/write to storage outside the browser.
+  - Run the app's secondary web server (see [Backend](backend.md) for details on this):
+    ```bash
+    $ cd app/initialization
+    $ ./start.sh
+    ```
+  - Open a browser to [http://localhost:7000](http://localhost:7000). Enter alice.id's private key (same as in the last step) and the IP address of the user-server (should be something like localhost:xxxx - check the port number). Then click "Save". This will store the information in alice.id's Blockstack storage.
+  - You can kill this server now.
 
 ## Frontend Behavior
 

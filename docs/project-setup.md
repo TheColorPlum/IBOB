@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/get-npm), and [MySQL Server](https://www.mysql.com/downloads/) installed. Before proceeding, make sure to have those installed.
+This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www.npmjs.com/get-npm), [MySQL Server](https://www.mysql.com/downloads/), and [Docker/docker-compose](https://docs.docker.com/) installed. Before proceeding, make sure to have those installed.
 
 
 ## How to set up the project
@@ -10,9 +10,9 @@ This requires that you have [Node.js](https://nodejs.org/en/), [npm](https://www
 We have scripts that automate some of this setup (at least, the parts that *can* be automated) in the `setup-scripts/` directory. Any scripts we mention in the following sections can be found in there.
 
 
-### Dummy Blockstack network
+### Blockstack
 
-The project depends on the Blockstack Core API to get information about Blockstack users. While this project is in developemtn, we are not using the real Blockstack API, and instead we created a simple server that mimics the API calls that our project needs.
+The project depends on the Blockstack Core API to get information about Blockstack users. While this project is in development, we are not using the real Blockstack API, and instead we created a simple server that mimics the API calls that our project needs.
 
 Whenever you go to work on the project, make sure to start the "Dummy Blockstack Core" server *before running anything else*. It's located in `dummy-blockstack-core/`:
 
@@ -20,6 +20,8 @@ Whenever you go to work on the project, make sure to start the "Dummy Blockstack
 $ cd dummy-blockstack-core
 $ ./start.sh
 ```
+
+However, the browser application still requires Blockstack so users can log in. You can get a simulated version of Blockstack running by setting up the Blockstack Docker environment. See [this page](blockstack.md) for details on that.
 
 ### Our project
 
