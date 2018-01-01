@@ -11,6 +11,7 @@ var dal = require("./dal");
 var debug = require('./debug');
 var jsontokens = require("jsontokens");
 
+
 // Permission levels
 const permissions = {
     owner: 0,

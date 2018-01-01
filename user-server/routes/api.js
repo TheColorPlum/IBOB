@@ -10,6 +10,21 @@ var dal = require('../lib/dal');
 var debug = require('../lib/debug');
 var express = require('express');
 var app = express();
+var path = require("path");
+var multer = require("multer");
+
+/******************************************************************************/
+
+// Storage config for photos
+var storage = multer.diskStorage({
+    destination: function(req, file, callback) {
+        callback(null, '../photos')
+    },
+    filename: function(req, file, callback) {
+        console.log(file)
+        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+    }
+});
 
 /******************************************************************************/
 
@@ -116,8 +131,16 @@ app.post(urls.getPosts, function(req, res, next) {
  * Updates this user's profile info.
  */
 app.post(urls.updateProfileInfo, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+        res.send(verification.errorMsg);
+        return;
+    }
 
+    // Process Request
     // TODO: Implement
+    dal.updateProfileInfo()
     res.json({success: false});
 });
 
@@ -127,6 +150,13 @@ app.post(urls.updateProfileInfo, function(req, res, next) {
  * Makes this user start following another specified user.
  */
 app.post(urls.followUser, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+        res.send(verification.errorMsg);
+        return;
+    }
+}
 
     // TODO: Implement
     res.json({success: false});
@@ -137,6 +167,13 @@ app.post(urls.followUser, function(req, res, next) {
  * Makes a post on this user's account.
  */
 app.post(urls.addPost, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if (!verification.ok) {
+        res.send(verification.errorMsg);
+        return;
+    }
+}
 
     // TODO: Implement
     res.json(
@@ -154,6 +191,14 @@ app.post(urls.addPhoto, function(req, res, next) {
     // TODO: Implement
     // NOTE: You don't need to verify the user in this request. Just upload
     // the photo to cloud storage.
+    var upload = multer({
+        storage: storage
+    }).single('userFile');
+    upload(req, res, function(err) {
+        dal.addPhoto(upload.path(), )
+        res.end('File is uploaded')
+    });
+
     res.json(
         {success: false, photo: {id: -1, path: ""}}
     );
