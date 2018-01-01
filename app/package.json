@@ -24,7 +24,9 @@
     "opn": "^4.0.2"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "blockstack": "^0.11.0",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "path": "^0.12.7"
   }
 }
