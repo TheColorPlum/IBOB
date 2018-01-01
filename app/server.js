@@ -24,8 +24,8 @@ var allowCrossDomain = function(req, res, next) {
 
 app.use(allowCrossDomain);
 
-// Expose static files
-app.use('/', express.static(path.join(__dirname, 'public')));
+// Expose static files at URLs with prefix /public/
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 /******************************************************************************/
 
@@ -60,17 +60,10 @@ app.get(urls.profile, function(req, res, next) {
     // Check that bsid requested has an account in the directory
     var bsid = req.params.bsid;
     var errorPage = path.join(viewsDir, '404.html');
-
-    console.log("Got request for bsid: " + bsid);
-
-    console.log("Making request to directory for " + bsid);
     axios.get(directoryBaseUrl + '/api/get/' + bsid)
     .then(resp => {
 
         var json = resp.data;
-
-        console.log("Got response: " + JSON.stringify(json));
-
         if (!json.success) {
             res.redirect(urls.error);
             return;
@@ -80,7 +73,6 @@ app.get(urls.profile, function(req, res, next) {
         res.sendFile(path.join(viewsDir, 'profile.html'));
     })
     .catch(err => {
-        console.log("Something went wrong: " + err);
         res.redirect(urls.error);
     });
 });
