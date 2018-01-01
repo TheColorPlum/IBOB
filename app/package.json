@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "browserify": "browserify requires.js -o public/bundle.js",
-    "start": "npm run browserify; node server.js",
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "start": "npm run browserify; node server.js"
   },
   "repository": {
     "type": "git",
@@ -20,13 +19,11 @@
   "homepage": "https://github.com/blockstack/hello-blockstack#readme",
   "devDependencies": {
     "browserify": "^14.1.0",
-    "express": "^4.15.2",
-    "opn": "^4.0.2"
+    "express": "^4.15.2"
   },
   "dependencies": {
     "axios": "^0.17.1",
     "blockstack": "^0.11.0",
-    "mocha": "^4.0.1",
     "path": "^0.12.7"
   }
 }
