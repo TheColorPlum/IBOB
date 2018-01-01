@@ -54,13 +54,6 @@ cd ..
 
 echo "Running tests..."
 
-# App
-echo "App tests..."
-cd app
-./test.sh
-echo "Done with app tests"
-echo
-
 # User-server
 echo "User-server tests..."
 cd ../user-server

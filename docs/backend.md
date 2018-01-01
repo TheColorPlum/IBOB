@@ -4,7 +4,39 @@ The back end is divided into three components: the **app**, the **user-server**,
 
 ## App
 
-*Documentation coming soon*
+This section describes the back end for the user-facing application. It is very simple, since most of the heavy-lifting work is done by the user-server and directory.
+
+### Codebase structure
+
+Code for the app is located in `app/`. The general layout of this directory is shown below:
+
+```
+- public/
+  - ...
+- views/
+  - ...
+- server.js
+- start.sh
+```
+
+The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
+
+### Server
+
+There is *one* server that provides the pages of the app to all users. These pages are just templates; they are populated with user data on the *client side* via requests to the user's user-server.
+
+> This is not a traditional way of handling requests. Usually, data is pulled on the app server itself, populated into the page, and only then is the page sent to the client. This is not possible here, since the *user-server* stores the data we need to populate the page, and it will not serve data without a *signature* from the client. Thus, only the client can pull the data, not the app server.
+
+The app has the following URL endpoints:
+
+- `GET /`: Returns the index/landing page. By default, this is a login page. However, it will redirect to the feed page on the client side if the user is already logged in.
+- `GET /feed`: Returns the logged-in user's feed page.
+- `GET /profile/<bsid>`: Returns the profile page for the user given by `bsid`, if they have an account on the network. If not, redirects to the error page.
+- `GET /error`: Returns a 404 error page.
+
+All of these are implemented in `server.js`.
+
+Additionally, `server.js` serves static files (i.e. CSS/JS) located in the `app/public/` directory. It is configured to serve these at the URL endpoint `/public/<file>` (e.g. `/public/styles.css`).
 
 ## User-server
 
