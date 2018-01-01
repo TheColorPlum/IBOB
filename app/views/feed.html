@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Import Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  <!-- Import Favicons -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Import Infinite Scroll and related packages -->
+  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+  <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+
+  <!-- Import Blockstack lib -->
+  <script src="/public/bundle.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" type="text/css" href="/public/styles.css">
+
+  <!-- Custom scripts -->
+  <script src="/public/scripts.js"></script>
+
+  <title>Angela Summers</title>
+</head>
+
+
+<body class="background-color-main">
+
+<!-- Navbar -->
+<nav class="navbar sticky-top navbar-toggleable-md navbar-inverse background-color-accent z-depth-1-half" id="navbar">
+
+  <!-- Logo -->
+  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <a class="navbar-brand" href="#">The Feed</a>
+
+  <!-- Navigation menu -->
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+    <!-- Buttons/menus -->
+    <ul class="navbar-nav ml-auto">
+      <!-- Search bar -->
+      <li class="nav-item active">
+        <form class="form-inline my-2 my-lg-0">
+          <input class="form-control mr-sm-2" type="text" placeholder="Search">
+        </form>
+      </li>
+
+      <!-- New post -->
+      <li class="nav-item active">
+        <a class="nav-link" href="#"><i class="fa fa-plus"> </i></a>
+      </li>
+
+      <!-- User menu -->
+      <li class="nav-item active dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-user"> </i>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <a class="dropdown-item" href="#">Feed</a>
+          <a class="dropdown-item" href="#">Profile</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Log out</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+<!-- /Navbar -->
+
+
+<div class="container">
+<div class="row extra-top-margin">
+
+<!-- Mini profile on left side -->
+<div class="col-md-2">
+
+  <!-- Profile photo -->
+  <div class="text-center hide-on-small-devices"><img src="https://mdbootstrap.com/img/Photos/Avatars/img(31).jpg" class="img-fluid img-thumbnail z-depth-1-half rounded-circle" alt="Profile Photo"></div>
+
+  <!-- Profile name -->
+  <p id="feed-title">Angela Summers' Feed</p>
+
+</div>
+
+<!-- Feed -->
+<div class="col-md-10">
+
+  <!-- Posts will be populated here -->
+  <div class="posts-grid">
+    <div class="posts-grid__col-sizer"></div>
+    <div class="posts-grid__gutter-sizer"></div>
+  </div>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- HTML template for posts. Processed and populated in scripts.js -->
+<script type="text/html" id="post-template">
+    <!--A post -->
+    <div class="post">
+      <div class="card background-color-main z-depth-1-half">
+        <!-- Card photo -->
+        <img class="img-fluid" src="{{photoSrc}}" alt="Post photo">
+
+        <!-- Card body -->
+        <div class="card-block">
+          <!-- Caption -->
+          <p class="card-text text-center">{{caption}}</p>
+
+          <!-- Date posted -->
+          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p>
+        </div>
+      </div>
+    </div>
+</script>
+
+</body>
+</html>

@@ -15,7 +15,7 @@ var app = express();
 /******************************************************************************/
 
 const urls = {
-    get: "/get",
+    get: "/get/:bsid",
     put: "/put"
 };
 
@@ -23,26 +23,16 @@ const urls = {
 /*
  * Returns the IP address of a user's user-server.
  */
-app.post(urls.get, function(req, res, next) {
-    // Verify
-    aps.verifyRequest(req.body, req.query.requester, aps.permissions.read)
-    .then(verification => {
-        if (!verification.ok) {
-            res.json({success: false, msg: verification.errorMsg});
-            return;
+app.get(urls.get, function(req, res, next) {
+    var bsid = req.params.bsid;
+    dal.get(bsid, result => {
+        if (result.success) {
+            // Entry exists. Return it.
+            res.json({success: true, ip: result.ip});
+        } else {
+            // Entry does not exist.
+            res.json({success: false, msg: "User-server does not exist"});
         }
-
-        // Get entry for the requested user
-        var data = JSON.parse(verification.decodedData);
-        dal.get(data.bsid, result => {
-            if (result.success) {
-                // Entry exists. Return it.
-                res.json({success: true, ip: result.ip});
-            } else {
-                // Entry does not exist.
-                res.json({success: false, msg: "User-server does not exist"});
-            }
-        });
     });
 });
 

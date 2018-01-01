@@ -17,11 +17,14 @@
   <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
   <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 
+  <!-- Import Blockstack lib -->
+  <script src="/public/bundle.js"></script>
+
   <!-- Custom styles -->
-  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="/public/styles.css">
 
   <!-- Custom scripts -->
-  <script src="scripts.js"></script>
+  <script src="/public/scripts.js"></script>
 
   <title>Angela Summers</title>
 </head>
@@ -36,7 +39,7 @@
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <a class="navbar-brand" href="#">IBOB</a>
+  <a class="navbar-brand" href="#">The Feed</a>
 
   <!-- Navigation menu -->
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -55,20 +58,16 @@
         <a class="nav-link" href="#"><i class="fa fa-plus"> </i></a>
       </li>
 
-      <!-- Notifications -->
-      <li class="nav-item active">
-        <a class="nav-link" href="#"><i class="fa fa-bell"> </i></a>
-      </li>
-
       <!-- User menu -->
       <li class="nav-item active dropdown">
-        <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" role="button" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-user"> </i>
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
           <a class="dropdown-item" href="#">Feed</a>
           <a class="dropdown-item" href="#">Profile</a>
-          <a class="dropdown-item" href="#">Settings</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Log out</a>
         </div>
       </li>
     </ul>
@@ -92,73 +91,41 @@
 
     <!-- Profile quote -->
     <p id="profile-quote">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-
-    <!-- Profile stats -->
-    <div class="row">
-      <div class="col"><button type="button" class="btn btn-link">10 Followers</button></div>
-      <div class="col"><button type="button" class="btn btn-link">12 Following</button></div>
-      <div class="col"><button type="button" class="btn btn-link">13 Friends</button></div>
-    </div>
   </div>
 </div>
 </div>
 <!-- /Profile cover -->
 
-
-<!-- Posts -->
 <div class="container">
-<div class="row">
 
-  <!-- Card -->
-  <div class="col-md">
-    <div class="card background-color-main z-depth-1-half">
-      <!-- Card photo -->
-      <img class="img-fluid" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).jpg" alt="Post photo">
-
-      <!-- Card body -->
-      <div class="card-block">
-        <!-- Caption -->
-        <p class="card-text text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-
-        <!-- Date posted -->
-        <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> October 28, 2017</p>
-
-        <!-- Stats -->
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-thumbs-o-up"> </i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-comments-o"></i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-share"></i> 1234</a>
-      </div>
-
-    </div>
-  </div>
-
-
-  <!--Card-->
-  <div class="col-md">
-    <div class="card background-color-main z-depth-1-half">
-      <!-- Card photo -->
-      <img class="img-fluid" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).jpg" alt="Post photo">
-
-      <!-- Card body -->
-      <div class="card-block">
-        <!-- Caption -->
-        <p class="card-text text-center">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-
-        <!-- Date posted -->
-        <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> October 28, 2017</p>
-
-        <!-- Stats -->
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-thumbs-o-up"> </i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-comments-o"></i> 1234</a>
-        <a href="#" class="card-link text-color-accent"><i class="fa fa-share"></i> 1234</a>
-      </div>
-
-    </div>
+  <!-- Posts will be populated here -->
+  <div class="posts-grid">
+    <div class="posts-grid__col-sizer"></div>
+    <div class="posts-grid__gutter-sizer"></div>
   </div>
 
 </div>
-</div>
-<!-- /Posts -->
+
+
+<!-- HTML template for posts. Processed and populated in scripts.js -->
+<script type="text/html" id="post-template">
+    <!--A post -->
+    <div class="post">
+      <div class="card background-color-main z-depth-1-half">
+        <!-- Card photo -->
+        <img class="img-fluid" src="{{photoSrc}}" alt="Post photo">
+
+        <!-- Card body -->
+        <div class="card-block">
+          <!-- Caption -->
+          <p class="card-text text-center">{{caption}}</p>
+
+          <!-- Date posted -->
+          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p>
+        </div>
+      </div>
+    </div>
+</script>
 
 </body>
 </html>
