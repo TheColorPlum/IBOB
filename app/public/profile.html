@@ -100,52 +100,35 @@
 </div>
 <!-- /Profile cover -->
 
+<div class="container">
 
-<!-- Posts will be populated here -->
-<div class="container"></div>
+  <!-- Posts will be populated here -->
+  <div class="posts-grid">
+    <div class="posts-grid__col-sizer"></div>
+    <div class="posts-grid__gutter-sizer"></div>
+  </div>
+
+</div>
 
 
 <!-- HTML template for posts. Processed and populated in scripts.js -->
-<script type="text/html" id="post-row-template">
-  <div class="row">
-
-    <!--Card 1 -->
-    <div class="col-md">
+<script type="text/html" id="post-template">
+    <!--A post -->
+    <div class="post">
       <div class="card background-color-main z-depth-1-half">
         <!-- Card photo -->
-        <img class="img-fluid" src="{{photoSrc1}}" alt="Post photo">
+        <img class="img-fluid" src="{{photoSrc}}" alt="Post photo">
 
         <!-- Card body -->
         <div class="card-block">
           <!-- Caption -->
-          <p class="card-text text-center">{{caption1}}</p>
+          <p class="card-text text-center">{{caption}}</p>
 
           <!-- Date posted -->
-          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp1}}</p>
+          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p>
         </div>
-
       </div>
     </div>
-
-    <!--Card 2 -->
-    <div class="col-md">
-      <div class="card background-color-main z-depth-1-half">
-        <!-- Card photo -->
-        <img class="img-fluid" src="{{photoSrc2}}" alt="Post photo">
-
-        <!-- Card body -->
-        <div class="card-block">
-          <!-- Caption -->
-          <p class="card-text text-center">{{caption2}}</p>
-
-          <!-- Date posted -->
-          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp2}}</p>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
 </script>
 
 </body>

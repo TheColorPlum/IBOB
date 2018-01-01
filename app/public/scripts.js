@@ -9,7 +9,7 @@ $(document).ready(function() {
 
 // Some helper constants/functions for infinite scroll
 
-var postRowHtmlTemplate = $('#post-row-template').html();  // defined in profile.html
+var postHtmlTemplate = $('#post-template').html();  // defined in profile.html
 
 /*
  * Simple micro templating. Returns the HTML string `html`, with all
@@ -17,7 +17,7 @@ var postRowHtmlTemplate = $('#post-row-template').html();  // defined in profile
  *   Ref: Copied from one of the examples in the Infinite Scroll docs
  *        https://codepen.io/desandro/pen/LLjYgG/
  */
-function microTemplate(html, vars) {
+var microTemplate = function(html, vars) {
   // Replace {{tags}}
   return html.replace(/\{\{([\w\-_\.]+)\}\}/gi, function(match, key) {
     // Walk through objects to get value
@@ -27,16 +27,36 @@ function microTemplate(html, vars) {
     });
     return value;
   });
-}
+};
 
-/******************************************************************************/
+/*****************************************************************************/
+
+// Configure Masonry (tiling library for posts)
+//   Ref: https://masonry.desandro.com/options.html (docs)
+//        https://codepen.io/desandro/pen/QgMWzV/   (code sample)
+
+var $posts = $('.posts-grid').masonry({
+    itemSelector: '.post',
+    columnWidth: '.posts-grid__col-sizer',
+    gutter: '.posts-grid__gutter-sizer',
+    percentPosition: true,
+    stagger: 30,
+
+    // Nicer reveal transition
+    visibleStyle: { transform: 'translateY(0)', opacity: 1 },
+    hiddenStyle: { transform: 'translateY(100px)', opacity: 0 }
+});
+
+var msnry = $posts.data('masonry');
+
+/*****************************************************************************/
 
 // Configure infinite scroll for posts
 //   Ref: https://infinite-scroll.com/options.html#responsetype
 
 var unsplashId = '9ad80b14098bcead9c7de952435e937cc3723ae61084ba8e729adb642daf0251';
 
-var $posts = $('.container').infiniteScroll({
+$posts.infiniteScroll({
     // Define url to request for next set of photos
     // TODO: Uncomment this when you're ready for dynamic content
     // path: function() {
@@ -49,7 +69,10 @@ var $posts = $('.container').infiniteScroll({
     // Do not immediately append, since the response is JSON (not HTML)
     append: false,
     responseType: 'text',
-    history: false
+    history: false,
+
+    // Integrate with Masonry
+    outlayer: msnry
 });
 
 $posts.on('load.infiniteScroll', function(event, response) {
@@ -61,31 +84,24 @@ $posts.on('load.infiniteScroll', function(event, response) {
         newPostsJson.pop();
     }
 
-    // Add posts in rows of 2
-    var newPosts = '';
-    for (var i = 0; i < newPostsJson.length / 2; i += 2) {
-        var post1 = newPostsJson[i];
-        var post2 = newPostsJson[i+1];
-
+    // Construct HTML for new posts
+    newPosts = newPostsJson.map(json => {
         var vars = {
-            photoSrc1: post1.urls.regular,
-            caption1: 'Sample caption',
-            timestamp1: new Date(post1.created_at).toDateString(),
-
-            photoSrc2: post2.urls.regular,
-            caption2: 'Sample caption',
-            timestamp2: new Date(post2.created_at).toDateString(),
+            photoSrc: json.urls.regular,
+            caption: 'Sample caption',
+            timestamp: new Date(json.created_at).toDateString()
         };
-        var newRow = microTemplate(postRowHtmlTemplate, vars);
-
-        newPosts += newRow;
-    }
+        return microTemplate(postHtmlTemplate, vars);
+    }).join('');
 
     // Compile HTML
     var newPostsHtml = $(newPosts);
 
     // Append new posts
-    $posts.infiniteScroll('appendItems', newPostsHtml);
+    newPostsHtml.imagesLoaded(function() {
+        $posts.infiniteScroll('appendItems', newPostsHtml);
+        $posts.masonry('appended', newPostsHtml);
+    });
 });
 
 // Load initial page
