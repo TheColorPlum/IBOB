@@ -18,12 +18,12 @@
   <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 
   <!-- Custom styles -->
-  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="/public/styles.css">
 
   <!-- Custom scripts -->
-  <script src="scripts.js"></script>
+  <script src="/public/scripts.js"></script>
 
-  <title>Angela Summers</title>
+  <title>Not Found</title>
 </head>
 
 
@@ -72,57 +72,15 @@
 </nav>
 <!-- /Navbar -->
 
-
-<!-- Profile cover -->
-<div class="jumbotron jumbotron-fluid text-color-main z-depth-1-half" id="profile-jumbotron">
-<div class="row">
-
-  <!-- Profile photo -->
-  <div class="col-md-4 text-center"><img src="https://mdbootstrap.com/img/Photos/Avatars/img(31).jpg" class="img-fluid img-thumbnail z-depth-1-half rounded-circle" alt="Profile Photo"></div>
-
-  <!-- Profile info -->
-  <div class="col-md-8">
-
-    <!-- Profile name -->
-    <h1 id="profile-username">Angela Summers</h1>
-
-    <!-- Profile quote -->
-    <p id="profile-quote">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-  </div>
-</div>
-</div>
-<!-- /Profile cover -->
-
 <div class="container">
 
-  <!-- Posts will be populated here -->
-  <div class="posts-grid">
-    <div class="posts-grid__col-sizer"></div>
-    <div class="posts-grid__gutter-sizer"></div>
+  <!-- Error message -->
+  <div class="text-center extra-top-margin">
+    <h1>Oops!</h1>
+    <p>Looks like that page doesn't exist.</p>
   </div>
 
 </div>
-
-
-<!-- HTML template for posts. Processed and populated in scripts.js -->
-<script type="text/html" id="post-template">
-    <!--A post -->
-    <div class="post">
-      <div class="card background-color-main z-depth-1-half">
-        <!-- Card photo -->
-        <img class="img-fluid" src="{{photoSrc}}" alt="Post photo">
-
-        <!-- Card body -->
-        <div class="card-block">
-          <!-- Caption -->
-          <p class="card-text text-center">{{caption}}</p>
-
-          <!-- Date posted -->
-          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p>
-        </div>
-      </div>
-    </div>
-</script>
 
 </body>
 </html>

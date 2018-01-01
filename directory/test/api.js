@@ -41,7 +41,7 @@ var setup = function(callback) {
 /******************************************************************************/
 
 // /get tests
-describe("/api " + api.urls.get, function() {
+describe("/api" + api.urls.get, function() {
 
     // Normal case - entry exists
     it("Returns the user-server's IP address", function(done) {
@@ -55,9 +55,7 @@ describe("/api " + api.urls.get, function() {
         var correctResponse = {success: true, ip: entry.ip};
 
         // Make request
-        var data = {bsid: alice, timestamp: requests.makeTimestamp()};
-        var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.get + "?requester=" + alice, reqBody)
+        axios.get(baseUrl + "/api/get/" + alice)
         .then(resp => {
 
             try {
@@ -84,9 +82,7 @@ describe("/api " + api.urls.get, function() {
         var correctResponse = {success: false, msg: "User-server does not exist"};
 
         // Make request
-        var data = {bsid: alice, timestamp: requests.makeTimestamp()};
-        var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.get + "?requester=" + alice, reqBody)
+        axios.get(baseUrl + "/api/get/" + alice)
         .then(resp => {
 
             try {

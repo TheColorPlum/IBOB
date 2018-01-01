@@ -17,11 +17,14 @@
   <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
   <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 
+  <!-- Import Blockstack lib -->
+  <script src="/public/bundle.js"></script>
+
   <!-- Custom styles -->
-  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="/public/styles.css">
 
   <!-- Custom scripts -->
-  <script src="scripts.js"></script>
+  <script src="/public/scripts.js"></script>
 
   <title>Angela Summers</title>
 </head>
@@ -73,22 +76,27 @@
 <!-- /Navbar -->
 
 
-<div class="container">
-<div class="row extra-top-margin">
-
-<!-- Mini profile on left side -->
-<div class="col-md-2">
+<!-- Profile cover -->
+<div class="jumbotron jumbotron-fluid text-color-main z-depth-1-half" id="profile-jumbotron">
+<div class="row">
 
   <!-- Profile photo -->
-  <div class="text-center hide-on-small-devices"><img src="https://mdbootstrap.com/img/Photos/Avatars/img(31).jpg" class="img-fluid img-thumbnail z-depth-1-half rounded-circle" alt="Profile Photo"></div>
+  <div class="col-md-4 text-center"><img src="https://mdbootstrap.com/img/Photos/Avatars/img(31).jpg" class="img-fluid img-thumbnail z-depth-1-half rounded-circle" alt="Profile Photo"></div>
 
-  <!-- Profile name -->
-  <p id="feed-title">Angela Summers' Feed</p>
+  <!-- Profile info -->
+  <div class="col-md-8">
 
+    <!-- Profile name -->
+    <h1 id="profile-username">Angela Summers</h1>
+
+    <!-- Profile quote -->
+    <p id="profile-quote">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+  </div>
 </div>
+</div>
+<!-- /Profile cover -->
 
-<!-- Feed -->
-<div class="col-md-10">
+<div class="container">
 
   <!-- Posts will be populated here -->
   <div class="posts-grid">
@@ -96,9 +104,6 @@
     <div class="posts-grid__gutter-sizer"></div>
   </div>
 
-</div>
-
-</div>
 </div>
 
 

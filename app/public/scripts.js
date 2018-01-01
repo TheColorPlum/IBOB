@@ -7,6 +7,37 @@
 
 $(document).ready(function() {
 
+/******************************************************************************/
+
+// Some setup so the client is ready to make requests to either the user-server
+// or the directory.
+
+// Load user-server's IP address from Blockstack storage
+// TODO: implement
+const userServerIp = '';
+
+// Load user's private key from Blockstack storage (for signatures)
+// TODO: implement
+const userPrivateKey = '';
+
+/*
+ * Helper function for making signed requests to the user-server or the
+ * directory. Makes a POST request to the url, with the body (JS object)
+ * appended a timestamp, and then encoded/signed in the format accepted by
+ * the servers. Returns a Promise for the response. Resolves if request
+ * is successful; rejects with an error if the request fails.
+ */
+var makeSignedRequest = function(url, body) {
+    // TODO: implement
+    return new Promise((resolve, reject) => {
+        reject();
+    });
+};
+
+
+/******************************************************************************/
+
+
 // Some helper constants/functions for infinite scroll
 
 var postHtmlTemplate = $('#post-template').html();  // defined in profile.html
@@ -29,7 +60,7 @@ var microTemplate = function(html, vars) {
   });
 };
 
-/*****************************************************************************/
+/******************************************************************************/
 
 // Configure Masonry (tiling library for posts)
 //   Ref: https://masonry.desandro.com/options.html (docs)
@@ -49,7 +80,7 @@ var $posts = $('.posts-grid').masonry({
 
 var msnry = $posts.data('masonry');
 
-/*****************************************************************************/
+/******************************************************************************/
 
 // Configure infinite scroll for posts
 //   Ref: https://infinite-scroll.com/options.html#responsetype
