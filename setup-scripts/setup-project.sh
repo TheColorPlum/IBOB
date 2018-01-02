@@ -27,6 +27,8 @@ npm install
 
 cd ..
 
+echo "Done with app"
+
 #------------------------------------------------------------------------------
 
 # User server
@@ -44,6 +46,8 @@ cd initialization
 node createDatabase.js
 
 cd ../..
+
+echo "Done with user-server"
 
 #------------------------------------------------------------------------------
 
@@ -63,23 +67,45 @@ node createDatabase.js
 
 cd ../..
 
+echo "Done with directory"
+
 #------------------------------------------------------------------------------
 
 echo "======================================="
 echo "          Running all tests...         "
 echo "======================================="
 
-# User-server
+# Start servers
+cd user-server
+node server.js &
+user_server_pid=$!
+cd ..
+
+cd directory
+node server.js &
+directory_pid=$!
+cd ..
+
+sleep 3
+
+
+# User-server tests
 echo "User-server tests..."
-cd ../user-server
+cd user-server
 ./test.sh
 echo "Done with user-server tests"
 echo
+cd ..
 
-# User-server directory
+# User-server directory tests
 echo "Directory tests..."
-cd ../directory
+cd directory
 ./test.sh
 echo "Done with directory tests"
 
-echo "Done!"
+
+# Kill servers
+kill $user_server_pid $directory_pid
+
+
+echo "Done setting up project!"

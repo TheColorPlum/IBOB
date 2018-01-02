@@ -15,8 +15,7 @@
     "express": "^4.16.2",
     "fs": "0.0.1-security",
     "jsontokens": "^0.7.6",
-    "mysql": "^2.15.0",
-    "path": "^0.12.7"
+    "mysql": "^2.15.0"
   },
   "devDependencies": {
     "mocha": "^4.0.1",

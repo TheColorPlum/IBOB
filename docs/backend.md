@@ -119,6 +119,9 @@ The structure of the directory is very similar to the user-server - it also has 
 The code is located in the `directory/` folder. Within that is the following structure:
 
 ```
+- initialization/
+  - main.sh
+  - ...
 - lib/
   - ...
   - ...
@@ -133,7 +136,7 @@ The code is located in the `directory/` folder. Within that is the following str
 - test.sh
 ```
 
-In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
+In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `initialization/` contains the scripts that automate the initialization of the directory. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
 
 ### Storage
 
@@ -168,8 +171,9 @@ The actual SQL queries used to insert/select entries are abstracted in a data-ac
 - `put(bsid, ip, callback)`: Adds a mapping from `bsid` (string user name) to `ip` (string IP address in decimal notation), or overwrites the entry for `bsid` if there already is one.
   - Returned to callback: `{success: true}`
 
-It also defines two other functions. One that closes the connection to the database, and one that clears the database (helpful when writing tests).
+It also defines three other functions: one that creates the database and the table shown above (for initialization); one that closes the connection to the database; and one that clears the database (helpful when writing tests).
 
+- `createDatabase(callback)`: Creates the directory's database and the table shown above. Calls the callback when done.
 - `closeConnection([callback])`: Closes the DAL's current connection to the database. You should call this before any code that uses the DAL terminates; otherwise, it will hang at the end. You can still continue to make queries after calling this, though; a new connection will be made for the next query. `callback` is optional, but if one is present, nothing is passed to it when it is called.
   > Note that you do *not* need to call this in the server, since it does not terminate, and thus can use a persistent connection.
 - `clearDatabase(callback)`: Clears the contents of all tables in the database. (Nothing is passed to the callback.)
@@ -182,6 +186,9 @@ The API is implemented as a set of HTTP request handlers in `routes/api.js`. We 
 
 The APS is also implemented as one of our libraries in `lib/aps.js`. Like the API, we wrote the spec of the APS in the same [Google doc](https://docs.google.com/document/d/1wykWWzwd8LasOF8lJKZEpNwXCW-B3se33YUEtK8M2OY), and we will move it to these docs when it is finalized.
 
+### Initialization (in deployment)
+
+The directory's initialization is much simpler than the user-server's. It just needs to create the database and start the server. This is automated by the script `main.sh` in the `initialization/` folder (the other scripts are run by `main.sh`).
 
 
 ## Testing

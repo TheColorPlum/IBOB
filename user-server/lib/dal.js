@@ -9,7 +9,6 @@
 var debug = require("./debug");
 var fs = require("fs");
 var mysql = require("mysql");
-var path = require("path");
 
 /***********************************************************/
 
@@ -99,7 +98,7 @@ var createDatabase = function(callback) {
     var createDatabaseSql = "CREATE DATABASE The_Feed";
 
     // Read table creation SQL from file
-    fs.readFile(path.join(__dirname, "/../create-database.sql"), "utf8", (err, createTablesSql) => {
+    fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {
     if (err) {
         debug.log("Failed to read create-database.sql. Did not create database.");
         callback(err);
