@@ -39,9 +39,12 @@ axios.post(requests.directoryBaseUrl + "/api/put?requester=" + bsid, reqBody)
         console.log("Directory responded with a failure: " + json.msg);
     }
 
+    dal.closeConnection();
+
 }).catch(err => {
 
     console.log(err);
+    dal.closeConnection();
 
 });
 

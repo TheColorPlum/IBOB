@@ -8,12 +8,7 @@
 
 var debug = require("./debug");
 var mysql = require("mysql");
-var connection = mysql.createConnection({
-    host     : "localhost",
-    user     : "root",
-    password : "TuringP_lumRubik$9",
-    database : "User_Server_Directory"
-});
+var connection = null;
 
 /******************************************************************************/
 
@@ -21,6 +16,15 @@ var connection = mysql.createConnection({
 // `sql`, a message to print once the query succeeds, and the callback
 // function to process the results from the database (if there are any).
 var query = function(sql, msg, callback) {
+    if (connection === null) {
+        connection = mysql.createConnection({
+            host     : "localhost",
+            user     : "root",
+            password : "TuringP_lumRubik$9",
+            database : "User_Server_Directory"
+        });
+    }
+
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
@@ -29,6 +33,21 @@ var query = function(sql, msg, callback) {
             debug.log("Database query successful: " + msg);
         }
         callback(result);
+    });
+}
+
+// Closes the current connection to the database. In the server (which runs
+// forever) you never need to close the connection. However, any code that
+// terminates must call this before it finishes, or it will hang at the end.
+// You can keep making queries even after calling this though; a new
+// connection will be made.
+//
+// Callback is optional
+var closeConnection = function(callback) {
+    connection.end(() => {
+        connection = null;
+
+        if (callback) callback();
     });
 }
 
@@ -52,7 +71,7 @@ var clearDatabase = function(callback) {
  */
 var get = function(bsid, callback) {
     var sql = "SELECT bsid, INET_NTOA(ip) AS ip FROM user_servers WHERE bsid = "
-      + connection.escape(bsid);
+      + mysql.escape(bsid);
     var msg = "Made query for " + bsid + "'s IP address";
     query(sql, msg, function(rows) {
         if (rows.length == 0) {
@@ -79,14 +98,14 @@ var put = function(bsid, ip, callback) {
     var msg = "";
     if (result.success) {
         // Entry for this user already exists. Make an overwrite query.
-        sql = "UPDATE user_servers SET ip = INET_ATON(" + connection.escape(ip) + ") "
-          + "WHERE bsid = " + connection.escape(bsid);
+        sql = "UPDATE user_servers SET ip = INET_ATON(" + mysql.escape(ip) + ") "
+          + "WHERE bsid = " + mysql.escape(bsid);
         msg = "Overwrote entry for " + bsid + " with " + ip;
     } else {
         // Entry does not exist. Make a query to add a new entry.
         sql = "INSERT INTO user_servers (bsid, ip) VALUES ("
-          + connection.escape(bsid) + ", "
-          + "INET_ATON(" + connection.escape(ip) + ")"
+          + mysql.escape(bsid) + ", "
+          + "INET_ATON(" + mysql.escape(ip) + ")"
           + ")";
         msg = "Inserted new entry: (" + bsid + ", " + ip + ")";
     }
@@ -100,6 +119,7 @@ var put = function(bsid, ip, callback) {
 
 
 module.exports = {
+    closeConnection,
     clearDatabase,
     get,
     put

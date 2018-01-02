@@ -8,12 +8,8 @@
 
 var debug = require("./debug");
 var mysql = require('mysql');
-var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : 'TuringP_lumRubik$9',
-    database : 'The_Feed'
-});
+
+var connection = null;
 
 /***********************************************************/
 
@@ -21,6 +17,16 @@ var connection = mysql.createConnection({
 // `sql`, a message to print once the query succeeds, and the callback
 // function to process the results from the database (if there are any).
 var query = function(sql, msg, callback) {
+    if (connection === null) {
+        // First open a connection
+        connection = mysql.createConnection({
+            host     : 'localhost',
+            user     : 'root',
+            password : 'TuringP_lumRubik$9',
+            database : 'The_Feed'
+        });
+    }
+
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
@@ -31,6 +37,23 @@ var query = function(sql, msg, callback) {
         callback(result);
     });
 }
+
+
+// Closes the current connection to the database. In the server (which runs
+// forever) you never need to close the connection. However, any code that
+// terminates must call this before it finishes, or it will hang at the end.
+// You can keep making queries even after calling this though; a new
+// connection will be made.
+//
+// Callback is optional
+var closeConnection = function(callback) {
+    connection.end(() => {
+        connection = null;
+
+        if (callback) callback();
+    });
+}
+
 
 // Clears all data in the database tables. Call this, for instance, between
 // tests to start with a clean slate.
@@ -74,26 +97,26 @@ var clearDatabase = function(callback) {
  **********************************************************/
 
 var followUser = function(bsid, callback) {
-    var sql = "Insert INTO following (bsid) values (" + connection.escape(bsid) + ")";
+    var sql = "Insert INTO following (bsid) values (" + mysql.escape(bsid) + ")";
     var msg = "Started following " + bsid;
     query(sql, msg, callback);
 }
 
 var addFollower = function(bsid, callback) {
-    var sql = "Insert INTO followers (bsid) values (" + connection.escape(bsid) + ")";
+    var sql = "Insert INTO followers (bsid) values (" + mysql.escape(bsid) + ")";
     var msg = "Added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
 var addPhoto = function(path, callback) {
-    var sql = "INSERT INTO photos (path) values (" + connection.escape(path) + ")";
+    var sql = "INSERT INTO photos (path) values (" + mysql.escape(path) + ")";
     var msg = "Photo added";
     query(sql, msg, callback);
 }
 
 var addPost = function(photoId, timestamp, callback) {
     var sql = "INSERT INTO posts (photoId, timestamp) values ("
-      + connection.escape(photoId) + ", " + connection.escape(timestamp) + ")";
+      + mysql.escape(photoId) + ", " + mysql.escape(timestamp) + ")";
     var msg = "Post added";
     query(sql, msg, callback);
 }
@@ -101,16 +124,16 @@ var addPost = function(photoId, timestamp, callback) {
 var updateProfileInfo = function(bsid, profile, callback) {
     var values = "";
     if (profile.displayName) {
-        values += "displayName = " + connection.escape(profile.displayName) + ",";
+        values += "displayName = " + mysql.escape(profile.displayName) + ",";
     }
     if (profile.bio) {
-        values += "bio = " + connection.escape(profile.bio) + ",";
+        values += "bio = " + mysql.escape(profile.bio) + ",";
     }
     if (profile.profilePhotoId) {
-        values += "profilePhotoId = " + connection.escape(profile.profilePhotoId) + ",";
+        values += "profilePhotoId = " + mysql.escape(profile.profilePhotoId) + ",";
     }
     if (profile.coverPhotoId) {
-        values += "coverPhotoId = " + connection.escape(profile.coverPhotoId) + ",";
+        values += "coverPhotoId = " + mysql.escape(profile.coverPhotoId) + ",";
     }
 
     if (values === "") {
@@ -124,7 +147,7 @@ var updateProfileInfo = function(bsid, profile, callback) {
 
     // Construct complete SQL statement
     sql = "UPDATE profile_info SET " + values + " WHERE bsid = "
-      + connection.escape(bsid);
+      + mysql.escape(bsid);
 
     var msg = "Profile updated";
     query(sql, msg, callback);
@@ -132,14 +155,14 @@ var updateProfileInfo = function(bsid, profile, callback) {
 
 var setOwner = function(bsid, callback) {
     var sql = "INSERT INTO profile_info (bsid) values ("
-      + connection.escape(bsid) + ")";
+      + mysql.escape(bsid) + ")";
     var msg = "Owner set to " + bsid;
     query(sql, msg, callback);
 }
 
 var setPrivateKey = function(privateKey, callback) {
     var sql = "INSERT INTO private_key (privateKey) values ("
-      + connection.escape(privateKey) + ")";
+      + mysql.escape(privateKey) + ")";
     var msg = "Private key set";
     query(sql, msg, callback);
 }
@@ -270,6 +293,7 @@ var getPrivateKey = function(callback) {
 
 
 module.exports = {
+    closeConnection,
     clearDatabase,
     followUser,
     addFollower,

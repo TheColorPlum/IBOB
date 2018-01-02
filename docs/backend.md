@@ -168,8 +168,10 @@ The actual SQL queries used to insert/select entries are abstracted in a data-ac
 - `put(bsid, ip, callback)`: Adds a mapping from `bsid` (string user name) to `ip` (string IP address in decimal notation), or overwrites the entry for `bsid` if there already is one.
   - Returned to callback: `{success: true}`
 
-And it also defines a function for clearing the database, which is helpful when writing tests.
+It also defines two other functions. One that closes the connection to the database, and one that clears the database (helpful when writing tests).
 
+- `closeConnection([callback])`: Closes the DAL's current connection to the database. You should call this before any code that uses the DAL terminates; otherwise, it will hang at the end. You can still continue to make queries after calling this, though; a new connection will be made for the next query. `callback` is optional, but if one is present, nothing is passed to it when it is called.
+  > Note that you do *not* need to call this in the server, since it does not terminate, and thus can use a persistent connection.
 - `clearDatabase(callback)`: Clears the contents of all tables in the database. (Nothing is passed to the callback.)
 
 ### Web API

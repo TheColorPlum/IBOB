@@ -8,6 +8,7 @@
 # Check usage
 if [ $# -ne 3 ]; then
   echo "Usage: ./main.sh BSID PRIVATE-KEY IP"
+  exit
 fi
 
 bsid=$1

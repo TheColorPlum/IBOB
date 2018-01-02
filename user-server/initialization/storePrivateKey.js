@@ -18,4 +18,5 @@ const privateKey = process.argv[2];
 
 dal.setPrivateKey(privateKey, () => {
     console.log("Done setting private key");
+    dal.closeConnection();
 });

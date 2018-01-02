@@ -8,6 +8,7 @@
 # Check usage
 if [ $# -ne 0 ]; then
   echo "Usage: ./setup-project.sh"
+  exit
 fi
 
 cd ..
