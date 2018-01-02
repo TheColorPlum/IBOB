@@ -45,3 +45,10 @@ CREATE TABLE IF NOT EXISTS following (
   bsid varchar(255),
   PRIMARY KEY (id)
 );
+
+# Private key
+CREATE TABLE IF NOT EXISTS private_key (
+  id int NOT NULL auto_increment,
+  privateKey varchar(255),
+  PRIMARY KEY (id)
+);

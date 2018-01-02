@@ -7,7 +7,7 @@
  */
 
 // Set this variable true/false to toggle debugging tools defined below.
-const debug = true;
+const debug = false;
 
 
 // A print statement toggled by the debug flag above. Prints msg to stderr.
