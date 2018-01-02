@@ -29,14 +29,15 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 /******************************************************************************/
 
-// Serve pages
-
 // Url endpoints
 const urls = {
     index: '/',
     profile: '/profile/:bsid',
     feed: '/feed',
-    error: '/error'
+    error: '/error',
+
+    // For development only
+    initialization: '/initialization'
 };
 
 // Base directory of views
@@ -44,6 +45,10 @@ const viewsDir = path.join(__dirname, '/views');
 
 // User-server directory url
 const directoryBaseUrl = 'http://localhost:4000';
+
+/******************************************************************************/
+
+// Public pages, available to users
 
 /*
  * Returns the index (login) page
@@ -89,10 +94,21 @@ app.get(urls.feed, function(req, res, next) {
 /*
  * Returns a 404 error page
  */
-app.get('/error', function(req, res, next) {
+app.get(urls.error, function(req, res, next) {
     res.sendFile(path.join(viewsDir, '404.html'));
 });
 
+
+/******************************************************************************/
+
+// Pages used only in development
+
+/*
+ * Returns the app initialization page
+ */
+app.get(urls.initialization, function(req, res, next) {
+    res.sendFile(path.join(viewsDir, 'initialization.html'));
+});
 
 /******************************************************************************/
 

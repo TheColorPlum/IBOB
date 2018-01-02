@@ -81,14 +81,13 @@ Now the actual initialization:
   $ ./main.sh alice.id <private-key> 127.0.0.1
   ```
   > Note: This will automatically start running the user-server in the background once it has been configured. Its process id (PID) will be printed for you. *Make sure to take note of it*. Then, when you want to kill the server, use this process ID: `$ kill <pid>`.
-- **Store some info in alice.id's Blockstack storage.** This part must be done in the browser, since Blockstack does not allow us to log in and read/write to storage outside the browser.
-  - Run the app's secondary web server (see [Backend](backend.md) for details on this):
+- **Store some info in alice.id's Blockstack storage.** This part must be done in the browser, since Blockstack does not allow us to log in and read/write to storage outside the browser. We have an extra page served by app server for this purpose.
+  - Run the app server:
     ```bash
-    $ cd app/initialization
+    $ cd app
     $ ./start.sh
     ```
-  - Open a browser to [http://localhost:7000](http://localhost:7000). Enter alice.id's private key (same as in the last step) and the IP address of the user-server (should be something like localhost:xxxx - check the port number). Then click "Save". This will store the information in alice.id's Blockstack storage.
-  - You can kill this server now.
+  - Open a browser to [http://localhost:5000/initialization](http://localhost:5000/initialization). Sign in as alice.id, enter alice.id's private key (same as in the last step), and enter 127.0.0.1 as the IP address of the user-server (i.e. localhost). Then click "Save". This will store the information in alice.id's Blockstack storage.
 
 ## Frontend Behavior
 

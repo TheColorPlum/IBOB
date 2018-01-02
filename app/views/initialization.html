@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Import jQuery -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+
+    <!-- Import Blockstack -->
+    <script src="/public/bundle.js"></script>
+
+    <!-- Only show the sign-in-panel initially. Once signed in, we can show
+         the enter-info-panel -->
+    <style>
+      #enter-info-panel {
+        display: none;
+      }
+    </style>
+
+    <title>Initialize the app</title>
+</head>
+<body>
+
+<h1>Initialize the app</h1>
+
+<!-- Sign-in button -->
+<div id="sign-in-panel">
+
+  <p>First, sign into Blockstack</p>
+  <p><button id="sign-in-button">Sign In</button></p>
+
+</div>
+
+
+<!-- Page content -->
+<div id="enter-info-panel">
+
+  <p>Enter the following user information to save it in Blockstack:</p>
+
+  <p>Private key: <input id="private-key" type="text"></p>
+  <p>IP address of user-server: <input id="ip" type="text"></p>
+  <p><button id="save-button" type="button">Save</button></p>
+
+  <p id="message"></p>
+
+</div>
+
+<!-- Scripts for the page -->
+<script>
+
+  // Sign into Blockstack, if necessary
+  $('#sign-in-button').click(function() {
+    blockstack.redirectToSignIn();
+  });
+
+
+  if (blockstack.isUserSignedIn()) {
+
+    // Hide sign-in-panel and show enter-info-panel
+    $('#sign-in-panel').hide();
+    $('#enter-info-panel').show();
+
+  } else if (blockstack.isSignInPending()) {
+
+    blockstack.handlePendingSignIn().then(function(userData) {
+      window.location = window.location.origin;
+    });
+
+  }
+
+  /****************************************************************************/
+
+  // Save info entered into form
+
+  $('#save-button').click(function() {
+
+    var successMessage = 'Done! Info has been saved to Blockstack. You can close this window now.';
+    var invalidMessage = 'You must enter something in both text boxes.';
+    var failureMessage = 'Oops! Something went wrong. Try again.';
+
+    // Get form data
+    var privateKey = $('#private-key').val();
+    var ip = $('#ip').val();
+
+    if (privateKey === "" || ip === "") {
+      // Invalid
+      $('#message').text(invalidMessage);
+      return;
+    }
+
+    // Save to Blockstack
+    var file = 'user-data.json';
+    var content = JSON.stringify({
+      userPrivateKey: privateKey,
+      userServerIp: ip
+    });
+    blockstack.putFile(file, content, false)
+    .then(() => {
+
+      // Success!
+      $('#message').text(successMessage);
+
+    }).catch(() => {
+
+      // Failure
+      $('#message').text(failureMessage);
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>

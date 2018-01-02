@@ -11,10 +11,6 @@ This section describes the back end for the user-facing application. It is very 
 Code for the app is located in `app/`. The general layout of this directory is shown below:
 
 ```
-- initialization/
-  - server.js
-  - start.sh
-  - ...
 - public/
   - ...
 - views/
@@ -23,7 +19,7 @@ Code for the app is located in `app/`. The general layout of this directory is s
 - start.sh
 ```
 
-The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server. Lastly, `initialization/` contains a server that we use in development only, to help configure the app before use (see the section on this below for more details).
+The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
 
 ### Main Web Server
 
@@ -31,12 +27,16 @@ There is *one* server that provides the pages of the app to all users. These pag
 
 > This is not a traditional way of handling requests. Usually, data is pulled on the app server itself, populated into the page, and only then is the page sent to the client. This is not possible here, since the *user-server* stores the data we need to populate the page, and it will not serve data without a *signature* from the client. Thus, only the client can pull the data, not the app server.
 
-The app has the following URL endpoints:
+The app defines the following URL endpoints for users in production:
 
 - `GET /`: Returns the index/landing page. By default, this is a login page. However, it will redirect to the feed page on the client side if the user is already logged in.
 - `GET /feed`: Returns the logged-in user's feed page.
 - `GET /profile/<bsid>`: Returns the profile page for the user given by `bsid`, if they have an account on the network. If not, redirects to the error page.
 - `GET /error`: Returns a 404 error page.
+
+We also have a URL endpoint we use *only in development*:
+
+- `GET /initialization`: Returns a page to help initialize the app in development. More details on this in the next section.
 
 All of these are implemented in `server.js`.
 
