@@ -97,10 +97,10 @@ The APS is also implemented as one of our libraries in `lib/aps.js`. Like the AP
 
 ### Initialization upon spinning up
 
-There are a collection of scripts in the `initialization/` folder that configure the user-server when it first spins up. The only one we explicitly run is `main.sh`, which in turn runs the other scripts. It takes two arguments: the Blockstack ID of the user-server's owner, and their private key.
+There are a collection of scripts in the `initialization/` folder that configure the user-server when it first spins up. The only one we explicitly run is `main.sh`, which in turn runs the other scripts. It takes three arguments: the Blockstack ID of the user-server's owner, their private key, and the IP address of this user-server.
 
 ```bash
-$ ./main.sh BSID PRIVATE-KEY
+$ ./main.sh BSID PRIVATE-KEY IP
 ```
 
 > We understand that storing the private key of the owner in this user-server is a security vulnerability. This is temporary until we implement proper security around the private key.

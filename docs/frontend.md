@@ -65,10 +65,10 @@ First, some prerequisites:
 
 Now the actual initialization:
 
-- **Initialize alice.id's user-server.** We have a script you can run that automates this for the most part. You will need to pass the arguments: Alice's ID (alice.id) and private key (find this in `dummy-blockstack-core/private-keys.txt`).
+- **Initialize alice.id's user-server.** We have a script you can run that automates this for the most part. You will need to fill in private key argument (find this in `dummy-blockstack-core/private-keys.txt`).
   ```bash
   $ cd user-server/initialization
-  $ ./main.sh BSID PRIVATE-KEY
+  $ ./main.sh alice.id <private-key> 127.0.0.1
   ```
 - **Store some info in alice.id's Blockstack storage.** This part must be done in the browser, since Blockstack does not allow us to log in and read/write to storage outside the browser.
   - Run the app's secondary web server (see [Backend](backend.md) for details on this):

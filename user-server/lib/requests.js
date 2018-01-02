@@ -2,11 +2,14 @@
  * requests.js
  * Author: Michael Friedman
  *
- * Some helper functions to help when making requests in tests.
+ * Some helper functions to help when making requests.
  */
 
 const aps = require("./aps");
 const jsontokens = require("jsontokens");
+
+// User-server directory URL
+const directoryBaseUrl = "http://localhost:4000";
 
 /*
  * Returns an encoded and signed version of `data` (JS object), which
@@ -26,6 +29,7 @@ var makeTimestamp = function() {
 }
 
  module.exports = {
+    directoryBaseUrl,
     makeBody,
     makeTimestamp
  };
