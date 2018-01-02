@@ -7,9 +7,53 @@
  */
 
 var debug = require("./debug");
-var mysql = require('mysql');
+var fs = require("fs");
+var mysql = require("mysql");
+var path = require("path");
 
-var connection = null;
+/***********************************************************/
+
+// Determine whether database has been created yet or not,
+// so we know what type of connection to make.
+
+
+// At first, assume it has been created
+var isDatabaseCreated = true;
+
+// Returns a connection to MySQL. If The_Feed database has been
+// created, this will be a connection to that database. If not,
+// it will be a regular connection, outside that database.
+var openConnection = function() {
+    if (isDatabaseCreated) {
+        return mysql.createConnection({
+            host               : 'localhost',
+            user               : 'root',
+            password           : 'TuringP_lumRubik$9',
+            multipleStatements : true,
+            database           : 'The_Feed'
+        });
+    } else {
+        return mysql.createConnection({
+            host               : 'localhost',
+            user               : 'root',
+            password           : 'TuringP_lumRubik$9',
+            multipleStatements : true
+        });
+    }
+}
+
+
+// Now check if we need to change this assumption
+connection = openConnection();
+connection.connect(err => {
+    if (err) {
+        // Couldn't connect - database must not have been
+        // created yet
+        isDatabaseCreated = false;
+        connection = openConnection();
+    }
+});
+
 
 /***********************************************************/
 
@@ -19,12 +63,7 @@ var connection = null;
 var query = function(sql, msg, callback) {
     if (connection === null) {
         // First open a connection
-        connection = mysql.createConnection({
-            host     : 'localhost',
-            user     : 'root',
-            password : 'TuringP_lumRubik$9',
-            database : 'The_Feed'
-        });
+        connection = openConnection();
     }
 
     connection.query(sql, (err, result) => {
@@ -52,6 +91,39 @@ var closeConnection = function(callback) {
 
         if (callback) callback();
     });
+}
+
+
+// Creates The_Feed database and all its tables
+var createDatabase = function(callback) {
+    var createDatabaseSql = "CREATE DATABASE The_Feed";
+
+    // Read table creation SQL from file
+    fs.readFile(path.join(__dirname, "/../create-database.sql"), "utf8", (err, createTablesSql) => {
+    if (err) {
+        debug.log("Failed to read create-database.sql. Did not create database.");
+        callback(err);
+        return;
+    }
+
+    // Create database
+    debug.log("Creating the database...");
+    query(createDatabaseSql, "Created The_Feed database", function() {
+
+    // Reset connection - now that database has been created, we can
+    // connect to it.
+    isDatabaseCreated = true;
+    connection.end(() => {
+    connection = openConnection();
+
+    // Create tables
+    debug.log("Creating the tables...");
+    query(createTablesSql, "Created The_Feed's tables", function() {
+
+    // Done. Callback.
+    callback();
+
+    })})})});
 }
 
 
@@ -294,6 +366,7 @@ var getPrivateKey = function(callback) {
 
 module.exports = {
     closeConnection,
+    createDatabase,
     clearDatabase,
     followUser,
     addFollower,

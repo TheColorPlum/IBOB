@@ -17,9 +17,8 @@ ip=$3
 
 #-------------------------------------------------------------------------------
 
-# Create the database tables
-echo 'Setting up the user-server database. You will need to enter the MySQL root password.'
-mysql The_Feed --user=root --password < ../create-database.sql
+# Create the database
+node createDatabase.js
 
 
 # Set the owner to bsid

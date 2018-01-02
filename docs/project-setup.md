@@ -25,16 +25,9 @@ However, the browser application still requires Blockstack so users can log in. 
 
 ### Our project
 
-To set up our project, you will first need to configure MySQL a little bit (unfortunately we cannot yet automate this...). Add a user named "root" with the password "TuringP_lumRubik$9". Then open the MySQL command line and enter the following statement:
+Most of our project setup is automated in a script. But before you can run it, you first need to add a MySQL user named "root" with the password "TuringP_lumRubik$9" (sorry, it's an odd password).
 
-```bash
-$ mysql --user=root --password
-Enter password:
-mysql> CREATE DATABASE The_Feed;
-mysql> CREATE DATABASE User_Server_Directory;
-```
-
-Once you have created the database, the rest can be automated! Change into the `setup-scripts/` directory and run the `setup-project.sh` script:
+Now, change into the `setup-scripts/` directory and run the `setup-project.sh` script:
 
 ```bash
 $ cd setup-scripts
@@ -42,7 +35,5 @@ $ ./setup-project.sh
 ```
 
 This will install the npm dependencies required for the project, set up the database, and run our tests to ensure that everything is working.
-
-> Note: We have not implemented the app tests, so when you run this script, you will get an error saying there are no tests for this part. You can ignore this error.
 
 **You should be all set!** See the [Frontend](frontend.md) and [Backend](backend.md) sections for details on how the project is built and how to work on it.

@@ -17,6 +17,10 @@ cd ..
 
 # App
 
+echo "======================================="
+echo "          Setting up app...            "
+echo "======================================="
+
 # Install npm dependencies
 cd app
 npm install
@@ -27,33 +31,43 @@ cd ..
 
 # User server
 
+echo "======================================="
+echo "       Setting up user-server...       "
+echo "======================================="
+
 # Install npm dependencies
 cd user-server
 npm install
 
 # Setup database
-echo 'Setting up the user-server database. You will need to enter the MySQL root password.'
-mysql The_Feed --user=root --password < create-database.sql
+cd initialization
+node createDatabase.js
 
-cd ..
+cd ../..
 
 #------------------------------------------------------------------------------
 
 # User server directory
+
+echo "=========================================="
+echo "    Setting up user-server directory...   "
+echo "=========================================="
 
 # Install dependencies
 cd directory
 npm install
 
 # Setup database
-echo 'Setting up the directory database. You will need to enter the MySQL root password.'
-mysql User_Server_Directory --user=root --password < create-database.sql
+cd initialization
+node createDatabase.js
 
-cd ..
+cd ../..
 
 #------------------------------------------------------------------------------
 
-echo "Running tests..."
+echo "======================================="
+echo "          Running all tests...         "
+echo "======================================="
 
 # User-server
 echo "User-server tests..."
