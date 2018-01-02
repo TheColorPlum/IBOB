@@ -48,20 +48,30 @@ $ ./start.sh
 
 **But note**: Before using the app in the browser, *you must (semi)manually "spin up" the local user-server*. (In production, this would be handled for you. A user requires a Blockstack ID before using the app, and when they log into our app for the first time, we automatically spin up a user-server for them in the cloud.)
 
-First, some prerequisites:
+### Initializing the user-server
 
-- **Start the dummy Blockstack core.**
+*You only need to do the procedure below once.* Afterwards, when you wish to test the app in the browser, you only need to make sure the servers listed below are running, in addition to the app server:
+
+- User-Server: `$ cd user-server && start.sh`
+- User-Server Directory: `$ cd directory && start.sh`
+- Dummy Blockstack Core: `$ cd dummy-blockstack-core && start.sh`
+
+> Caveat - you have to create the Blockstack ID on each reboot of your computer. See the Blockstack page for details.
+
+So now the procedure. First, some prerequisites:
+
+- **Start the dummy Blockstack core** if it's not already running.
   ```bash
   $ cd dummy-blockstack-core
   $ ./start.sh
   ```
-- **Create a Blockstack ID alice.id** in the Blockstack Docker environment. This process is kind of long (sorry! can't be automated), so we document it in a separate page: [The Blockstack Docker Environment](blockstack.md).
-  > Although this environment technically simluates Blockstack, we only use it to simulate a login in the browser. We do *not* use it in the user-server to get alice.id's public key when it needs to verify signatures. This is because we do not know what the Blockstack Docker environment's private key for alice.id is (we have not been able to figure out where it's stored.) So instead, we just made up a sample private key that we sign requests with, the dummy Blockstack core knows the corresponding public key, and the user-server asks the dummy Blockstack core for this public key when it needs to verify signatures.
-- **Start the user-server directory.**
+- **Start the directory** if it's not already running.
   ```bash
   $ cd directory
   $ ./start.sh
   ```
+- **Create a Blockstack ID alice.id** in the Blockstack Docker environment. This process is kind of long (sorry! can't be automated), so we document it in a separate page: [The Blockstack Docker Environment](blockstack.md).
+  > Although this environment technically simluates Blockstack, we only use it to simulate a login in the browser. We do *not* use it in the user-server to get alice.id's public key when it needs to verify signatures. This is because we do not know what the Blockstack Docker environment's private key for alice.id is (we have not been able to figure out where it's stored.) So instead, we just made up a sample private key that we sign requests with, the dummy Blockstack core knows the corresponding public key, and the user-server asks the dummy Blockstack core for this public key when it needs to verify signatures.
 
 Now the actual initialization:
 
@@ -70,6 +80,7 @@ Now the actual initialization:
   $ cd user-server/initialization
   $ ./main.sh alice.id <private-key> 127.0.0.1
   ```
+  > Note: This will automatically start running the user-server in the background once it has been configured. Its process id (PID) will be printed for you. *Make sure to take note of it*. Then, when you want to kill the server, use this process ID: `$ kill <pid>`.
 - **Store some info in alice.id's Blockstack storage.** This part must be done in the browser, since Blockstack does not allow us to log in and read/write to storage outside the browser.
   - Run the app's secondary web server (see [Backend](backend.md) for details on this):
     ```bash
