@@ -11,7 +11,7 @@ $(document).ready(function() {
 
 // Some constants
 
-const baseUrl = window.location.protocol + '//' + window.location.hostname;
+const baseUrl = window.location.protocol + '//' + window.location.host;
 const privateKeyFile = 'privateKey.json';
 
 /******************************************************************************/
@@ -33,7 +33,8 @@ $('#go-button').click(function() {
     // check in case they got here by accident.
     if (!blockstack.isUserSignedIn()) {
         $('#message').text(notSignedInMessage);
-        //window.location.replace(baseUrl);
+        alert(notSignedInMessage);
+        window.location.href = baseUrl;
         return;
     }
 
@@ -51,21 +52,24 @@ $('#go-button').click(function() {
     // Make request to create a user-server for this user
     // TODO: Get bsid from blockstack.js somehow
     var bsid = 'alice.id';
-    var reqBody = {privateKey: privateKey};
+    var reqBody = JSON.stringify({privateKey: privateKey});
     $.post('/create-user-server?requester=' + bsid, reqBody, (data, status) => {
-        var json = JSON.parse(data);
+        var json = data;
 
         if (!json.success) {
             // Request failed. Display failure message to user
             $('#message').text(failedMessage);
             console.log('/create-user-server request failed. Error message: '
-              + json.errorMsg);
+              + json.msg);
             return;
         }
 
 
-        // Success! Store IP address and private key in browser for reference
-        // from other pages
+        // Success!
+        $('#message').text(successMessage);
+
+        // A few more things to do: store IP address and private key in browser
+        // for reference from other pages
         sessionStorage.setItem('userServerIp', json.ip);
         sessionStorage.setItem('privateKey', privateKey);
 
@@ -78,7 +82,8 @@ $('#go-button').click(function() {
         .then(() => {
 
             // Now we're done. Redirect to feed page
-            window.location.replace(baseUrl + '/feed');
+            console.log('Success! Redirecting to feed page');
+            window.location.href = baseUrl + '/feed';
 
 
         }).catch(() => {

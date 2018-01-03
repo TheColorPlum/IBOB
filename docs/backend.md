@@ -45,9 +45,9 @@ The app defines the following URL endpoints. All of them are implemented in `ser
     {"success": true, "ip": "192.168.0.1"}
     ```
 
-  - Response, if failed (sample). The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `errorMsg`.
+  - Response, if failed (sample). The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `msg`.
     ```json
-    {"success": false, "errorMsg": "This user already has a user-server!"}
+    {"success": false, "msg": "This user already has a user-server!"}
     ```
 
   > Note: In development, this request does not actually spin up a user-server. Instead, it just puts an entry in the directory for a user-server that is *assumed already running*. So, you have to start the user-server manually before logging in. See the [Frontend](frontend.md) section for details on this.

@@ -125,7 +125,7 @@ app.post(urls.createUserServer, function(req, res, next) {
         if (json.success) {
             // User-server already exists. Respond with failure
             debug.log(bsid + ' already has a user-server. Fail.');
-            res.json({success: false, errorMsg: 'This user already has a user-server!'});
+            res.json({success: false, msg: 'This user already has a user-server!'});
             return;
         }
 
@@ -143,12 +143,12 @@ app.post(urls.createUserServer, function(req, res, next) {
         axios.post(directoryBaseUrl + '/api/put?requester=' + bsid, reqBody)
         .then(resp => {
 
+            debug.log('Got response from directory');
             var json = resp.data;
             if (!json.success) {
-                // This would mean an entry exists for this user already. But
-                // we already know it doesn't from the first request. So this
-                // should never happen
-                res.json({success: false, errorMsg: 'This should never happen'});
+                // The directory responded with a failure. Send that error
+                // message back.
+                res.json({success: false, msg: json.msg});
                 return;
             }
 
@@ -159,11 +159,13 @@ app.post(urls.createUserServer, function(req, res, next) {
 
 
         }).catch(err => { // failed to put entry into directory
-            res.json({success: false, errorMsg: 'User-server has been created, but failed to put entry into directory. Directory never responded.'});
+            debug.log('Failed to put entry into directory');
+            res.json({success: false, msg: 'User-server has been created, but failed to put entry into directory. Directory never responded.'});
         });
 
     }).catch(err => {  // failed to get entry from directory
-        res.json({success: false, errorMsg: 'Cannot determine if user already '
+        debug.log('Failed to get entry from directory');
+        res.json({success: false, msg: 'Cannot determine if user already '
             + 'has a user-server. Directory never responded.'});
     });
 });
