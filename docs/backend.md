@@ -11,6 +11,8 @@ This section describes the back end for the user-facing application. It is very 
 Code for the app is located in `app/`. The general layout of this directory is shown below:
 
 ```
+- lib/
+  - ...
 - public/
   - ...
 - views/
@@ -19,7 +21,7 @@ Code for the app is located in `app/`. The general layout of this directory is s
 - start.sh
 ```
 
-The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
+The `lib/` directory contains some JS libraries written by us (e.g. helper functions, global variables, etc.). The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
 
 ### Main Web Server
 
@@ -49,6 +51,8 @@ The app defines the following URL endpoints. All of them are implemented in `ser
     ```
 
   > Note: In development, this request does not actually spin up a user-server. Instead, it just puts an entry in the directory for a user-server that is *assumed already running*. So, you have to start the user-server manually before logging in. See the [Frontend](frontend.md) section for details on this.
+
+  > Another note: We have not implemented signature checking yet, so for now this request does *not* require a signature.
 
 And main pages:
 

@@ -9,6 +9,7 @@ const app = express();
 const port = 5000;
 
 const axios = require('axios');
+const debug = require('./lib/debug');
 const path = require('path');
 const requests = require('./lib/requests');
 
@@ -28,6 +29,25 @@ app.use(allowCrossDomain);
 // Expose static files at URLs prefixed with /public/
 const publicDir = path.join(__dirname, 'public');
 app.use('/public', express.static(publicDir));
+
+
+// Store raw request body in req.body.
+// Ref: https://stackoverflow.com/questions/9920208/expressjs-raw-body/9920700#9920700
+app.use(function(req, res, next) {
+    var data = "";
+    req.setEncoding("utf8");
+
+    // Concatenate request body into `data`
+    req.on("data", function(chunk) {
+        data += chunk;
+    });
+
+    // Store in req.body
+    req.on("end", function() {
+        req.body = data;
+        next();
+    });
+});
 
 /******************************************************************************/
 
@@ -91,17 +111,20 @@ app.post(urls.createUserServer, function(req, res, next) {
     // TODO: For simplicity of the first implementation, we are not requiring
     // that this request is signed. That will be implemented later.
 
-    var body = req.data;
+    var body = JSON.parse(req.body);
     var bsid = body.bsid;
     var privateKey = body.privateKey;
+    debug.log('Got request for ' + bsid);
 
     // Check that a user-server has not already been created for this user
+    debug.log('Checking if ' + bsid + ' already has a user-server...');
     axios.get(directoryBaseUrl + '/api/get/' + bsid)
     .then(resp => {
 
         var json = resp.data;
         if (json.success) {
             // User-server already exists. Respond with failure
+            debug.log(bsid + ' already has a user-server. Fail.');
             res.json({success: false, errorMsg: 'This user already has a user-server!'});
             return;
         }
@@ -110,9 +133,11 @@ app.post(urls.createUserServer, function(req, res, next) {
         // Spin up user-server
         // TODO: In production, we will do this. In development, we don't. You
         // will just have to manually start up user-server. See docs.
+        debug.log('Spinning up user-server for ' + bsid + '...');
         var ip = '127.0.0.1';
 
         // Add entry to the directory for the new user-server
+        debug.log('Adding entry (' + bsid + ', ' + ip + ') to directory...');
         var data = {bsid: bsid, ip: ip, timestamp: requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, privateKey);
         axios.post(directoryBaseUrl + '/api/put?requester=' + bsid, reqBody)
@@ -129,7 +154,8 @@ app.post(urls.createUserServer, function(req, res, next) {
 
 
             // All done!
-            res.json({success: true, ip: json.ip});
+            debug.log('All done! Responding success');
+            res.json({success: true, ip: ip});
 
 
         }).catch(err => { // failed to put entry into directory
@@ -140,7 +166,7 @@ app.post(urls.createUserServer, function(req, res, next) {
         res.json({success: false, errorMsg: 'Cannot determine if user already '
             + 'has a user-server. Directory never responded.'});
     });
-})
+});
 
 
 /*
