@@ -24,14 +24,16 @@ var allowCrossDomain = function(req, res, next) {
 
 app.use(allowCrossDomain);
 
-// Expose static files at URLs with prefix /public/
-app.use('/public', express.static(path.join(__dirname, 'public')));
+// Expose static files at URLs prefixed with /public/
+const publicDir = path.join(__dirname, 'public');
+app.use('/public', express.static(publicDir));
 
 /******************************************************************************/
 
 // Url endpoints
 const urls = {
     index: '/',
+    manifest: '/manifest.json',
     profile: '/profile/:bsid',
     feed: '/feed',
     error: '/error',
@@ -55,6 +57,15 @@ const directoryBaseUrl = 'http://localhost:4000';
  */
 app.get(urls.index, function(req, res, next) {
     res.sendFile(path.join(viewsDir, 'index.html'));
+});
+
+
+/*
+ * Returns the app's manifest file. We are required to have this page
+ * for login to work.
+ */
+app.get(urls.manifest, function(req, res, next) {
+    res.sendFile(path.join(publicDir, 'manifest.json'));
 });
 
 
