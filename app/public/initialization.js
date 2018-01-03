@@ -14,6 +14,10 @@ $(document).ready(function() {
 const baseUrl = window.location.protocol + '//' + window.location.host;
 const privateKeyFile = 'privateKey.json';
 
+// Keys into sessionStorage for private key and user-server IP address
+const sessionStoragePrivateKey = 'privateKey';
+const sessionStorageIp = 'userServerIp';
+
 /******************************************************************************/
 
 // Process info when "Go" button is pressed
@@ -70,8 +74,8 @@ $('#go-button').click(function() {
 
         // A few more things to do: store IP address and private key in browser
         // for reference from other pages
-        sessionStorage.setItem('userServerIp', json.ip);
-        sessionStorage.setItem('privateKey', privateKey);
+        sessionStorage.setItem(sessionStorageIp, json.ip);
+        sessionStorage.setItem(sessionStoragePrivateKey, privateKey);
 
 
         // Store private key in Blockstack storage
