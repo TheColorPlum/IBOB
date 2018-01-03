@@ -138,4 +138,6 @@ $posts.on('load.infiniteScroll', function(event, response) {
 // Load initial page
 $posts.infiniteScroll('loadNextPage');
 
+/******************************************************************************/
+
 });

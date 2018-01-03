@@ -34,10 +34,10 @@ The app defines the following URL endpoints. All of them are implemented in `ser
 - `GET /`: Returns the sign-in page.
 - `GET /manifest.json`: Returns the app's Blockstack manifest. Blockstack requires that this URL is defined in order to log users in.
 - `GET /initialization`: Returns a page to start up the user's user-server. They have to enter some info, and then click a button to spin it up.
-- `POST /create-user-server`: Upon receiving this request, the app spins up a new user-server for a particular user. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
+- `POST /create-user-server?requester=<requester>`: Upon receiving this request, the app spins up a new user-server for a particular user. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
   - Request body (sample):
     ```json
-    {"bsid": "alice.id", "privateKey": "..."}
+    {"privateKey": "..."}
     ```
 
   - Response, if successful (sample). `ip` is the IP address of the new user-server.

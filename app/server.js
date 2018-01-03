@@ -112,7 +112,7 @@ app.post(urls.createUserServer, function(req, res, next) {
     // that this request is signed. That will be implemented later.
 
     var body = JSON.parse(req.body);
-    var bsid = body.bsid;
+    var bsid = req.query.requester;
     var privateKey = body.privateKey;
     debug.log('Got request for ' + bsid);
 
