@@ -24,6 +24,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "blockstack": "^0.11.0",
+    "jsontokens": "^0.7.6",
     "path": "^0.12.7"
   }
 }

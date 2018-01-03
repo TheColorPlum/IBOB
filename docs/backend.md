@@ -27,29 +27,37 @@ There is *one* server that provides the pages of the app to all users. These pag
 
 > This is not a traditional way of handling requests. Usually, data is pulled on the app server itself, populated into the page, and only then is the page sent to the client. This is not possible here, since the *user-server* stores the data we need to populate the page, and it will not serve data without a *signature* from the client. Thus, only the client can pull the data, not the app server.
 
-The app defines the following URL endpoints for users in production:
+The app defines the following URL endpoints. All of them are implemented in `server.js`. For logging in:
 
-- `GET /`: Returns the index/landing page. By default, this is a login page. However, it will redirect to the feed page on the client side if the user is already logged in.
+- `GET /`: Returns the sign-in page.
+- `GET /manifest.json`: Returns the app's Blockstack manifest. Blockstack requires that this URL is defined in order to log users in.
+- `GET /initialization`: Returns a page to start up the user's user-server. They have to enter some info, and then click a button to spin it up.
+- `POST /create-user-server`: Upon receiving this request, the app spins up a new user-server for a particular user. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
+  - Request body (sample):
+    ```json
+    {"bsid": "alice.id", "privateKey": "..."}
+    ```
+
+  - Response, if successful (sample). `ip` is the IP address of the new user-server.
+    ```json
+    {"success": true, "ip": "192.168.0.1"}
+    ```
+
+  - Response, if failed (sample). The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `errorMsg`.
+    ```json
+    {"success": false, "errorMsg": "This user already has a user-server!"}
+    ```
+
+  > Note: In development, this request does not actually spin up a user-server. Instead, it just puts an entry in the directory for a user-server that is *assumed already running*. So, you have to start the user-server manually before logging in. See the [Frontend](frontend.md) section for details on this.
+
+And main pages:
+
 - `GET /feed`: Returns the logged-in user's feed page.
 - `GET /profile/<bsid>`: Returns the profile page for the user given by `bsid`, if they have an account on the network. If not, redirects to the error page.
 - `GET /error`: Returns a 404 error page.
 
-We also have a URL endpoint we use *only in development*:
-
-- `GET /initialization`: Returns a page to help initialize the app in development. More details on this in the next section.
-
-All of these are implemented in `server.js`.
-
 Additionally, `server.js` serves static files (i.e. CSS/JS) located in the `app/public/` directory. It is configured to serve these at the URL endpoint `/public/<file>` (e.g. `/public/styles.css`).
 
-
-### Initialization
-
-In production, user-servers are spun up automatically when users sign in for the first time, and the app stores some information required to contact the user-server in the user's Blockstack storage. Namely, it stores the user-server's IP address and the user's private key (for signatures).
-
-However, in development, we cannot simulate this because we do not use the cloud infrastructure to spin up servers. But we still need to store this information in Blockstack storage so the app can make requests to the development user-server.
-
-This is what the code in `initialization/` is for. Unfortunately, we cannot simply run a script to place the info in the user's storage, since Blockstack does not allow us to log into a user's account outside the browser. So instead, we serve a page with `server.js` that lets you log into a Blockstack account, type in the info manually, and then save it to Blockstack storage. This server's usage is described in the [Frontend](frontend.md) section.
 
 ## User-server
 
