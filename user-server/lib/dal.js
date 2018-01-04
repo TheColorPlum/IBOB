@@ -137,7 +137,6 @@ var setOwner = function(bsid, callback) {
 /***********************************************************
  * Get requests interface to the database
  **********************************************************/
-
 var getPhotos = function(callback) {
     var sql = "SELECT * FROM photos";
     var msg = "Retrieved all photos";

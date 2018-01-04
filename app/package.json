@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
-    "blockstack": "^0.11.0",
+    "blockstack": "^0.11.2",
     "path": "^0.12.7"
   }
 }
