@@ -170,7 +170,7 @@ app.post(urls.followUser, function(req, res, next) {
 
         // Process request
         debug.log("Processing " + urls.followUser + " request...");
-        var body = verification.decodedData;
+        var body = JSON.parse(verification.decodedData);
         var bsid = body.bsid;
 
         dal.followUser(bsid, function (result) {
