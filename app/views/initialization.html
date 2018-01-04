@@ -17,13 +17,16 @@
   <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
   <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 
+  <!-- Import Blockstack lib -->
+  <script src="/public/bundle.js"></script>
+
   <!-- Custom styles -->
   <link rel="stylesheet" type="text/css" href="/public/styles.css">
 
   <!-- Custom scripts -->
-  <script src="/public/scripts.js"></script>
+  <script src="/public/initialization.js"></script>
 
-  <title>Not Found</title>
+  <title>Welcome to The Feed!</title>
 </head>
 
 
@@ -37,47 +40,43 @@
     <span class="navbar-toggler-icon"></span>
   </button>
   <a class="navbar-brand" href="#">The Feed</a>
-
-  <!-- Navigation menu -->
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
-    <!-- Buttons/menus -->
-    <ul class="navbar-nav ml-auto">
-      <!-- Search bar -->
-      <li class="nav-item active">
-        <form class="form-inline my-2 my-lg-0">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search">
-        </form>
-      </li>
-
-      <!-- New post -->
-      <li class="nav-item active">
-        <a class="nav-link" href="#"><i class="fa fa-plus"> </i></a>
-      </li>
-
-      <!-- User menu -->
-      <li class="nav-item active dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-user"> </i>
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="#">Feed</a>
-          <a class="dropdown-item" href="#">Profile</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Log out</a>
-        </div>
-      </li>
-    </ul>
-  </div>
 </nav>
 <!-- /Navbar -->
 
+
+
 <div class="container">
 
-  <!-- Error message -->
+  <!-- Form where user enters info to start their user-server -->
   <div class="text-center extra-top-margin">
-    <h1>Oops!</h1>
-    <p>Looks like that page doesn't exist.</p>
+    <h1>Welcome to The Feed!</h1>
+    <p>
+      In The Feed, <span class="font-italic">you</span> own all the data you share. It is not stored
+      on some remote server owned by the social network.
+    </p>
+
+    <p>
+      We will create cloud storage for your data, and only <span class="font-italic">you</span> will
+      have access to it. To set this up, you need to enter your Blockstack
+      private key:
+    </p>
+
+    <p><input id="private-key" type="text" class="form-control"></p>
+
+    <p><button id="go-button" type="button" class="btn btn-primary background-color-accent">Go</button></p>
+
+    <p id="message"></p>  <!-- initially hidden -->
+
+    <p>
+      <span class="font-weight-bold">Disclaimer</span>:
+      <span class="font-weight-bold">We do not recommend using your primary,
+      personal Blockstack ID on The Feed</span>, and entering that private key
+      here. Although no one ever sees the private key you enter here (it is only
+      used to verify who you are to your cloud storage), it is safer for you to
+      keep that private key, well private. We would instead recommend creating
+      a <span class="font-italic">new</span> Blockstack ID just for The Feed,
+      and using that private key instead.
+    </p>
   </div>
 
 </div>

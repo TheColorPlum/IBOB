@@ -25,6 +25,7 @@ const urls = {
  */
 app.get(urls.get, function(req, res, next) {
     var bsid = req.params.bsid;
+    debug.log("Got /get request for " + bsid);
     dal.get(bsid, result => {
         if (result.success) {
             // Entry exists. Return it.
@@ -43,6 +44,7 @@ app.get(urls.get, function(req, res, next) {
  */
 app.post(urls.put, function(req, res, next) {
     // Verify
+    debug.log("Got /put request. Verifying...");
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.write)
     .then(verification => {
         if (!verification.ok) {
@@ -52,6 +54,7 @@ app.post(urls.put, function(req, res, next) {
 
         // Insert entry for the request user
         var data = JSON.parse(verification.decodedData);
+        debug.log("Inserting entry (" + data.bsid + ", " + data.ip + ")");
         dal.put(data.bsid, data.ip, () => {
             res.json({success: true});
         });

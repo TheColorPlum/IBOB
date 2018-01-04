@@ -9,19 +9,24 @@ Below is the directory structure that makes up the front end, under the `app/` d
   - bundle.js
   - styles.css
   - scripts.js
+  - *.js
 - views/
   - 404.html
   - index.html
+  - inintialization.html
   - feed.html
   - profile.html
+- server.js
+- start.sh
 ```
 
-The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory.
+The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory. `server.js` is the web server that servers the pages, and `start.sh` is a shortcut script that runs the server.
 
 HTML:
 
 - 404.html is a custom 404 error page.
 - index.html is our landing/login page.
+- initialization.html is the page a user loads to initialize their user-server.
 - feed.html is the page with the user's feed.
 - profile.html is a user profile page.
 
@@ -32,9 +37,75 @@ CSS:
 JavaScript:
 
 - bundle.js is the *Blockstack library*. Use the [Blockstack.js documentation](http://blockstack.github.io/blockstack.js/) as a reference for this library.
-- scripts.js contains code controlling the behavior of all pages.
+- scripts.js contains code controlling the behavior of the profile and feed pages.
+- *.js are the scripts for other pages, named by the page they correspond to (e.g. index.js).
 
 **Important note**: To use any static files in the HTML pages, you must place them in the `public/` directory, and then reference them from the HTML as `/public/<file>`. (This is how the app server is configured to load static files.) For example, `public/styles.css` must be imported as `/public/styles.css`.
+
+## Running the app
+
+To run the app, first run the web server:
+
+```bash
+$ ./start.sh
+```
+
+and then open [http://localhost:5000](http://localhost:5000) in your browser.
+
+**But note**: Before using the app in the browser, *you must have the user-server running*. (In production, this would be handled for you. A user requires a Blockstack ID before using the app, and when they log into our app for the first time, we automatically spin up a user-server for them in the cloud.)
+
+### Initializing the user-server
+
+The very first time you use the app, you have to configure the user-server first. In subsequent times, you only need to start it up. This is mostly an automated process, using a script, but there are still a few steps to take before running it.
+
+The first time:
+
+- **Start the dummy Blockstack core** if it's not already running.
+  ```bash
+  $ cd dummy-blockstack-core
+  $ ./start.sh
+  ```
+
+- **Start the directory** if it's not already running.
+  ```bash
+  $ cd directory
+  $ ./start.sh
+  ```
+
+- **Create a Blockstack ID alice.id** in the Blockstack Docker environment. This process is kind of long (sorry! can't be automated), so we document it in a separate page: [The Blockstack Docker Environment](blockstack.md).
+  > Caveat - you will still have to create the Blockstack ID on each  reboot of your computer. See the Blockstack page for details.
+
+  > Although this environment technically simluates Blockstack, we only use it to simulate a login in the browser. We do *not* use it in the user-server to get alice.id's public key when it needs to verify signatures. This is because we do not know what the Blockstack Docker environment's private key for alice.id is (we have not been able to figure out where it's stored.) So instead, we just made up a sample private key that we sign requests with, the dummy Blockstack core knows the corresponding public key, and the user-server asks the dummy Blockstack core for this public key when it needs to verify signatures.
+
+- **Finally, initialize alice.id's user-server.** Run the script below. You will need to fill in private key argument (find this in `dummy-blockstack-core/private-keys.txt`).
+  ```bash
+  $ cd user-server/initialization
+  $ ./main.sh alice.id <private-key> 127.0.0.1
+  ```
+  > Note: This will automatically start running the user-server in the background once it has been configured. Its process id (PID) will be printed for you. *Make sure to take note of it*. Then, when you want to kill the server, use this process ID: `$ kill <pid>`.
+
+
+Subsequent times:
+
+- Start each of the servers:
+  - Dummy Blockstack Core: `$ cd dummy-blockstack-core && start.sh`
+  - User-Server Directory: `$ cd directory && start.sh`
+  - User-Server: `$ cd user-server && start.sh`
+
+
+### Logging into the app
+
+When the user logs into the app for the first time, they must provide some information to "spin up" their user-server. So they are redirected to a page that asks them for this information. On this page, the user does the following:
+
+- Type in their private key (so we can use it to sign requests to their user-server)
+- Click "Go"
+
+When the user clicks "Go", we:
+
+- Spin up their user-server
+- Store the private key in their Blockstack storage (so we don't have to ask them for it again)
+
+But note that, in development, we do not actually spin up the user-server (you do that yourself with the procedure from the last section). We still store the private key, however.
 
 ## Frontend Behavior
 
