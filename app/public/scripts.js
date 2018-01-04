@@ -30,6 +30,10 @@ const userServerIp = sessionStorage.getItem(sessionStorageIp);
 // Load user's private key (for signatures)
 const userPrivateKey = sessionStorage.getItem(sessionStoragePrivateKey);
 
+// Load user's Blockstack ID
+// TODO: Implement
+const bsid = 'alice.id';
+
 /*
  * Helper function for making signed requests to the user-server or the
  * directory. Makes a POST request to the url, with the body (JS object)
@@ -47,7 +51,25 @@ var makeSignedRequest = function(url, body) {
 
 /******************************************************************************/
 
-// Make signout button sign the user out
+// Define behavior of navbar
+
+// Feed button
+$('#feed-button').click(function() {
+    console.log('Going to feed page...');
+
+    window.location.href = baseUrl + '/feed';
+});
+
+
+// Profile button
+$('#profile-button').click(function() {
+    console.log('Going to profile page...');
+
+    window.location.href = baseUrl + '/profile/' + bsid;
+});
+
+
+// Sign out button
 $('#signout-button').click(function() {
     console.log('Signing out...');
 
