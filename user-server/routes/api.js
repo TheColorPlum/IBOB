@@ -10,6 +10,24 @@ var dal = require('../lib/dal');
 var debug = require('../lib/debug');
 var express = require('express');
 var app = express();
+var path = require("path");
+var multer = require("multer");
+
+/******************************************************************************/
+
+// Storage config for photos. Photos will be uploaded into the /photos directory (can be changed)
+var storage = multer.diskStorage({
+    destination: function(req, file, callback) {
+        callback(null, '../photos');
+    },
+    filename: function(req, file, callback) {
+        console.log(file);
+        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Upload function
+var upload = multer({storage: storage}).single('userFile');
 
 /******************************************************************************/
 
@@ -116,9 +134,27 @@ app.post(urls.getPosts, function(req, res, next) {
  * Updates this user's profile info.
  */
 app.post(urls.updateProfileInfo, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if(!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
 
-    // TODO: Implement
-    res.json({success: false});
+        // Process Request
+        var body = verification.decodedData;
+        var bsid = body.bsid;
+        var profile = body.profile;
+
+        dal.updateProfileInfo(bsid, profile, function(result) {
+            if(result.affectedRows == 0) {
+                res.json({success: false});
+                res.end("Error updating profile.")
+            }
+            res.json({success: true});
+            res.end("Profile updated.")
+        });
+    });
 });
 
 
@@ -127,9 +163,26 @@ app.post(urls.updateProfileInfo, function(req, res, next) {
  * Makes this user start following another specified user.
  */
 app.post(urls.followUser, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if(!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
 
-    // TODO: Implement
-    res.json({success: false});
+        // Process request
+        var body = verification.decodedData;
+        var bsid = body.bsid;
+
+        dal.followUser(bsid, function (result) {
+            if(result.affectedRows == 0) {
+                res.json({success: false});
+                res.end("Could not follow user.");
+            }
+            res.json({success: true});
+            res.end("Followed user.");
+        });
+    });
 });
 
 
@@ -137,26 +190,53 @@ app.post(urls.followUser, function(req, res, next) {
  * Makes a post on this user's account.
  */
 app.post(urls.addPost, function(req, res, next) {
+    // Verify
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+        if(!verification.ok) {
+            res.send(verification.errorMsg);
+            return;
+        }
 
-    // TODO: Implement
-    res.json(
-        {success: false, post: {id: -1, timestamp: (new Date()).toJSON(),
-            photo: {id: -1, path: ""}}}
-    );
+        // Process request
+        var body = verification.decodedData;
+        var photoId = body.photoId;
+        var path = body.path;
+        var timestamp = (new Date()).toJSON();
+
+        dal.addPost(photoId, timestamp, function(result) {
+            if(result.affectedRows == 0) {
+                res.json({success: false, post: {id: -1, timestamp: (new Date()).toJSON(), photo: {id: -1, path: ""}}});
+                res.end("Error in uploading post.");
+            }
+            res.json({success: true, post: {id: result.insertId, timestamp: (new Date()).toJSON(), photo: {id: photoId, path: path}}});
+            res.end("Post uploaded.");
+        });
+    });
 });
-
 
 /*
  * Uploads a photo to this user's account.
  */
 app.post(urls.addPhoto, function(req, res, next) {
 
-    // TODO: Implement
     // NOTE: You don't need to verify the user in this request. Just upload
     // the photo to cloud storage.
-    res.json(
-        {success: false, photo: {id: -1, path: ""}}
-    );
+    upload(req, res, function(err) {
+        // Error handling
+        if(err) {
+            res.json({success: false, photo: {id: -1, path: ""}});
+            res.end("Error uploading file.");
+        }
+        var path = req.file.filename;
+        dal.addPhoto(path, function(result) {
+            if(result.affectedRows == 0) {
+                res.json({success: false, photo: {id: -1, path: ""}});
+                res.end("Error uploading file.");
+            }
+            res.json({success: true, photo: {id: result.insertId, path: path}});
+            res.end('File is uploaded');
+        });
+    });
 });
 
 
