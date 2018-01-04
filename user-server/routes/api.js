@@ -9,8 +9,10 @@ var aps = require('../lib/aps');
 var dal = require('../lib/dal');
 var debug = require('../lib/debug');
 var express = require('express');
-var app = express();
+var hasha = require("hasha");  // ref: https://github.com/sindresorhus/hasha
 var path = require("path");
+
+var app = express();
 
 /******************************************************************************/
 
@@ -29,9 +31,12 @@ const urls = {
 const photosDir = path.join(__dirname, "../photos");
 
 // Generates a filename for the photo in its permanent storage location
-var generateNewPhotoName = function(filename) {
-    var ext = path.extname(filename);
-    return path.basename(filename, ext) + "-" + Date.now() + ext;
+var generateNewPhotoName = function(file) {
+    var ext = path.extname(file.name);
+
+    // Hash the raw contents of the file. Use hash as the name
+    var hash = hasha(file.data, {algorithm: "sha512"});
+    return hash + "-" + Date.now() + ext;
 };
 
 /******************************************************************************/
@@ -231,7 +236,7 @@ app.post(urls.addPhoto, function(req, res, next) {
     var photo = req.files.photo;
 
     // Move photo to its permanent location
-    var photoPath = path.join(photosDir, generateNewPhotoName(photo.name));
+    var photoPath = path.join(photosDir, generateNewPhotoName(photo));
     photo.mv(photoPath).then(err => {
         if (err) {
             // Failed to store photo in permanent location
