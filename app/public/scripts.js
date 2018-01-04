@@ -9,16 +9,30 @@ $(document).ready(function() {
 
 /******************************************************************************/
 
+// Constants
+
+const baseUrl = window.location.protocol + '//' + window.location.host;
+const directoryBaseUrl = 'http://localhost:4000';
+const privateKeyFile = 'privateKey.json';
+
+// Keys into sessionStorage for private key and user-server IP address
+const sessionStoragePrivateKey = 'privateKey';
+const sessionStorageIp = 'userServerIp';
+
+/******************************************************************************/
+
 // Some setup so the client is ready to make requests to either the user-server
 // or the directory.
 
-// Load user-server's IP address from Blockstack storage
-// TODO: implement
-const userServerIp = '';
+// Load user-server's IP address
+const userServerIp = sessionStorage.getItem(sessionStorageIp);
 
-// Load user's private key from Blockstack storage (for signatures)
-// TODO: implement
-const userPrivateKey = '';
+// Load user's private key (for signatures)
+const userPrivateKey = sessionStorage.getItem(sessionStoragePrivateKey);
+
+// Load user's Blockstack ID
+// TODO: Implement
+const bsid = 'alice.id';
 
 /*
  * Helper function for making signed requests to the user-server or the
@@ -37,6 +51,37 @@ var makeSignedRequest = function(url, body) {
 
 /******************************************************************************/
 
+// Define behavior of navbar
+
+// Feed button
+$('#feed-button').click(function() {
+    console.log('Going to feed page...');
+
+    window.location.href = baseUrl + '/feed';
+});
+
+
+// Profile button
+$('#profile-button').click(function() {
+    console.log('Going to profile page...');
+
+    window.location.href = baseUrl + '/profile/' + bsid;
+});
+
+
+// Sign out button
+$('#signout-button').click(function() {
+    console.log('Signing out...');
+
+    // Sign out
+    blockstack.signUserOut();
+
+    // Redirect to login page
+    window.location.href = baseUrl;
+});
+
+
+/******************************************************************************/
 
 // Some helper constants/functions for infinite scroll
 
@@ -137,5 +182,7 @@ $posts.on('load.infiniteScroll', function(event, response) {
 
 // Load initial page
 $posts.infiniteScroll('loadNextPage');
+
+/******************************************************************************/
 
 });

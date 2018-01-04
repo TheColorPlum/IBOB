@@ -11,6 +11,8 @@ This section describes the back end for the user-facing application. It is very 
 Code for the app is located in `app/`. The general layout of this directory is shown below:
 
 ```
+- lib/
+  - ...
 - public/
   - ...
 - views/
@@ -19,24 +21,47 @@ Code for the app is located in `app/`. The general layout of this directory is s
 - start.sh
 ```
 
-The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
+The `lib/` directory contains some JS libraries written by us (e.g. helper functions, global variables, etc.). The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
 
-### Server
+### Main Web Server
 
 There is *one* server that provides the pages of the app to all users. These pages are just templates; they are populated with user data on the *client side* via requests to the user's user-server.
 
 > This is not a traditional way of handling requests. Usually, data is pulled on the app server itself, populated into the page, and only then is the page sent to the client. This is not possible here, since the *user-server* stores the data we need to populate the page, and it will not serve data without a *signature* from the client. Thus, only the client can pull the data, not the app server.
 
-The app has the following URL endpoints:
+The app defines the following URL endpoints. All of them are implemented in `server.js`. For logging in:
 
-- `GET /`: Returns the index/landing page. By default, this is a login page. However, it will redirect to the feed page on the client side if the user is already logged in.
+- `GET /`: Returns the sign-in page.
+- `GET /manifest.json`: Returns the app's Blockstack manifest. Blockstack requires that this URL is defined in order to log users in.
+- `GET /initialization`: Returns a page to start up the user's user-server. They have to enter some info, and then click a button to spin it up.
+- `POST /create-user-server?requester=<requester>`: Upon receiving this request, the app spins up a new user-server for a particular user. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
+  - Request body (sample):
+    ```json
+    {"privateKey": "..."}
+    ```
+
+  - Response, if successful (sample). `ip` is the IP address of the new user-server.
+    ```json
+    {"success": true, "ip": "192.168.0.1"}
+    ```
+
+  - Response, if failed (sample). The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `msg`.
+    ```json
+    {"success": false, "msg": "This user already has a user-server!"}
+    ```
+
+  > Note: In development, this request does not actually spin up a user-server. Instead, it just puts an entry in the directory for a user-server that is *assumed already running*. So, you have to start the user-server manually before logging in. See the [Frontend](frontend.md) section for details on this.
+
+  > Another note: We have not implemented signature checking yet, so for now this request does *not* require a signature.
+
+And main pages:
+
 - `GET /feed`: Returns the logged-in user's feed page.
 - `GET /profile/<bsid>`: Returns the profile page for the user given by `bsid`, if they have an account on the network. If not, redirects to the error page.
 - `GET /error`: Returns a 404 error page.
 
-All of these are implemented in `server.js`.
-
 Additionally, `server.js` serves static files (i.e. CSS/JS) located in the `app/public/` directory. It is configured to serve these at the URL endpoint `/public/<file>` (e.g. `/public/styles.css`).
+
 
 ## User-server
 
@@ -49,6 +74,9 @@ The user-server has three major components: *storage*, the *web API*, and an *au
 The user-server code is located in the `user-server/` directory. We show the structure of this directory below (we only show the main pieces here):
 
 ```
+- initialization/
+  - main.sh
+  - ...
 - lib/
   - ...
   - ...
@@ -63,7 +91,7 @@ The user-server code is located in the `user-server/` directory. We show the str
 - test.sh
 ```
 
-In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
+In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `initialization/` contains the scripts for automating the initialization of the user-server, when it is first spun up. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
 
 ### Storage
 
@@ -79,6 +107,16 @@ The API is implemented as a set of HTTP request handlers in `routes/api.js`. We 
 
 The APS is also implemented as one of our libraries in `lib/aps.js`. Like the API, we wrote the spec of the APS in the same [Google doc](https://docs.google.com/document/d/1wykWWzwd8LasOF8lJKZEpNwXCW-B3se33YUEtK8M2OY), and we will move it to these docs when it is finalized.
 
+### Initialization upon spinning up
+
+There are a collection of scripts in the `initialization/` folder that configure the user-server when it first spins up. The only one we explicitly run is `main.sh`, which in turn runs the other scripts. It takes three arguments: the Blockstack ID of the user-server's owner, their private key, and the IP address of this user-server.
+
+```bash
+$ ./main.sh BSID PRIVATE-KEY IP
+```
+
+> We understand that storing the private key of the owner in this user-server is a security vulnerability. This is temporary until we implement proper security around the private key.
+
 
 ## Directory
 
@@ -93,6 +131,9 @@ The structure of the directory is very similar to the user-server - it also has 
 The code is located in the `directory/` folder. Within that is the following structure:
 
 ```
+- initialization/
+  - main.sh
+  - ...
 - lib/
   - ...
   - ...
@@ -107,7 +148,7 @@ The code is located in the `directory/` folder. Within that is the following str
 - test.sh
 ```
 
-In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
+In summary: the root directory contains mostly configuration files and some helpful shortcut scripts. Most notably, it contains `server.js`, which configures the server (at a high level) and runs it. `initialization/` contains the scripts that automate the initialization of the directory. `lib/` contains helper libraries that are written by us and used in the other components; `routes/` contains code to handle HTTP requests; and `test/` contains all of our tests.
 
 ### Storage
 
@@ -142,8 +183,11 @@ The actual SQL queries used to insert/select entries are abstracted in a data-ac
 - `put(bsid, ip, callback)`: Adds a mapping from `bsid` (string user name) to `ip` (string IP address in decimal notation), or overwrites the entry for `bsid` if there already is one.
   - Returned to callback: `{success: true}`
 
-And it also defines a function for clearing the database, which is helpful when writing tests.
+It also defines three other functions: one that creates the database and the table shown above (for initialization); one that closes the connection to the database; and one that clears the database (helpful when writing tests).
 
+- `createDatabase(callback)`: Creates the directory's database and the table shown above. Calls the callback when done.
+- `closeConnection([callback])`: Closes the DAL's current connection to the database. You should call this before any code that uses the DAL terminates; otherwise, it will hang at the end. You can still continue to make queries after calling this, though; a new connection will be made for the next query. `callback` is optional, but if one is present, nothing is passed to it when it is called.
+  > Note that you do *not* need to call this in the server, since it does not terminate, and thus can use a persistent connection.
 - `clearDatabase(callback)`: Clears the contents of all tables in the database. (Nothing is passed to the callback.)
 
 ### Web API
@@ -154,6 +198,9 @@ The API is implemented as a set of HTTP request handlers in `routes/api.js`. We 
 
 The APS is also implemented as one of our libraries in `lib/aps.js`. Like the API, we wrote the spec of the APS in the same [Google doc](https://docs.google.com/document/d/1wykWWzwd8LasOF8lJKZEpNwXCW-B3se33YUEtK8M2OY), and we will move it to these docs when it is finalized.
 
+### Initialization (in deployment)
+
+The directory's initialization is much simpler than the user-server's. It just needs to create the database and start the server. This is automated by the script `main.sh` in the `initialization/` folder (the other scripts are run by `main.sh`).
 
 
 ## Testing

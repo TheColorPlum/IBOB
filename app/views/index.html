@@ -1,35 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hello, Blockstack!</title>
-  <link rel="stylesheet" href="/public/bootstrap.min.css" />
-  <link rel="stylesheet" href="/public/index.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Import Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  <!-- Import Favicons -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Import Blockstack lib -->
   <script src="/public/bundle.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" type="text/css" href="/public/styles.css">
+
+  <!-- Custom scripts -->
   <script src="/public/index.js"></script>
+
+  <!-- <link rel="stylesheet" href="/public/bootstrap.min.css" /> -->
+
+  <title>The Feed</title>
 </head>
-<body>
-  <div class="site-wrapper">
-    <div class="site-wrapper-inner">
-      <div class="panel-landing" id="section-1">
-        <h1 class="landing-heading">Hello, Blockstack!</h1>
-        <p class="lead">
-          <a href="#" class="btn btn-primary btn-lg" id="signin-button">
-            Sign In with Blockstack
-          </a>
-        </p>
-      </div>
-      <div class="panel-welcome hide" id="section-2">
-        <div class="avatar-section">
-          <img src="https://s3.amazonaws.com/onename/avatar-placeholder.png" class="img-rounded avatar" id="avatar-image">
-        </div>
-        <h1>Hello, <span id="heading-name">Anonymous</span>!</h1>
-        <p class="lead">
-          <a href="#" class="btn btn-primary btn-lg" id="signout-button">
-            Logout
-          </a>
-        </p>
-      </div>
-    </div>
+<body class="background-color-main">
+
+<!-- Navbar -->
+<nav class="navbar sticky-top navbar-toggleable-md navbar-inverse background-color-accent z-depth-1-half" id="navbar">
+
+  <!-- Logo -->
+  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <a class="navbar-brand" href="#">The Feed</a>
+</nav>
+<!-- /Navbar -->
+
+<div class="container">
+
+  <div id="signin-panel" class="text-center extra-top-margin">
+    <h1>The Feed</h1>
+
+    <p><button id="signin-button" type="button" class="btn btn-primary background-color-accent">Sign In</button></p>
   </div>
+
+</div>
+
 </body>
 </html>

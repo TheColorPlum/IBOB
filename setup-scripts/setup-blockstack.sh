@@ -8,6 +8,7 @@
 # Check usage
 if [ $# -ne 0 ]; then
   echo "Usage: ./setup-blockstack.sh"
+  exit
 fi
 
 #------------------------------------------------------------------------------

@@ -8,6 +8,7 @@
 # Check usage
 if [ $# -ne 0 ]; then
   echo "Usage: ./setup-project.sh"
+  exit
 fi
 
 cd ..
@@ -16,55 +17,95 @@ cd ..
 
 # App
 
+echo "======================================="
+echo "          Setting up app...            "
+echo "======================================="
+
 # Install npm dependencies
 cd app
 npm install
 
 cd ..
 
+echo "Done with app"
+
 #------------------------------------------------------------------------------
 
 # User server
+
+echo "======================================="
+echo "       Setting up user-server...       "
+echo "======================================="
 
 # Install npm dependencies
 cd user-server
 npm install
 
 # Setup database
-echo 'Setting up the user-server database. You will need to enter the MySQL root password.'
-mysql The_Feed --user=root --password < create-database.sql
+cd initialization
+node createDatabase.js
 
-cd ..
+cd ../..
+
+echo "Done with user-server"
 
 #------------------------------------------------------------------------------
 
 # User server directory
+
+echo "=========================================="
+echo "    Setting up user-server directory...   "
+echo "=========================================="
 
 # Install dependencies
 cd directory
 npm install
 
 # Setup database
-echo 'Setting up the directory database. You will need to enter the MySQL root password.'
-mysql User_Server_Directory --user=root --password < create-database.sql
+cd initialization
+node createDatabase.js
 
-cd ..
+cd ../..
+
+echo "Done with directory"
 
 #------------------------------------------------------------------------------
 
-echo "Running tests..."
+echo "======================================="
+echo "          Running all tests...         "
+echo "======================================="
 
-# User-server
+# Start servers
+cd user-server
+node server.js &
+user_server_pid=$!
+cd ..
+
+cd directory
+node server.js &
+directory_pid=$!
+cd ..
+
+sleep 3
+
+
+# User-server tests
 echo "User-server tests..."
-cd ../user-server
+cd user-server
 ./test.sh
 echo "Done with user-server tests"
 echo
+cd ..
 
-# User-server directory
+# User-server directory tests
 echo "Directory tests..."
-cd ../directory
+cd directory
 ./test.sh
 echo "Done with directory tests"
 
-echo "Done!"
+
+# Kill servers
+kill $user_server_pid $directory_pid
+
+
+echo "Done setting up project!"

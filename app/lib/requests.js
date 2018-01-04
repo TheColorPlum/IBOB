@@ -5,8 +5,10 @@
  * Some helper functions to help when making requests.
  */
 
-const aps = require("./aps");
 const jsontokens = require("jsontokens");
+
+// Encoding algorithm used
+const encAlg = 'ES256k';
 
 // User-server directory URL
 const directoryBaseUrl = "http://localhost:4000";
@@ -17,7 +19,7 @@ const directoryBaseUrl = "http://localhost:4000";
  * key of the requester to sign the data.
  */
 var makeBody = function(data, privateKey) {
-    return (new jsontokens.TokenSigner(aps.encAlg, privateKey)).sign(data);
+    return (new jsontokens.TokenSigner(encAlg, privateKey)).sign(data);
 };
 
 

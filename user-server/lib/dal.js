@@ -7,13 +7,52 @@
  */
 
 var debug = require("./debug");
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : 'TuringP_lumRubik$9',
-    database : 'The_Feed'
+var fs = require("fs");
+var mysql = require("mysql");
+
+/***********************************************************/
+
+// Determine whether database has been created yet or not,
+// so we know what type of connection to make.
+
+
+// At first, assume it has been created
+var isDatabaseCreated = true;
+
+// Returns a connection to MySQL. If The_Feed database has been
+// created, this will be a connection to that database. If not,
+// it will be a regular connection, outside that database.
+var openConnection = function() {
+    if (isDatabaseCreated) {
+        return mysql.createConnection({
+            host               : 'localhost',
+            user               : 'root',
+            password           : 'TuringP_lumRubik$9',
+            multipleStatements : true,
+            database           : 'The_Feed'
+        });
+    } else {
+        return mysql.createConnection({
+            host               : 'localhost',
+            user               : 'root',
+            password           : 'TuringP_lumRubik$9',
+            multipleStatements : true
+        });
+    }
+}
+
+
+// Now check if we need to change this assumption
+connection = openConnection();
+connection.connect(err => {
+    if (err) {
+        // Couldn't connect - database must not have been
+        // created yet
+        isDatabaseCreated = false;
+        connection = openConnection();
+    }
 });
+
 
 /***********************************************************/
 
@@ -21,6 +60,11 @@ var connection = mysql.createConnection({
 // `sql`, a message to print once the query succeeds, and the callback
 // function to process the results from the database (if there are any).
 var query = function(sql, msg, callback) {
+    if (connection === null) {
+        // First open a connection
+        connection = openConnection();
+    }
+
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
@@ -31,6 +75,56 @@ var query = function(sql, msg, callback) {
         callback(result);
     });
 }
+
+
+// Closes the current connection to the database. In the server (which runs
+// forever) you never need to close the connection. However, any code that
+// terminates must call this before it finishes, or it will hang at the end.
+// You can keep making queries even after calling this though; a new
+// connection will be made.
+//
+// Callback is optional
+var closeConnection = function(callback) {
+    connection.end(() => {
+        connection = null;
+
+        if (callback) callback();
+    });
+}
+
+
+// Creates The_Feed database and all its tables
+var createDatabase = function(callback) {
+    var createDatabaseSql = "CREATE DATABASE The_Feed";
+
+    // Read table creation SQL from file
+    fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {
+    if (err) {
+        debug.log("Failed to read create-database.sql. Did not create database.");
+        callback(err);
+        return;
+    }
+
+    // Create database
+    debug.log("Creating the database...");
+    query(createDatabaseSql, "Created The_Feed database", function() {
+
+    // Reset connection - now that database has been created, we can
+    // connect to it.
+    isDatabaseCreated = true;
+    connection.end(() => {
+    connection = openConnection();
+
+    // Create tables
+    debug.log("Creating the tables...");
+    query(createTablesSql, "Created The_Feed's tables", function() {
+
+    // Done. Callback.
+    callback();
+
+    })})})});
+}
+
 
 // Clears all data in the database tables. Call this, for instance, between
 // tests to start with a clean slate.
@@ -59,10 +153,14 @@ var clearDatabase = function(callback) {
     query(clearTable + "following", "", function() {
     query(resetTable1 + "following" + resetTable2, "", function() {
 
+    // Clear private key
+    query(clearTable + "private_key", "", function() {
+    query(resetTable1 + "private_key" + resetTable2, "", function() {
+
     // Callback
     callback();
 
-    })})})})})})})})})});
+    })})})})})})})})})})})});
 }
 
 /***********************************************************
@@ -70,26 +168,26 @@ var clearDatabase = function(callback) {
  **********************************************************/
 
 var followUser = function(bsid, callback) {
-    var sql = "Insert INTO following (bsid) values (" + connection.escape(bsid) + ")";
+    var sql = "Insert INTO following (bsid) values (" + mysql.escape(bsid) + ")";
     var msg = "Started following " + bsid;
     query(sql, msg, callback);
 }
 
 var addFollower = function(bsid, callback) {
-    var sql = "Insert INTO followers (bsid) values (" + connection.escape(bsid) + ")";
+    var sql = "Insert INTO followers (bsid) values (" + mysql.escape(bsid) + ")";
     var msg = "Added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
 var addPhoto = function(path, callback) {
-    var sql = "INSERT INTO photos (path) values (" + connection.escape(path) + ")";
+    var sql = "INSERT INTO photos (path) values (" + mysql.escape(path) + ")";
     var msg = "Photo added";
     query(sql, msg, callback);
 }
 
 var addPost = function(photoId, timestamp, callback) {
     var sql = "INSERT INTO posts (photoId, timestamp) values ("
-      + connection.escape(photoId) + ", " + connection.escape(timestamp) + ")";
+      + mysql.escape(photoId) + ", " + mysql.escape(timestamp) + ")";
     var msg = "Post added";
     query(sql, msg, callback);
 }
@@ -97,16 +195,16 @@ var addPost = function(photoId, timestamp, callback) {
 var updateProfileInfo = function(bsid, profile, callback) {
     var values = "";
     if (profile.displayName) {
-        values += "displayName = " + connection.escape(profile.displayName) + ",";
+        values += "displayName = " + mysql.escape(profile.displayName) + ",";
     }
     if (profile.bio) {
-        values += "bio = " + connection.escape(profile.bio) + ",";
+        values += "bio = " + mysql.escape(profile.bio) + ",";
     }
     if (profile.profilePhotoId) {
-        values += "profilePhotoId = " + connection.escape(profile.profilePhotoId) + ",";
+        values += "profilePhotoId = " + mysql.escape(profile.profilePhotoId) + ",";
     }
     if (profile.coverPhotoId) {
-        values += "coverPhotoId = " + connection.escape(profile.coverPhotoId) + ",";
+        values += "coverPhotoId = " + mysql.escape(profile.coverPhotoId) + ",";
     }
 
     if (values === "") {
@@ -120,7 +218,7 @@ var updateProfileInfo = function(bsid, profile, callback) {
 
     // Construct complete SQL statement
     sql = "UPDATE profile_info SET " + values + " WHERE bsid = "
-      + connection.escape(bsid);
+      + mysql.escape(bsid);
 
     var msg = "Profile updated";
     query(sql, msg, callback);
@@ -128,8 +226,15 @@ var updateProfileInfo = function(bsid, profile, callback) {
 
 var setOwner = function(bsid, callback) {
     var sql = "INSERT INTO profile_info (bsid) values ("
-      + connection.escape(bsid) + ")";
+      + mysql.escape(bsid) + ")";
     var msg = "Owner set to " + bsid;
+    query(sql, msg, callback);
+}
+
+var setPrivateKey = function(privateKey, callback) {
+    var sql = "INSERT INTO private_key (privateKey) values ("
+      + mysql.escape(privateKey) + ")";
+    var msg = "Private key set";
     query(sql, msg, callback);
 }
 
@@ -225,6 +330,22 @@ var getFollowers = function(callback) {
     query(sql, msg, callback);
 }
 
+var getPrivateKey = function(callback) {
+    var sql = "SELECT * FROM private_key";
+    var msg = "Got private key";
+    query(sql, msg, function(rows) {
+
+    if (rows.length == 0) {
+        // No private key set
+        callback("");
+    } else {
+        // Return private key
+        callback(rows[0].privateKey);
+    }
+
+    });
+}
+
 /***********************************************************
  * Some tests
  **********************************************************/
@@ -242,6 +363,8 @@ var getFollowers = function(callback) {
 
 
 module.exports = {
+    closeConnection,
+    createDatabase,
     clearDatabase,
     followUser,
     addFollower,
@@ -249,9 +372,11 @@ module.exports = {
     addPost,
     updateProfileInfo,
     setOwner,
+    setPrivateKey,
     getPhotos,
     getPosts,
     getProfileInfo,
     getFollowing,
-    getFollowers
+    getFollowers,
+    getPrivateKey
 };
