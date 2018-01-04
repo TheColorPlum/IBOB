@@ -198,18 +198,27 @@ app.post(urls.addPost, function(req, res, next) {
 
         // Process request
         debug.log("Processing " + urls.addPost + " request...");
-        var body = verification.decodedData;
+        var body = JSON.parse(verification.decodedData);
         var photoId = body.photoId;
-        var path = body.path;
         var timestamp = (new Date()).toJSON();
+        dal.getPhoto(photoId, photo => {
 
-        dal.addPost(photoId, timestamp, function(result) {
-            if(result.affectedRows == 0) {
-                res.json({success: false, post: {id: -1, timestamp: (new Date()).toJSON(), photo: {id: -1, path: ""}}});
-                res.end("Error in uploading post.");
+            if (!photo.success) {
+                res.json({success: false});
+                res.end("Error: photo does not exist. Cannot make a post with it.");
             }
-            res.json({success: true, post: {id: result.insertId, timestamp: (new Date()).toJSON(), photo: {id: photoId, path: path}}});
-            res.end("Post uploaded.");
+
+            var path = photo.path;
+
+            // Add a post with that photo
+            dal.addPost(photoId, timestamp, function(result) {
+                if(result.affectedRows == 0) {
+                    res.json({success: false});
+                    res.end("Error in uploading post.");
+                }
+                res.json({success: true, post: {id: result.insertId, timestamp: timestamp, photo: {id: photoId, path: path}}});
+                res.end("Post uploaded.");
+            });
         });
     });
 });

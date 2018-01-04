@@ -386,7 +386,7 @@ describe("/api" + api.urls.followUser, function() {
 
 describe("/api" + api.urls.addPost, function() {
 
-    it.skip("Adds a post correctly", function(done) {
+    it("Adds a post correctly", function(done) {
         setup(() => {
 
             // Add the post's photo to the database first
