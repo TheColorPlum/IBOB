@@ -5,39 +5,6 @@
  * Scripts for the index (login) page.
  */
 
-// document.addEventListener("DOMContentLoaded", function(event) {
-//   document.getElementById('signin-button').addEventListener('click', function(event) {
-//     event.preventDefault()
-//     blockstack.redirectToSignIn()
-//   })
-//   document.getElementById('signout-button').addEventListener('click', function(event) {
-//     event.preventDefault()
-//     blockstack.signUserOut(window.location.href)
-//   })
-
-//   function showProfile(profile) {
-//     var person = new blockstack.Person(profile)
-//     document.getElementById('heading-name').innerHTML = person.name() ? person.name() : "Nameless Person"
-//     if(person.avatarUrl()) {
-//       document.getElementById('avatar-image').setAttribute('src', person.avatarUrl())
-//     }
-//     document.getElementById('section-1').style.display = 'none'
-//     document.getElementById('section-2').style.display = 'block'
-//   }
-
-//   if (blockstack.isUserSignedIn()) {
-//     var profile = blockstack.loadUserData().profile
-//       showProfile(profile)
-//   } else if (blockstack.isSignInPending()) {
-//     blockstack.handlePendingSignIn().then(function(userData) {
-//       window.location = window.location.origin
-//     })
-//   }
-// })
-
-
-/******************************************************************************/
-
 $(document).ready(function() {
 
 /******************************************************************************/
@@ -55,15 +22,10 @@ const sessionStorageIp = 'userServerIp';
 
 /******************************************************************************/
 
-// Sign user in when they click the sign-in button
-$('#signin-button').click(function() {
-    blockstack.redirectToSignIn();
-});
-
-
-// Once signed in...
-if (blockstack.isUserSignedIn()) {
-
+/*
+ * Define what to do once user has signed in
+ */
+var handleSignedInUser = function() {
     console.log('User is signed in. Checking if they have a user-server...');
 
     // Check if this user has been setup with a user-server yet by checking
@@ -102,11 +64,27 @@ if (blockstack.isUserSignedIn()) {
         }
 
     });
-} else if (blockstack.isSignInPending()) {
-    blockstack.handlePendingSignIn().then(userData => {
-        window.location = window.location.origin;
-    });
-}
+};
+
+
+// Sign user in when they click the sign-in button
+$('#signin-button').click(function() {
+
+    if (blockstack.isUserSignedIn()) {
+        handleSignedInUser();
+    }
+
+    else if (blockstack.isSignInPending()) {
+        blockstack.handlePendingSignIn().then(userData => {
+            window.location = window.location.origin;
+        });
+    }
+
+    else {
+        // Not signed in yet
+        blockstack.redirectToSignIn();
+    }
+});
 
 
 /******************************************************************************/
