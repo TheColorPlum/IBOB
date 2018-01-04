@@ -9,6 +9,7 @@ var aps = require('../lib/aps');
 var dal = require('../lib/dal');
 var debug = require('../lib/debug');
 var express = require('express');
+var fs = require("fs");
 var hasha = require("hasha");  // ref: https://github.com/sindresorhus/hasha
 var path = require("path");
 
@@ -18,10 +19,14 @@ var app = express();
 
 // Constants
 
+// TODO: This will need to be changed when deployed at a domain name
+const baseUrl = "http://localhost:3000";
+
 const urls = {
     getFeed: "/get-feed",
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
+    getPhoto: "/get-photo/:filename",
     updateProfileInfo: "/update-profile-info",
     followUser: "/follow-user",
     addPost: "/add-post",
@@ -123,6 +128,24 @@ app.post(urls.getPosts, function(req, res, next) {
 
         });
     });
+});
+
+
+/*
+ * Returns a photo with a given filename
+ */
+app.get(urls.getPhoto, function(req, res, next) {
+    debug.log("Processing request for photo: " + req.params.filename);
+
+    // Make sure file exists
+    var photoPath = path.join(photosDir, req.params.filename);
+    if (!fs.existsSync(photoPath)) {
+        res.status(404).send("");
+        return;
+    }
+
+    // Send photo
+    res.sendFile(photoPath);
 });
 
 
@@ -236,7 +259,8 @@ app.post(urls.addPhoto, function(req, res, next) {
     var photo = req.files.photo;
 
     // Move photo to its permanent location
-    var photoPath = path.join(photosDir, generateNewPhotoName(photo));
+    var photoName = generateNewPhotoName(photo);
+    var photoPath = path.join(photosDir, photoName);
     photo.mv(photoPath).then(err => {
         if (err) {
             // Failed to store photo in permanent location
@@ -244,8 +268,9 @@ app.post(urls.addPhoto, function(req, res, next) {
             return;
         }
 
-        // Photo is stored. Now add its path to the database.
-        dal.addPhoto(photoPath, function(result) {
+        // Photo is stored. Now add its URL to the database.
+        var photoUrl = baseUrl + "/api/get-photo/" + photoName;
+        dal.addPhoto(photoUrl, function(result) {
             if (result.affectedRows == 0) {
                 // Error storing photo in database.
                 res.json({success: false});
@@ -254,7 +279,7 @@ app.post(urls.addPhoto, function(req, res, next) {
 
             // Done!
             res.json({success: true, photo: {id: result.insertId,
-              path: photoPath}});
+              path: photoUrl}});
         });
     });
 });
