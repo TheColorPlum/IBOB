@@ -11,37 +11,30 @@ var debug = require('../lib/debug');
 var express = require('express');
 var app = express();
 var path = require("path");
-var multer = require("multer");
 
 /******************************************************************************/
 
-// Storage config for photos. Photos will be uploaded into the /photos directory (can be changed)
-var storage = multer.diskStorage({
-    destination: function(req, file, callback) {
-        callback(null, '../photos');
-    },
-    filename: function(req, file, callback) {
-        console.log(file);
-        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
-// Upload function
-var upload = multer({storage: storage}).single('userFile');
-
-/******************************************************************************/
+// Constants
 
 const urls = {
     getFeed: "/get-feed",
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
-    getPhotos: "/get-photos",
     updateProfileInfo: "/update-profile-info",
     followUser: "/follow-user",
     addPost: "/add-post",
     addPhoto: "/add-photo"
-}
+};
 
+const photosDir = path.join(__dirname, "../photos");
+
+// Generates a filename for the photo in its permanent storage location
+var generateNewPhotoName = function(filename) {
+    var ext = path.extname(filename);
+    return path.basename(filename, ext) + "-" + Date.now() + ext;
+};
+
+/******************************************************************************/
 
 // GET requests (implemented as POST requests so they can receive request
 // body)
@@ -150,7 +143,6 @@ app.post(urls.updateProfileInfo, function(req, res, next) {
 
         dal.updateProfileInfo(bsid, profile, function(result) {
             res.json({success: true});
-            res.end("Profile updated.")
         });
     });
 });
@@ -176,10 +168,9 @@ app.post(urls.followUser, function(req, res, next) {
         dal.followUser(bsid, function (result) {
             if(result.affectedRows == 0) {
                 res.json({success: false});
-                res.end("Could not follow user.");
+                return;
             }
             res.json({success: true});
-            res.end("Followed user.");
         });
     });
 });
@@ -214,10 +205,9 @@ app.post(urls.addPost, function(req, res, next) {
             dal.addPost(photoId, timestamp, function(result) {
                 if(result.affectedRows == 0) {
                     res.json({success: false});
-                    res.end("Error in uploading post.");
+                    return;
                 }
                 res.json({success: true, post: {id: result.insertId, timestamp: timestamp, photo: {id: photoId, path: path}}});
-                res.end("Post uploaded.");
             });
         });
     });
@@ -227,24 +217,39 @@ app.post(urls.addPost, function(req, res, next) {
  * Uploads a photo to this user's account.
  */
 app.post(urls.addPhoto, function(req, res, next) {
-
     // NOTE: You don't need to verify the user in this request. Just upload
     // the photo to cloud storage.
+
     debug.log("Processing " + urls.addPhoto + " request...");
-    upload(req, res, function(err) {
-        // Error handling
-        if(err) {
-            res.json({success: false, photo: {id: -1, path: ""}});
-            res.end("Error uploading file.");
+
+    // Make sure there's a file
+    if (!req.files || !req.files.photo) {
+        res.send({success: false});
+        return;
+    }
+
+    var photo = req.files.photo;
+
+    // Move photo to its permanent location
+    var photoPath = path.join(photosDir, generateNewPhotoName(photo.name));
+    photo.mv(photoPath).then(err => {
+        if (err) {
+            // Failed to store photo in permanent location
+            res.send({success: false});
+            return;
         }
-        var path = req.file.filename;
-        dal.addPhoto(path, function(result) {
-            if(result.affectedRows == 0) {
-                res.json({success: false, photo: {id: -1, path: ""}});
-                res.end("Error uploading file.");
+
+        // Photo is stored. Now add its path to the database.
+        dal.addPhoto(photoPath, function(result) {
+            if (result.affectedRows == 0) {
+                // Error storing photo in database.
+                res.json({success: false});
+                return;
             }
-            res.json({success: true, photo: {id: result.insertId, path: path}});
-            res.end('File is uploaded');
+
+            // Done!
+            res.json({success: true, photo: {id: result.insertId,
+              path: photoPath}});
         });
     });
 });

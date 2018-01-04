@@ -436,9 +436,9 @@ describe("/api" + api.urls.addPost, function() {
 });
 
 
-describe("/api" + api.urls.addPhoto, function() {
+describe.skip("/api" + api.urls.addPhoto, function() {
 
-    it.skip("Adds a photo correctly", function(done) {
+    it("Adds a photo correctly", function(done) {
         setup(() => {
             // Define expected response
             var correctResponse = {
