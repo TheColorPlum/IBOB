@@ -82,10 +82,14 @@ if (blockstack.isUserSignedIn()) {
             // Get private key from storage, save in sessionStorage
             blockstack.getFile(privateKeyFile, false).then(contents => {
                 var json = JSON.parse(contents);
-                sessionStorage.setItem(sessionStoragePrivateKey, privateKey);
+                sessionStorage.setItem(sessionStoragePrivateKey, json.privateKey);
 
                 // Redirect to feed
                 window.location.href = baseUrl + '/feed';
+                console.log('Redirected to feed');
+            }).catch(err => {
+                console.log('This should never happen: Failed to get '
+                  + privateKeyFile + ' from Blockstack storage. Error: ' + err);
             });
         }
 

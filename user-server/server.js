@@ -14,6 +14,14 @@ const api = require("./routes/api");
 
 // Configuration
 
+// Allow url endpoints to be accessed from other domains (i.e. the web app)
+var allowCrossDomain = function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    next();
+}
+
+app.use(allowCrossDomain);
+
 // Store raw request body in req.body. Needed to access signatures on
 // requests.
 // Ref: https://stackoverflow.com/questions/9920208/expressjs-raw-body/9920700#9920700
