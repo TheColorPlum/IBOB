@@ -69,6 +69,7 @@ app.post(urls.getProfileInfo, function(req, res, next) {
         }
 
         // Process request
+        debug.log("Processing " + urls.getProfileInfo + " request...");
         dal.getProfileInfo(profileInfo => {
         dal.getFollowing(following => {
 
@@ -96,6 +97,7 @@ app.post(urls.getPosts, function(req, res, next) {
         }
 
         // Get posts
+        debug.log("Processing " + urls.getPosts + " request...");
         dal.getPosts(posts => {
 
             // Check that parameters are valid
@@ -142,15 +144,11 @@ app.post(urls.updateProfileInfo, function(req, res, next) {
         }
 
         // Process Request
-        var body = verification.decodedData;
-        var bsid = body.bsid;
-        var profile = body.profile;
+        debug.log("Processing " + urls.updateProfileInfo + " request...");
+        var bsid = req.query.requester;
+        var profile = JSON.parse(verification.decodedData);
 
         dal.updateProfileInfo(bsid, profile, function(result) {
-            if(result.affectedRows == 0) {
-                res.json({success: false});
-                res.end("Error updating profile.")
-            }
             res.json({success: true});
             res.end("Profile updated.")
         });
@@ -171,6 +169,7 @@ app.post(urls.followUser, function(req, res, next) {
         }
 
         // Process request
+        debug.log("Processing " + urls.followUser + " request...");
         var body = verification.decodedData;
         var bsid = body.bsid;
 
@@ -198,6 +197,7 @@ app.post(urls.addPost, function(req, res, next) {
         }
 
         // Process request
+        debug.log("Processing " + urls.addPost + " request...");
         var body = verification.decodedData;
         var photoId = body.photoId;
         var path = body.path;
@@ -221,6 +221,7 @@ app.post(urls.addPhoto, function(req, res, next) {
 
     // NOTE: You don't need to verify the user in this request. Just upload
     // the photo to cloud storage.
+    debug.log("Processing " + urls.addPhoto + " request...");
     upload(req, res, function(err) {
         // Error handling
         if(err) {
