@@ -117,13 +117,14 @@ describe("/api" + api.urls.getPosts, function() {
         // Add a few posts
         var post1 = {id: 1, photo: {id: 1, path: "https://s3.amazon.com/1.png"},
             timestamp: requests.makeTimestamp()};
+        dal.addPhoto(post1.photo.path, () => {
+
         var post2 = {id: 2, photo: {id: 2, path: "https://s3.amazon.com/2.png"},
             timestamp: requests.makeTimestamp()};
+        dal.addPhoto(post2.photo.path, () => {
+
         var post3 = {id: 3, photo: {id: 3, path: "https://s3.amazon.com/3.png"},
             timestamp: requests.makeTimestamp()};
-
-        dal.addPhoto(post1.photo.path, () => {
-        dal.addPhoto(post2.photo.path, () => {
         dal.addPhoto(post3.photo.path, () => {
 
         dal.addPost(post1.id, post1.timestamp, () => {
@@ -134,8 +135,8 @@ describe("/api" + api.urls.getPosts, function() {
         var correctResponse = [
             {id: post2.id, timestamp: post2.timestamp, photo:
                 {id: post2.photo.id, path: post2.photo.path}},
-            {id: post3.id, timestamp: post3.timestamp, photo:
-                {id: post3.photo.id, path: post3.photo.path}}
+            {id: post1.id, timestamp: post1.timestamp, photo:
+                {id: post1.photo.id, path: post1.photo.path}}
         ];
 
         // Make request

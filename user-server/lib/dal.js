@@ -263,7 +263,7 @@ var getPhoto = function(photoId, callback) {
 
 var getPosts = function(callback) {
     var sql = "SELECT * FROM posts JOIN photos ON posts.photoId = photos.id"
-               + " ORDER BY timestamp";
+               + " ORDER BY timestamp DESC";
     var msg = "Retrieved all posts";
     query(sql, msg, callback);
 }
