@@ -1,4 +1,4 @@
-Private keys of alice.id, bob.id, and mallory.id corresponding to the
+Private keys of alice.id, bob.id, mallory.id, and admin.id corresponding to the
 public keys served by this server.
 
 alice.id
@@ -9,3 +9,6 @@ bob.id
 
 mallory.id
 af8d0f959ab8bed4399d60b7d5c568d9ec7eecf0da10bedeec3247eb5fcca1be01
+
+admin.id
+989891b175321d7042a97da0cafdce73fe18a8c1d2bafe158c119ca46545e2fc01

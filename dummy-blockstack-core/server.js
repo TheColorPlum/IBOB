@@ -74,6 +74,28 @@ const mallory = {
     }]
 };
 
+const admin = {
+    id: "admin.id",
+    profile: {
+        address: "13o4bCPvsNTueMnGR4acqr29C4utYtr1ig",
+        blockchain: "bitcoin",
+        expire_block: 598717,
+        last_txid: "40c1c0e1b5d0168ef0977784ef3d1fa037ca297a53b437e68ea842be7c990236",
+        status: "registered",
+        zonefile: "$ORIGIN admin.id\n$TTL 3600\n_http._tcp URI 10 1 \"http://localhost:" + port + "/zonefile/admin.id\"\n",
+        zonefile_hash: "9659d60d5d5cb0a94bbf669561c3c4d96adc4361"
+    },
+    zonefile: [{
+        decodedToken: {
+            payload: {
+                subject: {
+                    publicKey: "034c74b8655ecd8b7f06ffda76baa5c8ba6bc9bbd8ea3be4b265904b29c9f0eb15"
+                }
+            }
+        }
+    }]
+};
+
 //------------------------------------------------------------------------------
 
 // GET /v1/names/<blockstack-id>
@@ -85,6 +107,8 @@ app.get('/v1/names/:id', function(req, res) {
         res.send(JSON.stringify(bob.profile));
     } else if (id === mallory.id) {
         res.send(JSON.stringify(mallory.profile));
+    } else if (id === admin.id) {
+        res.send(JSON.stringify(admin.profile));
     } else {
         res.send("Error: invalid name");
     }
@@ -100,6 +124,8 @@ app.get('/zonefile/:id', function(req, res) {
         res.send(JSON.stringify(bob.zonefile));
     } else if (id === mallory.id) {
         res.send(JSON.stringify(mallory.zonefile));
+    } else if (id === admin.id) {
+        res.send(JSON.stringify(admin.zonefile));
     } else {
         res.send("Error: invalid name");
     }
