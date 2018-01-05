@@ -111,15 +111,15 @@ app.post(urls.getPosts, function(req, res, next) {
             var min = offset;
             var max = offset + count - 1;
             if (min < 0 || max < 0 || min > posts.length - 1 || max > posts.length - 1) {
-                res.send("Error: Invalid values for offset/count");
+                res.json({success: false});
                 return;
             }
 
             // Only return `count` posts, starting from `offset`. Format to have
             // id, timestamp, and path
-            var json = [];
+            var json = {success: true, posts: []};
             for (var i = offset; i < offset + count; i++) {
-                json.push({
+                json.posts.push({
                     id: posts[i].id, timestamp: posts[i].timestamp,
                     photo: {id: posts[i].photoId, path: posts[i].path}
                 });

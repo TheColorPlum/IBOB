@@ -57,7 +57,6 @@ var makeSignedRequest = function(url, body, callback) {
     $.post(url, signedBody, callback);
 };
 
-
 /*******************************************************************************
  * Define behavior of navbar
  ******************************************************************************/
@@ -308,7 +307,7 @@ $('#new-post-form').ajaxForm({
 if (window.location.pathname.startsWith(urls.profile) || window.location.pathname === urls.feed) {
 
 
-// Some helper constants/functions for infinite scroll
+// Some helper constants/functions for adding posts
 
 var postHtmlTemplate = $('#post-template').html();  // defined in profile.html
 
@@ -328,6 +327,14 @@ var microTemplate = function(html, vars) {
     });
     return value;
   });
+};
+
+/*
+ * Helper function to convert a JSON timestamp to the format displayed on
+ * the page.
+ */
+var formatTimestamp = function(timestamp) {
+    return (new Date(timestamp)).toDateString();
 };
 
 /******************************************************************************/
@@ -352,61 +359,77 @@ var msnry = $posts.data('masonry');
 
 /******************************************************************************/
 
-// Configure infinite scroll for posts
-//   Ref: https://infinite-scroll.com/options.html#responsetype
+// Load more posts when user clicks "More" button
 
-var unsplashId = '9ad80b14098bcead9c7de952435e937cc3723ae61084ba8e729adb642daf0251';
+const count = 5;
+var offset = 0;
 
-$posts.infiniteScroll({
-    // Define url to request for next set of photos
-    // TODO: Uncomment this when you're ready for dynamic content
-    // path: function() {
-    //     var count = 20;
-    //     var offset = this.loadCount * count;
-    //     return userServerBaseUrl + '/get-feed/' + count + '/' + offset;
-    // },
-    path: 'https://api.unsplash.com/photos?page={{#}}&client_id=' + unsplashId,
+const pendingMessage = 'Loading more posts...';
+const noMorePostsMessage = 'No more posts!';
+const failureMessage = 'Oops! Something went wrong. Try again.';
 
-    // Do not immediately append, since the response is JSON (not HTML)
-    append: false,
-    responseType: 'text',
-    history: false,
+// Makes request for more posts
+var getNextPosts = function() {
+    // Adjust offset for next round
+    offset += count;
 
-    // Integrate with Masonry
-    outlayer: msnry
-});
+    // Get posts
+    var url = userServerBaseUrl + '/api/get-posts?requester=' + bsid;
+    var body = {count: count, offset: offset, timestamp: requests.makeTimestamp()};
+    makeSignedRequest(url, body, function(resp) {
+        var json = resp;
 
-$posts.on('load.infiniteScroll', function(event, response) {
-    // Parse JSON and construct HTML for the new posts
-    var newPostsJson = JSON.parse(response);
+        // Check that request succeeded
+        if (!json.success) {
+            $('#more-posts-message').text(failureMessage);
+            return;
+        }
 
-    // Make sure there are an even number of posts to add
-    if (newPostsJson.length % 2 != 0) {
-        newPostsJson.pop();
-    }
+        // If no posts left, disable the button and show no more posts
+        if (json.posts.length == 0) {
+            $('#more-posts-button').prop('disabled', true);
+            $('#more-posts-message').text(noMorePostsMessage);
+            return;
+        }
 
-    // Construct HTML for new posts
-    newPosts = newPostsJson.map(json => {
-        var vars = {
-            photoSrc: json.urls.regular,
-            caption: 'Sample caption',
-            timestamp: new Date(json.created_at).toDateString()
-        };
-        return microTemplate(postHtmlTemplate, vars);
-    }).join('');
+        // Parse JSON and construct HTML for the new posts
+        var newPostsHtmlStr = json.posts.map(postJson => {
+            var vars = {
+                photoSrc: postJson.photo.path,
+                timestamp: formatTimestamp(postJson.timestamp),
+                bsid: bsid
+            };
+            return microTemplate(postHtmlTemplate, vars);
+        }).join('');
 
-    // Compile HTML
-    var newPostsHtml = $(newPosts);
+        // Compile HTML
+        var newPostsHtml = $(newPostsHtmlStr);
 
-    // Append new posts
-    newPostsHtml.imagesLoaded(function() {
-        $posts.infiniteScroll('appendItems', newPostsHtml);
-        $posts.masonry('appended', newPostsHtml);
+        // Append new posts
+        newPostsHtml.imagesLoaded(function() {
+            $posts.append(newPostsHtml);
+            $posts.masonry('appended', newPostsHtml);
+        });
+
+        // Clear the message
+        $('#more-posts-message').text('');
+
     });
+};
+
+
+$('#more-posts-button').click(function() {
+
+    // Show pending message
+    $('#more-posts-message').text(pendingMessage);
+
+    // Get next round of posts
+    getNextPosts();
 });
 
-// Load initial page
-$posts.infiniteScroll('loadNextPage');
+
+// Get first round of posts
+getNextPosts();
 
 /******************************************************************************/
 

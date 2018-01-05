@@ -13,9 +13,9 @@
   <!-- Import Favicons -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-  <!-- Import Infinite Scroll and related packages -->
+  <!-- Import Masonry - photo tiling package -->
   <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
-  <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
 
   <!-- Import Blockstack lib -->
   <script src="/public/bundle.js"></script>
@@ -104,6 +104,12 @@
     <div class="posts-grid__gutter-sizer"></div>
   </div>
 
+  <!-- Buton for more posts -->
+  <div class="text-center">
+    <button id="more-posts-button" class="btn btn-primary background-color-accent">More</button>
+    <p id="more-posts-message"></p>
+  </div>
+
 </div>
 
 
@@ -117,11 +123,13 @@
 
         <!-- Card body -->
         <div class="card-block">
-          <!-- Caption -->
-          <p class="card-text text-center">{{caption}}</p>
+          <div class="row">
+            <!-- Date posted -->
+            <div class="col"><p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p></div>
 
-          <!-- Date posted -->
-          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p>
+            <!-- Blockstack ID -->
+            <div class="col"><p class="card-text text-muted text-right">{{bsid}}</p></div>
+          </div>
         </div>
       </div>
     </div>

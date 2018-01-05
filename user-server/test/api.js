@@ -132,12 +132,15 @@ describe("/api" + api.urls.getPosts, function() {
         dal.addPost(post3.id, post3.timestamp, () => {
 
         // Define expected response
-        var correctResponse = [
-            {id: post2.id, timestamp: post2.timestamp, photo:
-                {id: post2.photo.id, path: post2.photo.path}},
-            {id: post1.id, timestamp: post1.timestamp, photo:
-                {id: post1.photo.id, path: post1.photo.path}}
-        ];
+        var correctResponse = {
+            success: true,
+            posts: [
+                {id: post2.id, timestamp: post2.timestamp, photo:
+                    {id: post2.photo.id, path: post2.photo.path}},
+                {id: post1.id, timestamp: post1.timestamp, photo:
+                    {id: post1.photo.id, path: post1.photo.path}}
+            ]
+        };
 
         // Make request
         var data = {count: 2, offset: 1, timestamp: requests.makeTimestamp()};

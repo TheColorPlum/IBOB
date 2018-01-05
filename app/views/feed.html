@@ -115,11 +115,13 @@
 
         <!-- Card body -->
         <div class="card-block">
-          <!-- Caption -->
-          <p class="card-text text-center">{{caption}}</p>
+          <div class="row">
+            <!-- Date posted -->
+            <div class="col"><p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p></div>
 
-          <!-- Date posted -->
-          <p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p>
+            <!-- Blockstack ID -->
+            <div class="col"><p class="card-text text-muted text-right">{{bsid}}</p></div>
+          </div>
         </div>
       </div>
     </div>
