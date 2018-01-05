@@ -19,12 +19,12 @@ The constants are defined below. The main one:
 
 Constants for the server:
 
-- `SERVER_PORT`: The port number that the server runs on.
+- `PORT`: The port number that the server runs on. This is set already by Google App Engine, so we don't need to specify it.
 
 Constants about the admin (i.e. us):
 
 - `ADMIN_BSID`: Admin's Blockstack ID.
-- `ADMIN_PRVIATE_KEY`: Admin's private key (the one corresponding to the public key in our Blockstack zonefile).
+- `ADMIN_PRIVATE_KEY`: Admin's private key (the one corresponding to the public key in our Blockstack zonefile).
 
 URLs:
 

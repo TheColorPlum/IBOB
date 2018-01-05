@@ -16,7 +16,7 @@ const envVars = {
     // "production"
 
     // For the server
-    serverPort: "SERVER_PORT",
+    serverPort: "PORT",
 
     // Admin
     adminBsid: "ADMIN_BSID",
