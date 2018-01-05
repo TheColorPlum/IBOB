@@ -14,12 +14,16 @@ Below is the directory structure that makes up the front end, under the `app/` d
   - index.html
   - inintialization.html
   - feed.html
+  - new-post.html
   - profile.html
+- requires.js
 - server.js
 - start.sh
 ```
 
 The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory. `server.js` is the web server that servers the pages, and `start.sh` is a shortcut script that runs the server.
+
+`requires.js` is a file where we specify libraries we need to import into the *browser* using Browserify. Namely, this includes the *Blockstack library* and one of our own small libraries containing some helper functions (`lib/requests.js`). See the [Blockstack.js documentation](http://blockstack.github.io/blockstack.js/) for a reference on Blockstack.
 
 HTML:
 
@@ -27,6 +31,7 @@ HTML:
 - index.html is our landing/login page.
 - initialization.html is the page a user loads to initialize their user-server.
 - feed.html is the page with the user's feed.
+- new-post.html is the page where users upload photos/make posts.
 - profile.html is a user profile page.
 
 CSS:
@@ -35,7 +40,7 @@ CSS:
 
 JavaScript:
 
-- bundle.js is the *Blockstack library*. Use the [Blockstack.js documentation](http://blockstack.github.io/blockstack.js/) as a reference for this library.
+- bundle.js is the bundled up packages from Browserify (see above requires.js).
 - scripts.js contains code controlling the behavior of all the pages, and is imported by every HTML page.
 
 **Important note**: To use any static files in the HTML pages, you must place them in the `public/` directory, and then reference them from the HTML as `/public/<file>`. (This is how the app server is configured to load static files.) For example, `public/styles.css` must be imported as `/public/styles.css`.
