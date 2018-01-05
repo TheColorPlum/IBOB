@@ -8,3 +8,4 @@ This guide provides documentation on the app's components, how it is built, and 
 - [Frontend](frontend.md): UI, API usage
 - [Backend](backend.md): User storage, API spec, interface with Blockstack
 - [The Blockstack Docker Environment](blockstack.md): How to install and use the simulated Blockstack network for our purposes
+- [Deployment](deployment.md): How our app is deployed, and how to manage it.
