@@ -9,39 +9,42 @@ var aps = require('../lib/aps');
 var dal = require('../lib/dal');
 var debug = require('../lib/debug');
 var express = require('express');
-var app = express();
+var fs = require("fs");
+var hasha = require("hasha");  // ref: https://github.com/sindresorhus/hasha
 var path = require("path");
-var multer = require("multer");
+
+var app = express();
 
 /******************************************************************************/
 
-// Storage config for photos. Photos will be uploaded into the /photos directory (can be changed)
-var storage = multer.diskStorage({
-    destination: function(req, file, callback) {
-        callback(null, '../photos');
-    },
-    filename: function(req, file, callback) {
-        console.log(file);
-        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+// Constants
 
-// Upload function
-var upload = multer({storage: storage}).single('userFile');
-
-/******************************************************************************/
+// TODO: This will need to be changed when deployed at a domain name
+const baseUrl = "http://localhost:3000";
 
 const urls = {
     getFeed: "/get-feed",
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
-    getPhotos: "/get-photos",
+    getPhoto: "/get-photo/:filename",
     updateProfileInfo: "/update-profile-info",
     followUser: "/follow-user",
     addPost: "/add-post",
     addPhoto: "/add-photo"
-}
+};
 
+const photosDir = path.join(__dirname, "../photos");
+
+// Generates a filename for the photo in its permanent storage location
+var generateNewPhotoName = function(file) {
+    var ext = path.extname(file.name);
+
+    // Hash the raw contents of the file. Use hash as the name
+    var hash = hasha(file.data, {algorithm: "sha512"});
+    return hash + "-" + Date.now() + ext;
+};
+
+/******************************************************************************/
 
 // GET requests (implemented as POST requests so they can receive request
 // body)
@@ -69,6 +72,7 @@ app.post(urls.getProfileInfo, function(req, res, next) {
         }
 
         // Process request
+        debug.log("Processing " + urls.getProfileInfo + " request...");
         dal.getProfileInfo(profileInfo => {
         dal.getFollowing(following => {
 
@@ -96,6 +100,7 @@ app.post(urls.getPosts, function(req, res, next) {
         }
 
         // Get posts
+        debug.log("Processing " + urls.getPosts + " request...");
         dal.getPosts(posts => {
 
             // Check that parameters are valid
@@ -126,6 +131,24 @@ app.post(urls.getPosts, function(req, res, next) {
 });
 
 
+/*
+ * Returns a photo with a given filename
+ */
+app.get(urls.getPhoto, function(req, res, next) {
+    debug.log("Processing request for photo: " + req.params.filename);
+
+    // Make sure file exists
+    var photoPath = path.join(photosDir, req.params.filename);
+    if (!fs.existsSync(photoPath)) {
+        res.status(404).send("");
+        return;
+    }
+
+    // Send photo
+    res.sendFile(photoPath);
+});
+
+
 /******************************************************************************/
 
 // POST requests
@@ -142,17 +165,12 @@ app.post(urls.updateProfileInfo, function(req, res, next) {
         }
 
         // Process Request
-        var body = verification.decodedData;
-        var bsid = body.bsid;
-        var profile = body.profile;
+        debug.log("Processing " + urls.updateProfileInfo + " request...");
+        var bsid = req.query.requester;
+        var profile = JSON.parse(verification.decodedData);
 
         dal.updateProfileInfo(bsid, profile, function(result) {
-            if(result.affectedRows == 0) {
-                res.json({success: false});
-                res.end("Error updating profile.")
-            }
             res.json({success: true});
-            res.end("Profile updated.")
         });
     });
 });
@@ -171,16 +189,16 @@ app.post(urls.followUser, function(req, res, next) {
         }
 
         // Process request
-        var body = verification.decodedData;
+        debug.log("Processing " + urls.followUser + " request...");
+        var body = JSON.parse(verification.decodedData);
         var bsid = body.bsid;
 
         dal.followUser(bsid, function (result) {
             if(result.affectedRows == 0) {
                 res.json({success: false});
-                res.end("Could not follow user.");
+                return;
             }
             res.json({success: true});
-            res.end("Followed user.");
         });
     });
 });
@@ -198,18 +216,27 @@ app.post(urls.addPost, function(req, res, next) {
         }
 
         // Process request
-        var body = verification.decodedData;
+        debug.log("Processing " + urls.addPost + " request...");
+        var body = JSON.parse(verification.decodedData);
         var photoId = body.photoId;
-        var path = body.path;
         var timestamp = (new Date()).toJSON();
+        dal.getPhoto(photoId, photo => {
 
-        dal.addPost(photoId, timestamp, function(result) {
-            if(result.affectedRows == 0) {
-                res.json({success: false, post: {id: -1, timestamp: (new Date()).toJSON(), photo: {id: -1, path: ""}}});
-                res.end("Error in uploading post.");
+            if (!photo.success) {
+                res.json({success: false});
+                res.end("Error: photo does not exist. Cannot make a post with it.");
             }
-            res.json({success: true, post: {id: result.insertId, timestamp: (new Date()).toJSON(), photo: {id: photoId, path: path}}});
-            res.end("Post uploaded.");
+
+            var path = photo.path;
+
+            // Add a post with that photo
+            dal.addPost(photoId, timestamp, function(result) {
+                if(result.affectedRows == 0) {
+                    res.json({success: false});
+                    return;
+                }
+                res.json({success: true, post: {id: result.insertId, timestamp: timestamp, photo: {id: photoId, path: path}}});
+            });
         });
     });
 });
@@ -218,23 +245,41 @@ app.post(urls.addPost, function(req, res, next) {
  * Uploads a photo to this user's account.
  */
 app.post(urls.addPhoto, function(req, res, next) {
-
     // NOTE: You don't need to verify the user in this request. Just upload
     // the photo to cloud storage.
-    upload(req, res, function(err) {
-        // Error handling
-        if(err) {
-            res.json({success: false, photo: {id: -1, path: ""}});
-            res.end("Error uploading file.");
+
+    debug.log("Processing " + urls.addPhoto + " request...");
+
+    // Make sure there's a file
+    if (!req.files || !req.files.photo) {
+        res.send({success: false});
+        return;
+    }
+
+    var photo = req.files.photo;
+
+    // Move photo to its permanent location
+    var photoName = generateNewPhotoName(photo);
+    var photoPath = path.join(photosDir, photoName);
+    photo.mv(photoPath).then(err => {
+        if (err) {
+            // Failed to store photo in permanent location
+            res.send({success: false});
+            return;
         }
-        var path = req.file.filename;
-        dal.addPhoto(path, function(result) {
-            if(result.affectedRows == 0) {
-                res.json({success: false, photo: {id: -1, path: ""}});
-                res.end("Error uploading file.");
+
+        // Photo is stored. Now add its URL to the database.
+        var photoUrl = baseUrl + "/api/get-photo/" + photoName;
+        dal.addPhoto(photoUrl, function(result) {
+            if (result.affectedRows == 0) {
+                // Error storing photo in database.
+                res.json({success: false});
+                return;
             }
-            res.json({success: true, photo: {id: result.insertId, path: path}});
-            res.end('File is uploaded');
+
+            // Done!
+            res.json({success: true, photo: {id: result.insertId,
+              path: photoUrl}});
         });
     });
 });

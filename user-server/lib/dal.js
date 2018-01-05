@@ -242,10 +242,23 @@ var setPrivateKey = function(privateKey, callback) {
 /***********************************************************
  * Get requests interface to the database
  **********************************************************/
-var getPhotos = function(callback) {
-    var sql = "SELECT * FROM photos";
-    var msg = "Retrieved all photos";
-    query(sql, msg, callback);
+
+// Returns the photo with id photoId as an object:
+//   {success: true, id: 26, path: '/path/to/photo.png'}  (if it exists)
+//   {success: false}                                     (if it doesn't exist)
+var getPhoto = function(photoId, callback) {
+    var sql = "SELECT * FROM photos WHERE id = " + mysql.escape(photoId);
+    var msg = "Retrieved photo " + photoId;
+    query(sql, msg, function(rows) {
+
+        if (rows.length == 0) {
+            // No photo with that ID
+            callback({success: false});
+        } else {
+            var photo = rows[0];
+            callback({success: true, id: photo.id, path: photo.path});
+        }
+    });
 }
 
 var getPosts = function(callback) {
@@ -373,7 +386,7 @@ module.exports = {
     updateProfileInfo,
     setOwner,
     setPrivateKey,
-    getPhotos,
+    getPhoto,
     getPosts,
     getProfileInfo,
     getFollowing,

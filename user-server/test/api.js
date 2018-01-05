@@ -182,7 +182,7 @@ describe("Put operations", function() {
 
 describe("/api" + api.urls.updateProfileInfo, function() {
 
-    it.skip("Updates correctly when given all profile info attributes", function(done) {
+    it("Updates correctly when given all profile info attributes", function(done) {
         setup(() => {
             // Insert initial profile info
             var profilePhoto1 = {id: 1, path: "profile1.png"};
@@ -239,7 +239,14 @@ describe("/api" + api.urls.updateProfileInfo, function() {
                     // Check that profile info contents in database match the
                     // expected contents
                     dal.getProfileInfo(dbProfileInfo => {
+
+                    // Format db contents
+                    dbProfileInfo.profilePhotoId = dbProfileInfo.profilePhoto.id;
+                    dbProfileInfo.coverPhotoId = dbProfileInfo.coverPhoto.id;
                     delete dbProfileInfo.id;
+                    delete dbProfileInfo.profilePhoto;
+                    delete dbProfileInfo.coverPhoto;
+
                     assert.deepStrictEqual(dbProfileInfo, correctProfileInfo,
                         "Updated profile info is wrong is the database");
                     done();
@@ -258,7 +265,7 @@ describe("/api" + api.urls.updateProfileInfo, function() {
     });
 
 
-    it.skip("Updates correctly when given only some profile info attributes", function(done) {
+    it("Updates correctly when given only some profile info attributes", function(done) {
         setup(() => {
             // Insert initial profile info
             var profilePhoto1 = {id: 1, path: "profile1.png"};
@@ -310,7 +317,14 @@ describe("/api" + api.urls.updateProfileInfo, function() {
                     // Check that profile info contents in database match the
                     // expected contents
                     dal.getProfileInfo(dbProfileInfo => {
+
+                    // Format db contents
+                    dbProfileInfo.profilePhotoId = dbProfileInfo.profilePhoto.id;
+                    dbProfileInfo.coverPhotoId = dbProfileInfo.coverPhoto.id;
                     delete dbProfileInfo.id;
+                    delete dbProfileInfo.profilePhoto;
+                    delete dbProfileInfo.coverPhoto;
+
                     assert.deepStrictEqual(dbProfileInfo, correctProfileInfo, "Updated profile info is wrong in the database");
                     done();
                     });
@@ -331,7 +345,7 @@ describe("/api" + api.urls.updateProfileInfo, function() {
 
 describe("/api" + api.urls.followUser, function() {
 
-    it.skip("Adds a user to my following list correctly", function(done) {
+    it("Adds a user to my following list correctly", function(done) {
         setup(() => {
 
             // Define expected following list after request is made
@@ -372,7 +386,7 @@ describe("/api" + api.urls.followUser, function() {
 
 describe("/api" + api.urls.addPost, function() {
 
-    it.skip("Adds a post correctly", function(done) {
+    it("Adds a post correctly", function(done) {
         setup(() => {
 
             // Add the post's photo to the database first
@@ -422,9 +436,9 @@ describe("/api" + api.urls.addPost, function() {
 });
 
 
-describe("/api" + api.urls.addPhoto, function() {
+describe.skip("/api" + api.urls.addPhoto, function() {
 
-    it.skip("Adds a photo correctly", function(done) {
+    it("Adds a photo correctly", function(done) {
         setup(() => {
             // Define expected response
             var correctResponse = {

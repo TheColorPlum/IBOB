@@ -10,6 +10,10 @@ const port = 3000;
 
 const api = require("./routes/api");
 
+// Package for easily handling file uploads.
+//   Ref: https://github.com/richardgirges/express-fileupload
+const fileUpload = require("express-fileupload");
+
 /******************************************************************************/
 
 // Configuration
@@ -22,10 +26,10 @@ var allowCrossDomain = function(req, res, next) {
 
 app.use(allowCrossDomain);
 
-// Store raw request body in req.body. Needed to access signatures on
+// Stores raw request body in req.body. Needed to access signatures on
 // requests.
 // Ref: https://stackoverflow.com/questions/9920208/expressjs-raw-body/9920700#9920700
-app.use(function(req, res, next) {
+var storeRequestBody = function(req, res, next) {
     var data = "";
     req.setEncoding("utf8");
 
@@ -39,10 +43,26 @@ app.use(function(req, res, next) {
         req.body = data;
         next();
     });
+};
+
+var apiPrefix = "/api";
+
+// Store the raw request body for the following API calls:
+var urlsUsingRequestBody = [
+  api.urls.getFeed, api.urls.getProfileInfo, api.urls.getPosts,
+  api.urls.updateProfileInfo, api.urls.followUser, api.urls.addPost
+];
+urlsUsingRequestBody.forEach(url => {
+    app.use(apiPrefix + url, storeRequestBody);
 });
 
+
+// But for photo uploads, handle the request body with file upload package
+app.use(apiPrefix + api.urls.addPhoto, fileUpload());
+
+
 // Map /api URLs to routes/api.js
-app.use("/api", api.app);
+app.use(apiPrefix, api.app);
 
 /******************************************************************************/
 
