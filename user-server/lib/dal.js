@@ -95,7 +95,7 @@ var closeConnection = function(callback) {
 
 // Creates The_Feed database and all its tables
 var createDatabase = function(callback) {
-    var createDatabaseSql = "CREATE DATABASE The_Feed";
+    var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
 
     // Read table creation SQL from file
     fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {

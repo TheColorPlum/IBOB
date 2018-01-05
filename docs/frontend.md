@@ -9,7 +9,6 @@ Below is the directory structure that makes up the front end, under the `app/` d
   - bundle.js
   - styles.css
   - scripts.js
-  - *.js
 - views/
   - 404.html
   - index.html
@@ -37,8 +36,7 @@ CSS:
 JavaScript:
 
 - bundle.js is the *Blockstack library*. Use the [Blockstack.js documentation](http://blockstack.github.io/blockstack.js/) as a reference for this library.
-- scripts.js contains code controlling the behavior of the profile and feed pages.
-- *.js are the scripts for other pages, named by the page they correspond to (e.g. index.js).
+- scripts.js contains code controlling the behavior of all the pages, and is imported by every HTML page.
 
 **Important note**: To use any static files in the HTML pages, you must place them in the `public/` directory, and then reference them from the HTML as `/public/<file>`. (This is how the app server is configured to load static files.) For example, `public/styles.css` must be imported as `/public/styles.css`.
 
