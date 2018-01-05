@@ -6,9 +6,9 @@
 
 const express = require("express");
 const app = express();
-const port = 4000;
 
 const api = require("./routes/api");
+const constants = require("./lib/constants");
 
 /******************************************************************************/
 
@@ -47,6 +47,6 @@ app.use("/api", api.app);
 /******************************************************************************/
 
 // Start server
-app.listen(port, function() {
-    console.log("User-Server Directory is running on port " + port);
+app.listen(constants.serverPort, function() {
+    console.log("User-Server Directory is running on port " + constants.serverPort);
 });
