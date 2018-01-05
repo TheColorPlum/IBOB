@@ -12,20 +12,94 @@ $(document).ready(function() {
  * Constants
  ******************************************************************************/
 
-const baseUrl = window.location.protocol + '//' + window.location.host;
-const directoryBaseUrl = 'http://localhost:4000';
-const privateKeyFile = 'privateKey.json';
-
 // Keys into sessionStorage for private key and user-server IP address
 const sessionStoragePrivateKey = 'privateKey';
 const sessionStorageIp = 'userServerIp';
 
+// Load user's Blockstack ID
+// TODO: Implement
+const bsid = 'alice.id';
+
+// Base URLs
+// TODO: Need to update userServerBaseUrl with real port number when deployed
+const baseUrl = window.location.protocol + '//' + window.location.host;
+const userServerBaseUrl = 'http://' + sessionStorage.getItem(sessionStorageIp)
+  + ':3000';
+const directoryBaseUrl = 'http://localhost:4000';
+
+// URL extensions
+const urls = {
+    index: '/',
+    manifest: '/manifest.json',
+    initialization: '/initialization',
+    createUserServer: '/create-user-server',
+    profile: '/profile/',
+    feed: '/feed',
+    error: '/error',
+    newPost: '/new-post'
+};
+
+// Private key file
+const privateKeyFile = 'privateKey.json';
+
+// Note: window.blockstack and window.requests are also available. Imported via
+// browserify in app/requires.js
+
+/*
+ * Helper function for making signed requests to the user-server or the
+ * directory. Makes a POST request to the url with the given body (JS
+ * object) encoded/signed in the format accepted by the servers. Calls
+ * the callback with the response.
+ */
+var makeSignedRequest = function(url, body, callback) {
+    var signedBody = requests.makeBody(body,
+      sessionStorage.getItem(sessionStoragePrivateKey));
+    $.post(url, signedBody, callback);
+};
+
+
+/*******************************************************************************
+ * Define behavior of navbar
+ ******************************************************************************/
+
+// Feed button
+$('#feed-button').click(function() {
+    console.log('Going to feed page...');
+
+    window.location.href = baseUrl + urls.feed;
+});
+
+
+// Profile button
+$('#profile-button').click(function() {
+    console.log('Going to profile page...');
+
+    window.location.href = baseUrl + urls.profile + bsid;
+});
+
+
+// Sign out button
+$('#signout-button').click(function() {
+    console.log('Signing out...');
+
+    // Sign out
+    blockstack.signUserOut();
+
+    // Redirect to login page
+    window.location.href = baseUrl;
+});
+
+
+// New post button
+$('#new-post-button').click(function() {
+    window.location.href = baseUrl + urls.newPost;
+});
 
 /*******************************************************************************
  * Index/login page scripts
  ******************************************************************************/
 
-if (window.location.pathname === '/') {
+if (window.location.pathname === urls.index) {
 
 
 /*
@@ -36,8 +110,6 @@ var handleSignedInUser = function() {
 
     // Check if this user has been setup with a user-server yet by checking
     // directory
-    // TODO: Get bsid from blockstack.js somehow
-    var bsid = 'alice.id';
     $.get(directoryBaseUrl + '/api/get/' + bsid, (data, status) => {
         var json = data;
 
@@ -53,7 +125,7 @@ var handleSignedInUser = function() {
                 sessionStorage.setItem(sessionStoragePrivateKey, json.privateKey);
 
                 // Redirect to feed
-                window.location.href = baseUrl + '/feed';
+                window.location.href = baseUrl + urls.feed;
                 console.log('Redirected to feed');
             }).catch(err => {
                 console.log('This should never happen: Failed to get '
@@ -66,7 +138,7 @@ var handleSignedInUser = function() {
               + 'to initialization page...');
 
             // Redirect to initialization page
-            window.location.href = baseUrl + '/initialization';
+            window.location.href = baseUrl + urls.initialization;
         }
 
     });
@@ -100,7 +172,7 @@ $('#signin-button').click(function() {
  * Initialization page scripts
  ******************************************************************************/
 
-if (window.location.pathname === '/initialization') {
+if (window.location.pathname === urls.initialization) {
 
 
 // Process info when "Go" button is pressed
@@ -137,16 +209,14 @@ $('#go-button').click(function() {
 
 
     // Make request to create a user-server for this user
-    // TODO: Get bsid from blockstack.js somehow
-    var bsid = 'alice.id';
     var reqBody = JSON.stringify({privateKey: privateKey});
-    $.post('/create-user-server?requester=' + bsid, reqBody, (data, status) => {
+    $.post(urls.createUserServer + '?requester=' + bsid, reqBody, (data, status) => {
         var json = data;
 
         if (!json.success) {
             // Request failed. Display failure message to user
             $('#message').text(failedMessage);
-            console.log('/create-user-server request failed. Error message: '
+            console.log(urls.createUserServer + ' request failed. Error message: '
               + json.msg);
             return;
         }
@@ -170,7 +240,7 @@ $('#go-button').click(function() {
 
             // Now we're done. Redirect to feed page
             console.log('Success! Redirecting to feed page');
-            window.location.href = baseUrl + '/feed';
+            window.location.href = baseUrl + urls.feed;
 
 
         }).catch(() => {
@@ -185,74 +255,58 @@ $('#go-button').click(function() {
 }
 
 
+/*******************************************************************************
+ * New-post page scripts
+ ******************************************************************************/
+
+if (window.location.pathname === urls.newPost) {
+
+const pendingMessage = 'Posting...';
+const failureMessage = "Oops! Looks like it didn't go through. Try again.";
+const successMessage = 'Posted!';
+
+// Process server reply when photo is uploaded
+$('#new-post-form').ajaxForm({
+    url: userServerBaseUrl + '/api/add-photo',
+    dataType: 'json',
+    beforeSubmit: function(arr, $form, options) {
+        // Show pending message
+        $('#message').text(pendingMessage);
+    },
+
+    success: function(resp) {
+        // Check if it worked
+        if (!resp.success) {
+            $('#message').text(failureMessage);
+            return;
+        }
+
+        // Now that photo is uploaded, make the request to add the post
+        // itself
+        var url = userServerBaseUrl + '/api/add-post?requester=' + bsid;
+        var body = {photoId: resp.photo.id, timestamp: requests.makeTimestamp()};
+        makeSignedRequest(url, body, function(resp) {
+            // Check if it worked
+            if (!resp.success) {
+                $('#message').text(failureMessage);
+                return;
+            }
+
+            // Posted! Redirect to profile page
+            $('#message').text(successMessage);
+            window.location.href = baseUrl + urls.profile + bsid;
+        });
+    }
+});
+
+}
 
 /*******************************************************************************
  * Profile and Feed page scripts
  ******************************************************************************/
 
-if (window.location.pathname.startsWith('/profile') || window.location.pathname === '/feed') {
+if (window.location.pathname.startsWith(urls.profile) || window.location.pathname === urls.feed) {
 
-// Some setup so the client is ready to make requests to either the user-server
-// or the directory.
-
-// Load user-server's IP address
-const userServerIp = sessionStorage.getItem(sessionStorageIp);
-
-// Load user's private key (for signatures)
-const userPrivateKey = sessionStorage.getItem(sessionStoragePrivateKey);
-
-// Load user's Blockstack ID
-// TODO: Implement
-const bsid = 'alice.id';
-
-/*
- * Helper function for making signed requests to the user-server or the
- * directory. Makes a POST request to the url, with the body (JS object)
- * appended a timestamp, and then encoded/signed in the format accepted by
- * the servers. Returns a Promise for the response. Resolves if request
- * is successful; rejects with an error if the request fails.
- */
-var makeSignedRequest = function(url, body) {
-    // TODO: implement
-    return new Promise((resolve, reject) => {
-        reject();
-    });
-};
-
-
-/******************************************************************************/
-
-// Define behavior of navbar
-
-// Feed button
-$('#feed-button').click(function() {
-    console.log('Going to feed page...');
-
-    window.location.href = baseUrl + '/feed';
-});
-
-
-// Profile button
-$('#profile-button').click(function() {
-    console.log('Going to profile page...');
-
-    window.location.href = baseUrl + '/profile/' + bsid;
-});
-
-
-// Sign out button
-$('#signout-button').click(function() {
-    console.log('Signing out...');
-
-    // Sign out
-    blockstack.signUserOut();
-
-    // Redirect to login page
-    window.location.href = baseUrl;
-});
-
-
-/******************************************************************************/
 
 // Some helper constants/functions for infinite scroll
 
