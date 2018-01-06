@@ -270,14 +270,6 @@ describe("/api" + api.urls.getPosts, function() {
 });
 
 
-describe("/api" + api.urls.getFeed, function() {
-
-    it.skip("Returns correct feed", function(done) {
-        // TODO: Implement this test
-    });
-
-});
-
 }); // end of "Get operations"
 
 /******************************************************************************/

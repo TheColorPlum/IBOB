@@ -23,7 +23,6 @@ var app = express();
 const baseUrl = "http://localhost:3000";
 
 const urls = {
-    getFeed: "/get-feed",
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
     getPhoto: "/get-photo/:filename",
@@ -48,17 +47,6 @@ var generateNewPhotoName = function(file) {
 
 // GET requests (implemented as POST requests so they can receive request
 // body)
-
-/*
- * Returns a specified number of posts from the user's feed.
- */
-app.post(urls.getFeed, function(req, res, next) {
-
-    // TODO: Implement
-    res.send("Not implemented");
-});
-
-
 
 /*
  * Returns this user's profile info.
