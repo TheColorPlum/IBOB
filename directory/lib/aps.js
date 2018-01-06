@@ -7,6 +7,7 @@
  */
 
 var axios = require("axios");
+var constants = require("./constants");
 var dal = require("./dal");
 var debug = require("./debug");
 var jsontokens = require("jsontokens");
@@ -21,12 +22,7 @@ const permissions = {
 const encAlg = "ES256k";
 
 // Blockstack core API url
-const blockstackBaseUrl = "http://localhost:6000"; // dummy-blockstack-core
 const blockstackProfileExt = "/v1/names/";
-
-// Regex for Blockstack zonefiles
-// const zonefileRegex = "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profile.json"; // real one
-const zonefileRegex = "http://localhost:6000/zonefile/[A-za-z]+.id"; // dummy-blockstack-core
 
 // Time delta (ms) allowed between a request's send time and receive time to
 // consider it valid.
@@ -37,7 +33,7 @@ const timeDelta = 5000;
  * Authenticates the requester (requester, their Blockstack ID) as the one who
  * actually sent the request (encData, a JWT) and, if they're requesting write
  * permissions (indicated by reqPermission, one of the permissions defined
- * above), that the requester is the user they're trying to write to.
+ * above), that the requester is the admin.
  *
  * Returns a Promise for the object:
  *   {ok (boolean), decodedData (string), errorMsg (string)}
@@ -48,29 +44,29 @@ const timeDelta = 5000;
  * See documentation for more details.
  */
 var verifyRequest = function(encData, requester, reqPermission) {
-    //-----------------------------
-    // Step 1: Authenticate user
-    //-----------------------------
+    //--------------------------------
+    // Step 1: Authenticate requester
+    //--------------------------------
 
     debug.log("verifyRequest()");
-    debug.log("Step 1: Authenticate user");
+    debug.log("Step 1: Authenticate requester");
 
-    // Get user's public key from blockstack. First, get
+    // Get requester's public key from blockstack. First, get
     // their profile.
-    var profileUrl = blockstackBaseUrl + blockstackProfileExt + requester;
+    var profileUrl = constants.blockstackBaseUrl + blockstackProfileExt + requester;
     return axios.get(profileUrl).then(response => {
 
         var json = response.data;
 
-        // Make sure user is registered
+        // Make sure requester is registered
         debug.log("Checking that " + requester + " is registered");
         if (json.status !== "registered") {
-            return {ok: false, decodedData: "", errorMsg: "Denied: User is not registered"};
+            return {ok: false, decodedData: "", errorMsg: "Denied: Requester is not registered"};
         }
 
-        // Get user's zone file
+        // Get requester's zone file
         debug.log("Getting " + requester + "'s zonefile");
-        var zonefileUrl = json.zonefile.match(zonefileRegex)[0];
+        var zonefileUrl = json.zonefile.match(constants.blockstackZonefileRegex)[0];
         return axios.get(zonefileUrl).then(response => {
 
             debug.log("Parsing " + requester + "'s zonefile");
@@ -97,13 +93,12 @@ var verifyRequest = function(encData, requester, reqPermission) {
 
             debug.log("Step 3: Check permissions");
 
-            // If it's a write, make sure the requester is the user they're
-            // trying to perform the write for
-            var user = decodedData.bsid;
-            if (reqPermission === permissions.write && requester !== user) {
+            // If it's a write, make sure the requester is the admin
+            if (reqPermission === permissions.write && requester !== constants.adminBsid) {
                 return {ok: false, decodedData: "",
-                  errorMsg: "Denied: Requester " + requester + " is not " + user + ". "
-                  + "Does not have permission to write to " + user + "."};
+                  errorMsg: "Denied: Requester " + requester + " is not the "
+                  + "admin " + constants.adminBsid + ". Does not have permission to write "
+                  + "to the directory."};
             }
 
             //-------------------------------------------------

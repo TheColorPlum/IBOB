@@ -1,0 +1,16 @@
+{
+  "name": "admin-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "putDirectoryEntry.js",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "jsontokens": "^0.7.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -198,10 +198,6 @@ The API is implemented as a set of HTTP request handlers in `routes/api.js`. We 
 
 The APS is also implemented as one of our libraries in `lib/aps.js`. Like the API, we wrote the spec of the APS in the same [Google doc](https://docs.google.com/document/d/1wykWWzwd8LasOF8lJKZEpNwXCW-B3se33YUEtK8M2OY), and we will move it to these docs when it is finalized.
 
-### Initialization (in deployment)
-
-The directory's initialization is much simpler than the user-server's. It just needs to create the database and start the server. This is automated by the script `main.sh` in the `initialization/` folder (the other scripts are run by `main.sh`).
-
 
 ## Testing
 

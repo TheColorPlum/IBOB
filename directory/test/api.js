@@ -8,20 +8,12 @@
 var assert = require("assert");
 var api = require("../routes/api");
 var axios = require("axios");
+var constants = require("../lib/constants");
 var dal = require("../lib/dal");
 var debug = require("../lib/debug");
 var requests = require("../lib/requests");
 
 /******************************************************************************/
-
-const baseUrl = "http://localhost:4000";
-
-const alice = "alice.id";
-const bob = "bob.id";
-
-const alicePrivateKey = "86fc2fd6b25e089ed7e277224d810a186e52305d105f95f23fd0e10c1f15854501";
-var bobPrivateKey     = "3548b2141ac92ada2aa7bc8391f15b8d70881956f7c0094fdde72313d06393b601";
-
 
 // Run this first at each test to clear/prepare the database. Pass the test
 // code in the callback. e.g:
@@ -48,14 +40,14 @@ describe("/api" + api.urls.get, function() {
         setup(() => {
 
         // Put a (bsid, IP address) mapping into the database
-        var entry = {bsid: alice, ip: "192.168.0.0"};
+        var entry = {bsid: constants.aliceBsid, ip: "192.168.0.0"};
         dal.put(entry.bsid, entry.ip, () => {
 
         // Define expected response
         var correctResponse = {success: true, ip: entry.ip};
 
         // Make request
-        axios.get(baseUrl + "/api/get/" + alice)
+        axios.get(constants.serverBaseUrl + "/api/get/" + constants.aliceBsid)
         .then(resp => {
 
             try {
@@ -82,7 +74,7 @@ describe("/api" + api.urls.get, function() {
         var correctResponse = {success: false, msg: "User-server does not exist"};
 
         // Make request
-        axios.get(baseUrl + "/api/get/" + alice)
+        axios.get(constants.serverBaseUrl + "/api/get/" + constants.aliceBsid)
         .then(resp => {
 
             try {
@@ -106,7 +98,7 @@ describe("/api" + api.urls.get, function() {
 describe("/api" + api.urls.put, function() {
 
     // Normal case 1 - entry doesn't exist. Check that it gets added.
-    it("Inserts an entry when that doesn't yet exist", function(done) {
+    it("Inserts an entry that doesn't yet exist", function(done) {
         setup(() => {
 
         // Define expected response
@@ -117,9 +109,9 @@ describe("/api" + api.urls.put, function() {
         var correctResult = {success: true, ip: ip};
 
         // Make request
-        var data = {bsid: alice, ip: ip, timestamp: requests.makeTimestamp()};
-        var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.put + "?requester=" + alice, reqBody)
+        var data = {bsid: constants.aliceBsid, ip: ip, timestamp: requests.makeTimestamp()};
+        var reqBody = requests.makeBody(data, constants.adminPrivateKey);
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.put + "?requester=" + constants.adminBsid, reqBody)
         .then(resp => {
 
             try {
@@ -128,7 +120,7 @@ describe("/api" + api.urls.put, function() {
                 assert.deepStrictEqual(json, correctResponse, "API response was incorrect");
 
                 // Check that contents of database are correct
-                dal.get(alice, result => {
+                dal.get(constants.aliceBsid, result => {
                 assert.deepStrictEqual(result, correctResult,
                     "Database returned the wrong result after call to /put");
                 done();
@@ -150,7 +142,7 @@ describe("/api" + api.urls.put, function() {
 
         // Insert an entry first
         var ip = "192.168.0.0";
-        dal.put(alice, ip, () => {
+        dal.put(constants.aliceBsid, ip, () => {
 
         // Define expected API response
         var correctResponse = {success: true};
@@ -160,9 +152,9 @@ describe("/api" + api.urls.put, function() {
         var correctResult = {success: true, ip: newIp};
 
         // Make request
-        var data = {bsid: alice, ip: newIp, timestamp: requests.makeTimestamp()};
-        var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.put + "?requester=" + alice, reqBody)
+        var data = {bsid: constants.aliceBsid, ip: newIp, timestamp: requests.makeTimestamp()};
+        var reqBody = requests.makeBody(data, constants.adminPrivateKey);
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.put + "?requester=" + constants.adminBsid, reqBody)
         .then(resp => {
 
             try {
@@ -171,7 +163,7 @@ describe("/api" + api.urls.put, function() {
                 assert.deepStrictEqual(json, correctResponse, "API response was incorrect");
 
                 // Check that contents of database are correct
-                dal.get(alice, result => {
+                dal.get(constants.aliceBsid, result => {
                 assert.deepStrictEqual(result, correctResult,
                     "Database returned the wrong result after call to /put");
                 done();
@@ -189,26 +181,26 @@ describe("/api" + api.urls.put, function() {
     });
 
 
-    // Failure case 1 - user tries to write an entry that isn't theirs
-    it("Returns a failure when a user tries to write someone else's entry", function(done) {
+    // Failure case 1 - non-admin tries to write to their own entry
+    it("Returns a failure when a non-admin tries to write to their own entry", function(done) {
         setup(() => {
 
         // Insert an entry for Alice first
         var ip = "192.168.0.0";
-        dal.put(alice, ip, () => {
+        dal.put(constants.aliceBsid, ip, () => {
 
         // Define expected API response
         var correctResponse = {success: false,
-          msg: "Denied: Requester bob.id is not alice.id. Does not have permission to write to alice.id."};
+          msg: "Denied: Requester " + constants.aliceBsid + " is not the admin " + constants.adminBsid + ". Does not have permission to write to the directory."};
 
         // Define expected result from database after the request (should be
         // unchanged from dal.put())
         var correctResult = {success: true, ip: ip};
 
-        // Make request - from *Bob*, trying to write *Alice's* entry
-        var data = {bsid: alice, ip: ip, timestamp: requests.makeTimestamp()};
-        var reqBody = requests.makeBody(data, bobPrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.put + "?requester=" + bob, reqBody)
+        // Make request - from Alice, trying to write her own
+        var data = {bsid: constants.aliceBsid, ip: ip, timestamp: requests.makeTimestamp()};
+        var reqBody = requests.makeBody(data, constants.alicePrivateKey);
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.put + "?requester=" + constants.aliceBsid, reqBody)
         .then(resp => {
 
             try {
@@ -217,7 +209,53 @@ describe("/api" + api.urls.put, function() {
                 assert.deepStrictEqual(json, correctResponse, "API response was incorrect");
 
                 // Check that contents of database are correct
-                dal.get(alice, result => {
+                dal.get(constants.aliceBsid, result => {
+                assert.deepStrictEqual(result, correctResult,
+                    "Database returned the wrong result after call to /put");
+                done();
+
+                }); // end of dal.get()
+            } catch (err) {
+                done(err);
+            }
+
+        }); // end of axios.post()
+
+        }); // end of dal.put()
+
+        });
+    });
+
+
+    // Failure case 2 - non-admin tries to write an entry that isn't theirs
+    it("Returns a failure when a non-admin tries to write someone else's entry", function(done) {
+        setup(() => {
+
+        // Insert an entry for Alice first
+        var ip = "192.168.0.0";
+        dal.put(constants.aliceBsid, ip, () => {
+
+        // Define expected API response
+        var correctResponse = {success: false,
+          msg: "Denied: Requester " + constants.bobBsid + " is not the admin " + constants.adminBsid + ". Does not have permission to write to the directory."};
+
+        // Define expected result from database after the request (should be
+        // unchanged from dal.put())
+        var correctResult = {success: true, ip: ip};
+
+        // Make request - from *Bob*, trying to write *Alice's* entry
+        var data = {bsid: constants.aliceBsid, ip: ip, timestamp: requests.makeTimestamp()};
+        var reqBody = requests.makeBody(data, constants.bobPrivateKey);
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.put + "?requester=" + constants.bobBsid, reqBody)
+        .then(resp => {
+
+            try {
+                // Check that response matches expected response
+                var json = resp.data;
+                assert.deepStrictEqual(json, correctResponse, "API response was incorrect");
+
+                // Check that contents of database are correct
+                dal.get(constants.aliceBsid, result => {
                 assert.deepStrictEqual(result, correctResult,
                     "Database returned the wrong result after call to /put");
                 done();

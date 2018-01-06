@@ -6,6 +6,7 @@
  * (see documentation for details).
  */
 
+var constants = require("./constants");
 var debug = require("./debug");
 var fs = require("fs");
 var mysql = require("mysql");
@@ -25,17 +26,17 @@ var isDatabaseCreated = true;
 var openConnection = function() {
     if (isDatabaseCreated) {
         return mysql.createConnection({
-            host               : 'localhost',
-            user               : 'root',
-            password           : 'TuringP_lumRubik$9',
+            host               : constants.mysqlHost,
+            user               : constants.mysqlUser,
+            password           : constants.mysqlPassword,
             multipleStatements : true,
             database           : 'User_Server_Directory'
         });
     } else {
         return mysql.createConnection({
-            host               : 'localhost',
-            user               : 'root',
-            password           : 'TuringP_lumRubik$9',
+            host               : constants.mysqlHost,
+            user               : constants.mysqlUser,
+            password           : constants.mysqlPassword,
             multipleStatements : true
         });
     }
@@ -93,7 +94,7 @@ var closeConnection = function(callback) {
 
 // Creates the User_Server_Directory database and its table
 var createDatabase = function(callback) {
-    var createDatabaseSql = "CREATE DATABASE User_Server_Directory";
+    var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS User_Server_Directory";
 
     // Read table creation SQL from file
     fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {

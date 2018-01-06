@@ -36,4 +36,12 @@ $ ./setup-project.sh
 
 This will install the npm dependencies required for the project, set up the database, and run our tests to ensure that everything is working.
 
+**Project mode environment variable.** Lastly, whenever you work on the project, you will need to set the environment variable `PROJECT_MODE` in your terminal. Set this to `development` when working on the project locally:
+
+```bash
+$ export PROJECT_MODE="development"
+```
+
+More details on the purpose of this variable are in the [Deployment](deployment.md) page. But for now, what you need to know is that the servers will *not* run unless this variable is set.
+
 **You should be all set!** See the [Frontend](frontend.md) and [Backend](backend.md) sections for details on how the project is built and how to work on it.
