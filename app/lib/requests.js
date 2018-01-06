@@ -10,9 +10,6 @@ const jsontokens = require("jsontokens");
 // Encoding algorithm used
 const encAlg = 'ES256k';
 
-// User-server directory URL
-const directoryBaseUrl = "http://localhost:4000";
-
 /*
  * Returns an encoded and signed version of `data` (JS object), which
  * you can use directly as the body of a request. Also requires the private
@@ -31,7 +28,6 @@ var makeTimestamp = function() {
 }
 
  module.exports = {
-    directoryBaseUrl,
     makeBody,
     makeTimestamp
  };

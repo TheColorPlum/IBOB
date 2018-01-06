@@ -47,6 +47,48 @@
 
 /*---------------------------------------------------*/
 
+/* Styles shared by profile and feed pages */
+
+/* Spacing for the posts. Two cols for large devices. */
+/*   Ref: https://codepen.io/desandro/pen/QgMWzV/ */
+.posts-grid__col-sizer, .post {
+  width: 49%;
+}
+
+.posts-grid__gutter-sizer {
+  width: 2%;
+}
+
+.post {
+  margin-bottom: 2%;
+}
+
+#more-posts-button {
+  display: none;
+}
+
+#no-posts-message {
+  display: none;
+}
+
+
+/* Extra small and small devices */
+@media (max-width: 767px) {
+
+  /* Only one col of posts */
+  .posts-grid__col-sizer, .post {
+    width: 100%;
+  }
+
+  .posts-grid__gutter-sizer {
+    width: 0%;
+  }
+}
+
+
+
+/*---------------------------------------------------*/
+
 /* Profile page styles */
 
 #profile-jumbotron {
@@ -64,20 +106,6 @@
   font-weight: normal;
 }
 
-/* Spacing for the posts. Two cols for large devices. */
-/*   Ref: https://codepen.io/desandro/pen/QgMWzV/ */
-.posts-grid__col-sizer, .post {
-  width: 49%;
-}
-
-.posts-grid__gutter-sizer {
-  width: 2%;
-}
-
-.post {
-  margin-bottom: 2%;
-}
-
 
 /* Extra small and small devices */
 @media (max-width: 767px) {
@@ -87,15 +115,6 @@
 
   #profile-quote {
     text-align: center;
-  }
-
-  /* Only one col of posts */
-  .posts-grid__col-sizer, .post {
-    width: 100%;
-  }
-
-  .posts-grid__gutter-sizer {
-    width: 0%;
   }
 }
 

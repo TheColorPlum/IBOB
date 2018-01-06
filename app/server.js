@@ -62,7 +62,8 @@ const urls = {
     // Main pages
     profile: '/profile/:bsid',
     feed: '/feed',
-    error: '/error'
+    error: '/error',
+    newPost: '/new-post'
 };
 
 // Base directory of views
@@ -211,6 +212,13 @@ app.get(urls.error, function(req, res, next) {
     res.sendFile(path.join(viewsDir, '404.html'));
 });
 
+
+/*
+ * Returns the new-post page
+ */
+app.get(urls.newPost, function(req, res, next) {
+    res.sendFile(path.join(viewsDir, 'new-post.html'));
+});
 
 /******************************************************************************/
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,12 +13,11 @@
   <!-- Import Favicons -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-  <!-- Import Masonry - photo tiling package -->
-  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
-  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-
   <!-- Import Blockstack lib -->
   <script src="/public/bundle.js"></script>
+
+  <!-- Import jQuery Form plugin -->
+  <script src="http://malsup.github.com/jquery.form.js"></script>
 
   <!-- Custom styles -->
   <link rel="stylesheet" type="text/css" href="/public/styles.css">
@@ -26,10 +25,8 @@
   <!-- Custom scripts -->
   <script src="/public/scripts.js"></script>
 
-  <title>Angela Summers</title>
+  <title>The Feed</title>
 </head>
-
-
 <body class="background-color-main">
 
 <!-- Navbar -->
@@ -76,68 +73,32 @@
 <!-- /Navbar -->
 
 
-<!-- Profile cover -->
-<div class="jumbotron jumbotron-fluid text-color-main z-depth-1-half" id="profile-jumbotron">
-<div class="row">
-
-  <!-- Profile photo -->
-  <div class="col-md-4 text-center"><img src="https://mdbootstrap.com/img/Photos/Avatars/img(31).jpg" class="img-fluid img-thumbnail z-depth-1-half rounded-circle" alt="Profile Photo"></div>
-
-  <!-- Profile info -->
-  <div class="col-md-8">
-
-    <!-- Profile name -->
-    <h1 id="profile-username">Angela Summers</h1>
-
-    <!-- Profile quote -->
-    <p id="profile-quote">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-  </div>
-</div>
-</div>
-<!-- /Profile cover -->
-
+<!-- New post panel -->
 <div class="container">
 
-  <!-- Posts will be populated here -->
-  <div class="posts-grid">
-    <div class="posts-grid__col-sizer"></div>
-    <div class="posts-grid__gutter-sizer"></div>
-  </div>
+  <div id="new-post-panel" class="text-center extra-top-margin">
 
-  <!-- Button for more posts. Initially hidden -->
-  <div class="text-center">
-    <p><button id="more-posts-button" class="btn btn-primary background-color-accent">More</button></p>
-  </div>
+    <h1>New Post</h1>
+    <p>Upload a photo to make a post.</p>
 
-  <!-- Message to show if there are no posts. Initially hidden -->
-  <div class="text-center text-muted">
-    <p id="no-posts-message">You haven't posted anything yet. Why not try it out?</p>
+    <!-- Form to upload a photo -->
+    <form id="new-post-form" method="post" enctype="multipart/form-data">
+
+      <div class="form-group row">
+        <div class="col-md-5"></div>
+        <input type="file" class="form-control-file col-md-2" name="photo">
+        <div class="col-md-5"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary background-color-accent">Post!</button>
+
+    </form>
+
+    <p id="message"></p>
   </div>
 
 </div>
-
-
-<!-- HTML template for posts. Processed and populated in scripts.js -->
-<script type="text/html" id="post-template">
-    <!--A post -->
-    <div class="post">
-      <div class="card background-color-main z-depth-1-half">
-        <!-- Card photo -->
-        <img class="img-fluid" src="{{photoSrc}}" alt="Post photo">
-
-        <!-- Card body -->
-        <div class="card-block">
-          <div class="row">
-            <!-- Date posted -->
-            <div class="col"><p class="card-text text-muted"><i class="fa fa-clock-o"> </i> {{timestamp}}</p></div>
-
-            <!-- Blockstack ID -->
-            <div class="col"><p class="card-text text-muted text-right">{{bsid}}</p></div>
-          </div>
-        </div>
-      </div>
-    </div>
-</script>
+<!-- /New post panel -->
 
 </body>
 </html>

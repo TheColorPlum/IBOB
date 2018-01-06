@@ -23,7 +23,6 @@ var app = express();
 const baseUrl = "http://localhost:3000";
 
 const urls = {
-    getFeed: "/get-feed",
     getProfileInfo: "/get-profile-info",
     getPosts: "/get-posts",
     getPhoto: "/get-photo/:filename",
@@ -48,17 +47,6 @@ var generateNewPhotoName = function(file) {
 
 // GET requests (implemented as POST requests so they can receive request
 // body)
-
-/*
- * Returns a specified number of posts from the user's feed.
- */
-app.post(urls.getFeed, function(req, res, next) {
-
-    // TODO: Implement
-    res.send("Not implemented");
-});
-
-
 
 /*
  * Returns this user's profile info.
@@ -103,23 +91,30 @@ app.post(urls.getPosts, function(req, res, next) {
         debug.log("Processing " + urls.getPosts + " request...");
         dal.getPosts(posts => {
 
-            // Check that parameters are valid
+            // Check that parameters are valid. min index is out of range,
+            // fail. But if min is in range and max is over the limit, just
+            // return as many posts as you have.
             var body = JSON.parse(verification.decodedData);
             var count = body.count;
             var offset = body.offset;
 
+            if (count <= 0) {
+                res.json({success: true, posts: []});
+            }
+
             var min = offset;
             var max = offset + count - 1;
-            if (min < 0 || max < 0 || min > posts.length - 1 || max > posts.length - 1) {
-                res.send("Error: Invalid values for offset/count");
+            if (min < 0 || max < 0 || min > posts.length - 1) {
+                res.json({success: false});
                 return;
             }
 
-            // Only return `count` posts, starting from `offset`. Format to have
-            // id, timestamp, and path
-            var json = [];
-            for (var i = offset; i < offset + count; i++) {
-                json.push({
+            // Only return `count` posts, starting from `offset`, or as many
+            // as you have starting from `offset`. Format to have id, timestamp,
+            // and path
+            var json = {success: true, posts: []};
+            for (var i = offset; i < Math.min(offset + count, posts.length); i++) {
+                json.posts.push({
                     id: posts[i].id, timestamp: posts[i].timestamp,
                     photo: {id: posts[i].photoId, path: posts[i].path}
                 });

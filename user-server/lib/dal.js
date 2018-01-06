@@ -95,7 +95,7 @@ var closeConnection = function(callback) {
 
 // Creates The_Feed database and all its tables
 var createDatabase = function(callback) {
-    var createDatabaseSql = "CREATE DATABASE The_Feed";
+    var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
 
     // Read table creation SQL from file
     fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {
@@ -263,7 +263,7 @@ var getPhoto = function(photoId, callback) {
 
 var getPosts = function(callback) {
     var sql = "SELECT * FROM posts JOIN photos ON posts.photoId = photos.id"
-               + " ORDER BY timestamp";
+               + " ORDER BY timestamp DESC";
     var msg = "Retrieved all posts";
     query(sql, msg, callback);
 }

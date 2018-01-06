@@ -13,10 +13,6 @@
   <!-- Import Favicons -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-  <!-- Import Infinite Scroll and related packages -->
-  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
-  <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
-
   <!-- Custom styles -->
   <link rel="stylesheet" type="text/css" href="/public/styles.css">
 
@@ -52,7 +48,7 @@
 
       <!-- New post -->
       <li class="nav-item active">
-        <a class="nav-link" href="#"><i class="fa fa-plus"> </i></a>
+        <a id="new-post-button" class="nav-link" href="#"><i class="fa fa-plus"> </i></a>
       </li>
 
       <!-- User menu -->
@@ -61,10 +57,10 @@
           <i class="fa fa-user"> </i>
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="#">Feed</a>
-          <a class="dropdown-item" href="#">Profile</a>
+          <a class="dropdown-item" href="#" id="feed-button">Feed</a>
+          <a class="dropdown-item" href="#" id="profile-button">Profile</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Log out</a>
+          <a class="dropdown-item" href="#" id="signout-button">Log out</a>
         </div>
       </li>
     </ul>

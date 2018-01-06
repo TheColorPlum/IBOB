@@ -49,8 +49,8 @@ var apiPrefix = "/api";
 
 // Store the raw request body for the following API calls:
 var urlsUsingRequestBody = [
-  api.urls.getFeed, api.urls.getProfileInfo, api.urls.getPosts,
-  api.urls.updateProfileInfo, api.urls.followUser, api.urls.addPost
+  api.urls.getProfileInfo, api.urls.getPosts, api.urls.updateProfileInfo,
+  api.urls.followUser, api.urls.addPost
 ];
 urlsUsingRequestBody.forEach(url => {
     app.use(apiPrefix + url, storeRequestBody);
