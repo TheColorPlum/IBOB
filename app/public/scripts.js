@@ -382,17 +382,17 @@ var formatTimestamp = function(timestamp) {
 
 
 /*
- * Appends posts to the page, given the JSON response from /get-posts.
- * Calls the callback when done, in case any additional actions need
- * to be taken after the posts are added.
+ * Appends posts to the page, given the JSON response from /get-posts for
+ * the user `userBsid`. Calls the callback when done, in case any additional
+ * actions need to be taken after the posts are added.
  */
-var appendPosts = function(json, callback) {
+var appendPosts = function(json, userBsid, callback) {
     // Parse JSON and construct HTML for the new posts
     var newPostsHtmlStr = json.posts.map(postJson => {
         var vars = {
             photoSrc: postJson.photo.path,
             timestamp: formatTimestamp(postJson.timestamp),
-            bsid: bsid
+            bsid: userBsid
         };
         return microTemplate(postHtmlTemplate, vars);
     }).join('');
@@ -460,7 +460,7 @@ var getNextPosts = function() {
             }
         }
 
-        appendPosts(json, function() {
+        appendPosts(json, bsid, function() {
             // Clear the message and re-enable the button
             $('#more-posts-button').prop('disabled', false);
             $('#more-posts-button').text(defaultButtonText);
@@ -529,6 +529,7 @@ var randomInt = function(max) {
 var getIpOf = function(index, followingStats, callback) {
     // Check if IP address is cached first
     if (followingStats[index].ip !== '') {
+        console.log('Using cached value of IP for ' + followingStats[index].bsid);
         callback({success: true, ip: followingStats[index].ip});
         return;
     }
@@ -544,6 +545,7 @@ var getIpOf = function(index, followingStats, callback) {
             var json = resp;
             if (json.success) {
                 // Got their IP. Cache it and return it to callback
+                console.log('Using IP from directory GET request for ' + followingStats[index].bsid);
                 followingStats[index].ip = json.ip;
                 callback({success: true, ip: json.ip});
             } else {
@@ -565,6 +567,9 @@ var getIpOf = function(index, followingStats, callback) {
  */
 var getNextPosts = function() {
 
+    // Disable the "More" button while posts load
+    $('#more-posts-button').prop('disabled', true);
+
     // Update/reset counts and offsets for each following
     for (var i = 0; i < followingStats.length; i++) {
         followingStats[i].offset += followingStats[i].count;
@@ -574,7 +579,7 @@ var getNextPosts = function() {
     // Select a random following postsPerPage times. Each time a
     // following is selected, mark them for another post.
     for (var i = 0; i < postsPerPage; i++) {
-        var r = randomInt(postsPerPage);
+        var r = randomInt(followingStats.length);
         followingStats[r].count++;
     }
 
@@ -587,10 +592,16 @@ var getNextPosts = function() {
         }
 
         // Get user-server IP for this user
-        getIpOf(i, followingStats, function(result) {
+        // (Execute this within its own function to save the current stats
+        // before i changes, since getIpOf() will execute asynchronously)
+        (function() {
+
+        var stats = followingStats[i];
+        var index = i;
+        getIpOf(index, followingStats, function(result) {
             // Skip this user if we couldn't get their IP
             if (!result.success) {
-                console.log('Failed to get user-server IP for ' + followingStats[i].bsid);
+                console.log('Failed to get user-server IP for ' + stats.bsid);
                 return;
             }
 
@@ -598,7 +609,7 @@ var getNextPosts = function() {
             var ip = result.ip;
             var url = userServerProtocol + '//' + ip + ':' + userServerPort
               + '/api/get-posts?requester=' + bsid;
-            var data = {count: followingStats[i].count, offset: followingStats[i].offset,
+            var data = {count: stats.count, offset: stats.offset,
                 timestamp: requests.makeTimestamp()};
             makeSignedRequest(url, data,
 
@@ -608,21 +619,27 @@ var getNextPosts = function() {
 
                 // Check that there are posts
                 if (!json.success || json.posts.length == 0) {
-                    console.log('Got response, but not posts for ' + followingStats[i].bsid);
+                    console.log('Got response, but not posts for ' + stats.bsid);
                     return; // skip this user
                 }
 
-                // Append the posts for this user
-                appendPosts(json, function() {
+                // Append the posts for this user and re-enable button
+                // (It's ok to re-enable the button when any of the posts
+                // have loaded; not necessarily when *all* have loaded.)
+                appendPosts(json, stats.bsid, function() {
+                    console.log('Appended posts for ' + stats.bsid);
+                    $('#more-posts-button').prop('disabled', false);
                     $('#more-posts-button').show();
                 });
             },
 
             // Execute if request failed
             function() {
-                console.log('Failed to get posts from user-server for ' + followingStats[i].bsid);
+                console.log('Failed to get posts from user-server for ' + stats.bsid);
             });
         });
+
+        })();
     }
 };
 
