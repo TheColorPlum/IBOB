@@ -116,21 +116,73 @@ if (window.location.pathname === urls.index) {
 
 
 /*
+ * Shows pending message on the sign-in button
+ */
+var showPendingMessage = function() {
+    var pendingMessage = 'Signing you in...';
+    $('#signin-button').prop('disabled', true);
+    $('#signin-button').text(pendingMessage);
+};
+
+
+/*
+ * Gets the user-server IP for this user. Tries to retrieve it from
+ * sessionStorage first, or makes a request to the directory if it's
+ * not in sessionStorage. Calls the callback with an object:
+ *   {success: true, ip: ip}      (if successful)
+ *   {success: false}             (if unsuccessful)
+ */
+var getMyIp = function(callback) {
+    // Check sessionStorage first
+    var potentialIp = sessionStorage.getItem(sessionStorageIp);
+    if (potentialIp !== null) {
+        console.log("Got this user's user-server IP from sessionStorage");
+        callback({success: true, ip: potentialIp});
+        return;
+    }
+
+    // Not found in sessionStorage. Make request to directory instead.
+    var url = directoryBaseUrl + '/api/get/' + bsid;
+    $.ajax({
+        type: 'GET',
+        url: url,
+        timeout: requestTimeout,
+
+        success: function(resp) {
+            var json = resp;
+            if (json.success) {
+                // Got their IP. Cache it and return it to callback
+                console.log("Got this user's user-server IP from directory.");
+                sessionStorage.setItem(sessionStorageIp, json.ip);
+                callback({success: true, ip: json.ip});
+            } else {
+                // No entry for this user
+                callback({success: false});
+            }
+        },
+
+        error: function() {
+            // Request failed
+            callback({success: false});
+        }
+    });
+};
+
+
+
+/*
  * Define what to do once user has signed in
  */
 var handleSignedInUser = function() {
     console.log('User is signed in. Checking if they have a user-server...');
 
-    // Check if this user has been setup with a user-server yet by checking
-    // directory
-    $.get(directoryBaseUrl + '/api/get/' + bsid, (data, status) => {
-        var json = data;
+    // Check if this user has been set up with a user-server by seeing if
+    // they have a user-server IP
+    getMyIp(result => {
+        var json = result;
 
         if (json.success) { // user has been set up
             console.log('User has a user-server. Redirecting to feed...');
-
-            // Save IP in sessionStorage
-            sessionStorage.setItem(sessionStorageIp, json.ip);
 
             // Get private key from storage, save in sessionStorage
             blockstack.getFile(privateKeyFile, false).then(contents => {
@@ -158,24 +210,25 @@ var handleSignedInUser = function() {
 };
 
 
-// Sign user in when they click the sign-in button
-$('#signin-button').click(function() {
+if (blockstack.isUserSignedIn()) {
+    showPendingMessage();
+    handleSignedInUser();
+}
 
-    if (blockstack.isUserSignedIn()) {
+else if (blockstack.isSignInPending()) {
+    showPendingMessage();
+    blockstack.handlePendingSignIn().then(userData => {
         handleSignedInUser();
-    }
+    });
+}
 
-    else if (blockstack.isSignInPending()) {
-        blockstack.handlePendingSignIn().then(userData => {
-            window.location = window.location.origin;
-        });
-    }
-
-    else {
-        // Not signed in yet
+else {
+    // Not signed in yet. Sign user in when they click the sign-in button.
+    $('#signin-button').click(function() {
+        showPendingMessage();
         blockstack.redirectToSignIn();
-    }
-});
+    });
+}
 
 
 }
