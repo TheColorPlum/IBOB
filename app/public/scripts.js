@@ -402,16 +402,8 @@ var getNextPosts = function() {
     function(resp) {
         var json = resp;
 
-        // Check that request succeeded
-        if (!json.success) {
-            $('#more-posts-button').prop('disabled', false);
-            $('#more-posts-button').text(failureMessage);
-            $('#more-posts-button').show();
-            return;
-        }
-
         // If no posts left, disable the button and show no more posts message
-        if (json.posts.length == 0) {
+        if (!json.success || json.posts.length == 0) {
             $('#more-posts-button').prop('disabled', true);
             $('#more-posts-button').text(noMorePostsMessage);
             return;
