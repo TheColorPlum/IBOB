@@ -78,6 +78,10 @@
   margin-bottom: 2%;
 }
 
+#more-posts-button {
+  display: none;
+}
+
 
 /* Extra small and small devices */
 @media (max-width: 767px) {

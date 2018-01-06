@@ -42,6 +42,9 @@ const urls = {
 // Private key file
 const privateKeyFile = 'privateKey.json';
 
+// Timeout period in milliseconds
+const requestTimeout = 10000;
+
 // Note: window.blockstack and window.requests are also available. Imported via
 // browserify in app/requires.js
 
@@ -49,12 +52,20 @@ const privateKeyFile = 'privateKey.json';
  * Helper function for making signed requests to the user-server or the
  * directory. Makes a POST request to the url with the given body (JS
  * object) encoded/signed in the format accepted by the servers. Calls
- * the callback with the response.
+ * the successCallback with the response if we got one, or the errorCallback
+ * if we didn't.
  */
-var makeSignedRequest = function(url, body, callback) {
+var makeSignedRequest = function(url, body, successCallback, errorCallback) {
     var signedBody = requests.makeBody(body,
       sessionStorage.getItem(sessionStoragePrivateKey));
-    $.post(url, signedBody, callback);
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: signedBody,
+        timeout: requestTimeout,
+        success: successCallback,
+        error: errorCallback
+    });
 };
 
 /*******************************************************************************
@@ -284,7 +295,10 @@ $('#new-post-form').ajaxForm({
         // itself
         var url = userServerBaseUrl + '/api/add-post?requester=' + bsid;
         var body = {photoId: resp.photo.id, timestamp: requests.makeTimestamp()};
-        makeSignedRequest(url, body, function(resp) {
+        makeSignedRequest(url, body,
+
+        // Execute if got a response
+        function(resp) {
             // Check if it worked
             if (!resp.success) {
                 $('#message').text(failureMessage);
@@ -294,6 +308,12 @@ $('#new-post-form').ajaxForm({
             // Posted! Redirect to profile page
             $('#message').text(successMessage);
             window.location.href = baseUrl + urls.profile + bsid;
+        },
+
+        // Execute if didn't get a response
+        function() {
+            // Show failure message
+            $('#message').text(failureMessage);
         });
     }
 });
@@ -364,31 +384,36 @@ var msnry = $posts.data('masonry');
 const count = 5;
 var offset = 0;
 
-const pendingMessage = 'Loading more posts...';
-const noMorePostsMessage = 'No more posts!';
-const failureMessage = 'Oops! Something went wrong. Try again.';
-
 // Makes request for more posts
 var getNextPosts = function() {
-    // Adjust offset for next round
-    offset += count;
+    const defaultButtonText = 'More';
+    const noMorePostsMessage = 'No more posts!';
+    const failureMessage = 'Oops! Something went wrong. Click to try again.';
+
+    // Disable button while loading
+    $('#more-posts-button').prop('disabled', true);
 
     // Get posts
     var url = userServerBaseUrl + '/api/get-posts?requester=' + bsid;
     var body = {count: count, offset: offset, timestamp: requests.makeTimestamp()};
-    makeSignedRequest(url, body, function(resp) {
+    makeSignedRequest(url, body,
+
+    // Execute when function is received
+    function(resp) {
         var json = resp;
 
         // Check that request succeeded
         if (!json.success) {
-            $('#more-posts-message').text(failureMessage);
+            $('#more-posts-button').prop('disabled', false);
+            $('#more-posts-button').text(failureMessage);
+            $('#more-posts-button').show();
             return;
         }
 
-        // If no posts left, disable the button and show no more posts
+        // If no posts left, disable the button and show no more posts message
         if (json.posts.length == 0) {
             $('#more-posts-button').prop('disabled', true);
-            $('#more-posts-message').text(noMorePostsMessage);
+            $('#more-posts-button').text(noMorePostsMessage);
             return;
         }
 
@@ -409,19 +434,27 @@ var getNextPosts = function() {
         newPostsHtml.imagesLoaded(function() {
             $posts.append(newPostsHtml);
             $posts.masonry('appended', newPostsHtml);
+
+            // Clear the message and re-enable the button
+            $('#more-posts-button').prop('disabled', false);
+            $('#more-posts-button').text(defaultButtonText);
+            $('#more-posts-button').show();
         });
+    },
 
-        // Clear the message
-        $('#more-posts-message').text('');
-
+    // Execute if error/no response
+    function() {
+        $('#more-posts-button').prop('disabled', false);
+        $('#more-posts-button').text(failureMessage);
+        $('#more-posts-button').show();
     });
+
+    // Adjust offset for next round
+    offset += count;
 };
 
 
 $('#more-posts-button').click(function() {
-
-    // Show pending message
-    $('#more-posts-message').text(pendingMessage);
 
     // Get next round of posts
     getNextPosts();
