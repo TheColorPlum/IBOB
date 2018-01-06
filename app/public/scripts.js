@@ -191,8 +191,8 @@ if (window.location.pathname === urls.initialization) {
 // Process info when "Go" button is pressed
 
 $('#go-button').click(function() {
-    var processingMessage = 'Creating your cloud storage. Please wait (this '
-      + 'may take a little while)...';
+    var processingMessage = 'Putting in a request for your cloud storage. '
+      + 'Please wait...';
     var notSignedInMessage = 'You must sign in first! Redirecting to the '
       + 'login page...';
     var noPrivateKeyMessage = 'Please enter your private key.';
@@ -222,7 +222,9 @@ $('#go-button').click(function() {
 
 
     // Make request to create a user-server for this user
-    var reqBody = JSON.stringify({privateKey: privateKey});
+    // TODO: Reimplement this to actually send a full request once you
+    // have finished gathering performance metrics.
+    var reqBody = "";
     $.post(urls.createUserServer + '?requester=' + bsid, reqBody, (data, status) => {
         var json = data;
 
@@ -238,13 +240,13 @@ $('#go-button').click(function() {
         // Success!
         $('#message').text(successMessage);
 
-        // A few more things to do: store IP address and private key in browser
-        // for reference from other pages
-        sessionStorage.setItem(sessionStorageIp, json.ip);
+        // A few more things to do: initialize the value of user-server IP
+        // address to nothing. This will be retrieved on next sign-in.
+        sessionStorage.setItem(sessionStorageIp, "");
+
+        // Store private key in browser for reference from other pages, and
+        // in Blockstack storage so we can pull it in future sessions.
         sessionStorage.setItem(sessionStoragePrivateKey, privateKey);
-
-
-        // Store private key in Blockstack storage
         var content = JSON.stringify({
             privateKey: privateKey
         });

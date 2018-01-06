@@ -34,23 +34,23 @@ The app defines the following URL endpoints. All of them are implemented in `ser
 - `GET /`: Returns the sign-in page.
 - `GET /manifest.json`: Returns the app's Blockstack manifest. Blockstack requires that this URL is defined in order to log users in.
 - `GET /initialization`: Returns a page to start up the user's user-server. They have to enter some info, and then click a button to spin it up.
-- `POST /create-user-server?requester=<requester>`: Upon receiving this request, the app spins up a new user-server for a particular user. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
+- `POST /create-user-server?requester=<requester>`: Upon receiving this request, the app send the site admins (i.e. us) a message to spin up a new user-server for the sender. The admins will send back an email to the provided email address when the user-server is ready. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
   - Request body (sample):
     ```json
-    {"privateKey": "..."}
+    {"email": "bob@gmail.com", "timestamp": "2017-10-23T18:25:43.511Z"}
     ```
 
-  - Response, if successful (sample). `ip` is the IP address of the new user-server.
+  - Response (sample), if successful.
     ```json
-    {"success": true, "ip": "192.168.0.1"}
+    {"success": true}
     ```
 
-  - Response, if failed (sample). The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `msg`.
+  - Response (sample), if failed. The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `msg`.
     ```json
     {"success": false, "msg": "This user already has a user-server!"}
     ```
 
-  > Note: In development, this request does not actually spin up a user-server. Instead, it just puts an entry in the directory for a user-server that is *assumed already running*. So, you have to start the user-server manually before logging in. See the [Frontend](frontend.md) section for details on this.
+  > Note: In development, this request does not actually do anything. It just returns the success message so the user can get logged in. You will have to manually start a local user-server before you can do anything after logging in. See the [Frontend](frontend.md) section for details on this.
 
   > Another note: We have not implemented signature checking yet, so for now this request does *not* require a signature.
 
@@ -109,13 +109,11 @@ The APS is also implemented as one of our libraries in `lib/aps.js`. Like the AP
 
 ### Initialization upon spinning up
 
-There are a collection of scripts in the `initialization/` folder that configure the user-server when it first spins up. The only one we explicitly run is `main.sh`, which in turn runs the other scripts. It takes three arguments: the Blockstack ID of the user-server's owner, their private key, and the IP address of this user-server.
+There are a collection of scripts in the `initialization/` folder that configure the user-server when it first spins up. The only one we explicitly run is `main.sh`, which in turn runs the other scripts. It takes one arguments: the Blockstack ID of the user-server's owner.
 
 ```bash
-$ ./main.sh BSID PRIVATE-KEY IP
+$ ./main.sh BSID
 ```
-
-> We understand that storing the private key of the owner in this user-server is a security vulnerability. This is temporary until we implement proper security around the private key.
 
 
 ## Directory

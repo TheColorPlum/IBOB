@@ -6,14 +6,12 @@
 # See Backend docs for details.
 
 # Check usage
-if [ $# -ne 3 ]; then
-  echo "Usage: ./main.sh BSID PRIVATE-KEY IP"
+if [ $# -ne 1 ]; then
+  echo "Usage: ./main.sh BSID"
   exit
 fi
 
 bsid=$1
-private_key=$2
-ip=$3
 
 #-------------------------------------------------------------------------------
 
@@ -25,15 +23,4 @@ node createDatabase.js
 node setOwner.js $bsid
 
 
-# Store the private key in the database
-node storePrivateKey.js $private_key
-
-
-# Register this user-server with the directory
-node registerWithDirectory.js $ip
-
-
-# Start the server in background
-cd ..
-node server.js &
-echo "Server running as process $!"
+echo "Done! User-server is set up for $bsid. You can start the server now."

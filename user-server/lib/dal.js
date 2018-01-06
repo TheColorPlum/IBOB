@@ -153,14 +153,10 @@ var clearDatabase = function(callback) {
     query(clearTable + "following", "", function() {
     query(resetTable1 + "following" + resetTable2, "", function() {
 
-    // Clear private key
-    query(clearTable + "private_key", "", function() {
-    query(resetTable1 + "private_key" + resetTable2, "", function() {
-
     // Callback
     callback();
 
-    })})})})})})})})})})})});
+    })})})})})})})})})});
 }
 
 /***********************************************************
@@ -228,13 +224,6 @@ var setOwner = function(bsid, callback) {
     var sql = "INSERT INTO profile_info (bsid) values ("
       + mysql.escape(bsid) + ")";
     var msg = "Owner set to " + bsid;
-    query(sql, msg, callback);
-}
-
-var setPrivateKey = function(privateKey, callback) {
-    var sql = "INSERT INTO private_key (privateKey) values ("
-      + mysql.escape(privateKey) + ")";
-    var msg = "Private key set";
     query(sql, msg, callback);
 }
 
@@ -343,21 +332,6 @@ var getFollowers = function(callback) {
     query(sql, msg, callback);
 }
 
-var getPrivateKey = function(callback) {
-    var sql = "SELECT * FROM private_key";
-    var msg = "Got private key";
-    query(sql, msg, function(rows) {
-
-    if (rows.length == 0) {
-        // No private key set
-        callback("");
-    } else {
-        // Return private key
-        callback(rows[0].privateKey);
-    }
-
-    });
-}
 
 /***********************************************************
  * Some tests
@@ -385,11 +359,9 @@ module.exports = {
     addPost,
     updateProfileInfo,
     setOwner,
-    setPrivateKey,
     getPhoto,
     getPosts,
     getProfileInfo,
     getFollowing,
     getFollowers,
-    getPrivateKey
 };
