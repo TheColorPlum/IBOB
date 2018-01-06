@@ -21,10 +21,13 @@ const sessionStorageIp = 'userServerIp';
 const bsid = 'alice.id';
 
 // Base URLs
-// TODO: Need to update userServerBaseUrl with real port number when deployed
+// TODO: Need to update userServerProtocol and userServerPort with real port
+// number when deployed
 const baseUrl = window.location.protocol + '//' + window.location.host;
-const userServerBaseUrl = 'http://' + sessionStorage.getItem(sessionStorageIp)
-  + ':3000';
+const userServerProtocol = 'http:';
+const userServerPort = 3000;
+const userServerBaseUrl = userServerProtocol + '//'
+  + sessionStorage.getItem(sessionStorageIp) + ':' + userServerPort;
 const directoryBaseUrl = 'http://localhost:4000';
 
 // URL extensions
@@ -321,11 +324,31 @@ $('#new-post-form').ajaxForm({
 }
 
 /*******************************************************************************
- * Profile and Feed page scripts
+ * Scripts shared by profile and feed pages
  ******************************************************************************/
 
 if (window.location.pathname.startsWith(urls.profile) || window.location.pathname === urls.feed) {
 
+
+// Configure Masonry (tiling library for posts)
+//   Ref: https://masonry.desandro.com/options.html (docs)
+//        https://codepen.io/desandro/pen/QgMWzV/   (code sample)
+
+var $posts = $('.posts-grid').masonry({
+    itemSelector: '.post',
+    columnWidth: '.posts-grid__col-sizer',
+    gutter: '.posts-grid__gutter-sizer',
+    percentPosition: true,
+    stagger: 30,
+
+    // Nicer reveal transition
+    visibleStyle: { transform: 'translateY(0)', opacity: 1 },
+    hiddenStyle: { transform: 'translateY(100px)', opacity: 0 }
+});
+
+var msnry = $posts.data('masonry');
+
+/******************************************************************************/
 
 // Some helper constants/functions for adding posts
 
@@ -357,27 +380,47 @@ var formatTimestamp = function(timestamp) {
     return (new Date(timestamp)).toDateString();
 };
 
-/******************************************************************************/
 
-// Configure Masonry (tiling library for posts)
-//   Ref: https://masonry.desandro.com/options.html (docs)
-//        https://codepen.io/desandro/pen/QgMWzV/   (code sample)
+/*
+ * Appends posts to the page, given the JSON response from /get-posts.
+ * Calls the callback when done, in case any additional actions need
+ * to be taken after the posts are added.
+ */
+var appendPosts = function(json, callback) {
+    // Parse JSON and construct HTML for the new posts
+    var newPostsHtmlStr = json.posts.map(postJson => {
+        var vars = {
+            photoSrc: postJson.photo.path,
+            timestamp: formatTimestamp(postJson.timestamp),
+            bsid: bsid
+        };
+        return microTemplate(postHtmlTemplate, vars);
+    }).join('');
 
-var $posts = $('.posts-grid').masonry({
-    itemSelector: '.post',
-    columnWidth: '.posts-grid__col-sizer',
-    gutter: '.posts-grid__gutter-sizer',
-    percentPosition: true,
-    stagger: 30,
+    // Compile HTML
+    var newPostsHtml = $(newPostsHtmlStr);
 
-    // Nicer reveal transition
-    visibleStyle: { transform: 'translateY(0)', opacity: 1 },
-    hiddenStyle: { transform: 'translateY(100px)', opacity: 0 }
-});
+    // Append new posts
+    newPostsHtml.imagesLoaded(function() {
+        $posts.append(newPostsHtml);
+        $posts.masonry('appended', newPostsHtml);
 
-var msnry = $posts.data('masonry');
+        // Callback
+        callback();
+    });
+};
 
-/******************************************************************************/
+
+}  // end of shared scripts for profile and feed pages
+
+
+
+/*******************************************************************************
+ * Profile page-specific scripts
+ ******************************************************************************/
+
+if (window.location.pathname.startsWith(urls.profile)) {
+
 
 // Load more posts when user clicks "More" button
 
@@ -402,35 +445,29 @@ var getNextPosts = function() {
     function(resp) {
         var json = resp;
 
-        // If no posts left, disable the button and show no more posts message
+        // If no posts left...
         if (!json.success || json.posts.length == 0) {
-            $('#more-posts-button').prop('disabled', true);
-            $('#more-posts-button').text(noMorePostsMessage);
-            return;
+            if (offset == 0) {
+                // No posts were loaded yet. This must mean there are no posts
+                // at all.
+                $('#no-posts-message').show();
+                return;
+            } else {
+                // Disable the button and show no more posts message
+                $('#more-posts-button').prop('disabled', true);
+                $('#more-posts-button').text(noMorePostsMessage);
+                return;
+            }
         }
 
-        // Parse JSON and construct HTML for the new posts
-        var newPostsHtmlStr = json.posts.map(postJson => {
-            var vars = {
-                photoSrc: postJson.photo.path,
-                timestamp: formatTimestamp(postJson.timestamp),
-                bsid: bsid
-            };
-            return microTemplate(postHtmlTemplate, vars);
-        }).join('');
-
-        // Compile HTML
-        var newPostsHtml = $(newPostsHtmlStr);
-
-        // Append new posts
-        newPostsHtml.imagesLoaded(function() {
-            $posts.append(newPostsHtml);
-            $posts.masonry('appended', newPostsHtml);
-
+        appendPosts(json, function() {
             // Clear the message and re-enable the button
             $('#more-posts-button').prop('disabled', false);
             $('#more-posts-button').text(defaultButtonText);
             $('#more-posts-button').show();
+
+            // Adjust offset for next round
+            offset += count;
         });
     },
 
@@ -440,15 +477,10 @@ var getNextPosts = function() {
         $('#more-posts-button').text(failureMessage);
         $('#more-posts-button').show();
     });
-
-    // Adjust offset for next round
-    offset += count;
 };
 
 
 $('#more-posts-button').click(function() {
-
-    // Get next round of posts
     getNextPosts();
 });
 
@@ -456,8 +488,197 @@ $('#more-posts-button').click(function() {
 // Get first round of posts
 getNextPosts();
 
+
+} // end of profile page scripts
+
+/*******************************************************************************
+ * Feed page scripts
+ ******************************************************************************/
+
+if (window.location.pathname === urls.feed) {
+
+// Some constants/helper functions
+
+const postsPerPage = 20;
+
+// Keeps track of stats for each user I'm following:
+//   - bsid
+//   - count: num posts to get in current page
+//   - offset: index of next post to get
+//   - ip: cached IP address of user-server
+var followingStats = [];
+
+
+/*
+ * Returns a random integer in range [0, max).
+ */
+var randomInt = function(max) {
+    return Math.floor(max * Math.random());
+};
+
+
+/*
+ * Gets the user-server IP for a given bsid. Pass the reference to the
+ * entire stats list and the index of the particular user whose IP we
+ * want. If it's not cached in the stats, makes a request to the
+ * directory for it and caches it in the stats; otherwise, just pulls
+ * from the stats. Calls the callback with an object of the form:
+ *   {success: true, ip: ip}        if request was successful
+ *   {success: false}               if not
+ */
+var getIpOf = function(index, followingStats, callback) {
+    // Check if IP address is cached first
+    if (followingStats[index].ip !== '') {
+        callback({success: true, ip: followingStats[index].ip});
+        return;
+    }
+
+    // Not cached. Make request to directory instead.
+    var url = directoryBaseUrl + '/api/get/' + followingStats[index].bsid;
+    $.ajax({
+        type: 'GET',
+        url: url,
+        timeout: requestTimeout,
+
+        success: function(resp) {
+            var json = resp;
+            if (json.success) {
+                // Got their IP. Cache it and return it to callback
+                followingStats[index].ip = json.ip;
+                callback({success: true, ip: json.ip});
+            } else {
+                // No entry for this user
+                callback({success: false});
+            }
+        },
+
+        error: function() {
+            // Request failed
+            callback({success: false});
+        }
+    });
+};
+
+
+/*
+ * Procedure for getting more posts
+ */
+var getNextPosts = function() {
+
+    // Update/reset counts and offsets for each following
+    for (var i = 0; i < followingStats.length; i++) {
+        followingStats[i].offset += followingStats[i].count;
+        followingStats[i].count = 0;
+    }
+
+    // Select a random following postsPerPage times. Each time a
+    // following is selected, mark them for another post.
+    for (var i = 0; i < postsPerPage; i++) {
+        var r = randomInt(postsPerPage);
+        followingStats[r].count++;
+    }
+
+    // Get new posts and append them to the page
+    for (var i = 0; i < followingStats.length; i++) {
+        // Skip followings that weren't selected
+        if (followingStats[i].count <= 0) {
+            console.log('Skipping ' + followingStats[i].bsid);
+            continue;
+        }
+
+        // Get user-server IP for this user
+        getIpOf(i, followingStats, function(result) {
+            // Skip this user if we couldn't get their IP
+            if (!result.success) {
+                console.log('Failed to get user-server IP for ' + followingStats[i].bsid);
+                return;
+            }
+
+            // Make request to that user-server
+            var ip = result.ip;
+            var url = userServerProtocol + '//' + ip + ':' + userServerPort
+              + '/api/get-posts?requester=' + bsid;
+            var data = {count: followingStats[i].count, offset: followingStats[i].offset,
+                timestamp: requests.makeTimestamp()};
+            makeSignedRequest(url, data,
+
+            // Execute if request was successful
+            function(resp) {
+                var json = resp;
+
+                // Check that there are posts
+                if (!json.success || json.posts.length == 0) {
+                    console.log('Got response, but not posts for ' + followingStats[i].bsid);
+                    return; // skip this user
+                }
+
+                // Append the posts for this user
+                appendPosts(json, function() {
+                    $('#more-posts-button').show();
+                });
+            },
+
+            // Execute if request failed
+            function() {
+                console.log('Failed to get posts from user-server for ' + followingStats[i].bsid);
+            });
+        });
+    }
+};
+
+
 /******************************************************************************/
 
-} // end of Profile and Feed page scripts
+// Populate the page
+
+// Get list of users I'm following
+var url = userServerBaseUrl + '/api/get-profile-info?requester=' + bsid;
+var data = {timestamp: requests.makeTimestamp()};
+makeSignedRequest(url, data,
+
+// Execute if successful
+function(resp) {
+
+    var json = resp;
+
+    if (json.following.length == 0) {
+        // Not following anyone. No feed to load
+        $('#no-posts-message').show();
+        return;
+    }
+
+    // Initialize stats for each following
+    json.following.forEach(followingBsid => {
+        followingStats.push({
+            bsid: followingBsid,
+            count: 0,
+            offset: 0,
+            ip: '',
+        });
+    });
+
+
+    // Load more posts when user clicks "More" button
+    $('#more-posts-button').click(function() {
+        getNextPosts();
+    });
+
+
+    // Get first round of posts
+    getNextPosts();
+
+},
+
+// Execute if failed
+function() {
+    $('#no-posts-message').text("Oops! Couldn't load your feed. Try reloading the page.");
+    $('#no-posts-message').show();
+});
+
+
+} // end of feed scripts
+
+
+/******************************************************************************/
 
 });
