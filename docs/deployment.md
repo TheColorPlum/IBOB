@@ -4,8 +4,15 @@ All components (app, user-server, directory) are deployed as Google App Engine i
 
 ## Directory
 
-The directory's initialization is relatively simple. It needs to create the database/tables and start the server. This is automated by the script `main.sh` in the `initialization/` folder (the other scripts are run by `main.sh`).
+We mostly describe the process of deploying the directory in a [Google doc](https://docs.google.com/document/d/1HEz8ke7DDHz3HShVo8a9Hojq1TtEkDl_qS5K6n7w0hc/edit).
 
+Below we also document some additional details.
+
+### Initialization script
+
+> Note: The main.sh currently does not work for deployment. We are working on a new way of scripting the deployment, once we figure out how to do it manually.
+
+The directory's initialization is relatively simple. It needs to create the database/tables and start the server. This is automated by the script `main.sh` in the `initialization/` folder (the other scripts are run by `main.sh`).
 
 ### Constants
 
