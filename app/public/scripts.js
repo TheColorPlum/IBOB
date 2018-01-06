@@ -17,8 +17,7 @@ const sessionStoragePrivateKey = 'privateKey';
 const sessionStorageIp = 'userServerIp';
 
 // Load user's Blockstack ID
-// TODO: Implement
-const bsid = 'alice.id';
+const bsid = blockstack.loadUserData().username || 'alice.id';
 
 // Base URLs
 // TODO: Need to update userServerProtocol and userServerPort with real port
