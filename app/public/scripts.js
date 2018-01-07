@@ -12,16 +12,24 @@ $(document).ready(function() {
  * Constants
  ******************************************************************************/
 
-// Note: window.blockstack, window.requests, and window.constants are available.
-// Imported via browserify in app/requires.js.
-
-// Add more constants
+/*
+ * Note: window.blockstack, window.requests are available. Imported via
+ * browserify in app/requires.js.
+ *
+ * Also, the object `constants` is available, from constants.js. See docs
+ * for a list of constants it contains.
+ *
+ * More constants are added below.
+ */
 
 // User's Blockstack ID
 constants.bsid = blockstack.loadUserData().username || 'alice.id';
 
-// App base URL
+// URLs
 constants.appBaseUrl = window.location.protocol + '//' + window.location.host;
+constants.userServerBaseUrl = constants.makeUserServerBaseUrl(
+    sessionStorage.getItem(constants.userServerIpVarName)
+);
 
 // App URL extensions
 constants.urls = {
@@ -323,7 +331,7 @@ const successMessage = 'Posted!';
 
 // Process server reply when photo is uploaded
 $('#new-post-form').ajaxForm({
-    url: userServerBaseUrl + '/api/add-photo',
+    url: constants.userServerBaseUrl + '/api/add-photo',
     dataType: 'json',
     beforeSubmit: function(arr, $form, options) {
         // Show pending message
@@ -339,7 +347,8 @@ $('#new-post-form').ajaxForm({
 
         // Now that photo is uploaded, make the request to add the post
         // itself
-        var url = userServerBaseUrl + '/api/add-post?requester=' + constants.bsid;
+        var url = constants.userServerBaseUrl + '/api/add-post?requester='
+          + constants.bsid;
         var body = {photoId: resp.photo.id, timestamp: requests.makeTimestamp()};
         makeSignedRequest(url, body,
 
@@ -395,6 +404,8 @@ var msnry = $posts.data('masonry');
 /******************************************************************************/
 
 // Some helper constants/functions for adding posts
+
+var postsPerPage = 20;
 
 var postHtmlTemplate = $('#post-template').html();  // defined in profile.html
 
@@ -468,7 +479,7 @@ if (window.location.pathname.startsWith(constants.urls.profile)) {
 
 // Load more posts when user clicks "More" button
 
-const count = 5;
+const count = postsPerPage;
 var offset = 0;
 
 // Makes request for more posts
@@ -481,7 +492,8 @@ var getNextPosts = function() {
     $('#more-posts-button').prop('disabled', true);
 
     // Get posts
-    var url = userServerBaseUrl + '/api/get-posts?requester=' + constants.bsid;
+    var url = constants.userServerBaseUrl + '/api/get-posts?requester='
+      + constants.bsid;
     var body = {count: count, offset: offset, timestamp: requests.makeTimestamp()};
     makeSignedRequest(url, body,
 
@@ -542,8 +554,6 @@ getNextPosts();
 if (window.location.pathname === constants.urls.feed) {
 
 // Some constants/helper functions
-
-const postsPerPage = 20;
 
 // Keeps track of stats for each user I'm following:
 //   - bsid
@@ -693,7 +703,8 @@ var getNextPosts = function() {
 // Populate the page
 
 // Get list of users I'm following
-var url = userServerBaseUrl + '/api/get-profile-info?requester=' + constants.bsid;
+var url = constants.userServerBaseUrl + '/api/get-profile-info?requester='
+  + constants.bsid;
 var data = {timestamp: requests.makeTimestamp()};
 makeSignedRequest(url, data,
 
