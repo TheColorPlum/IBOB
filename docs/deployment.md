@@ -11,7 +11,7 @@ The app's initialization process in deployment is the simplest, since it does no
 
 ### Constants and Environment Variables
 
-Constants used throughout the code are defined by *environment variables* on the production server. This is because hard-coding them in would make their values visible in the source code, which is bad for secret values. So we wrote `lib/serverConstants.js` and `lib/generateBrowserConstants.js` to import their values from environment variables on the production server.
+Constants used throughout the code are defined by *environment variables* on the production server. This is because hard-coding them in would make their values visible in the source code, which is bad for secret values. So we wrote `lib/serverConstants.js`, `lib/generateBrowserConstants.js`, and `lib/generateManifest.js` to import their values from environment variables on the production server.
 
 The constants are defined below. The main one:
 
@@ -40,6 +40,10 @@ Additionally, `generateBrowserConstants.js` generates a function that's imported
   var url = makeUserServerBaseUrl(ip) + '/api/get-posts?requester=sample.id'
   // Make request for the url...
   ```
+
+Lastly, for the `generateManifest.js` script, define:
+
+- `MANIFEST_START_URL`: The base URL of the app when deployed.
 
 ## Directory
 

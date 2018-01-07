@@ -1,5 +1,5 @@
 /*
- * browserConstants.js
+ * generateBrowserConstants.js
  * Author: Michael Friedman
  *
  * Defines all the constants used by the browser, whose values are either
@@ -13,6 +13,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 const projectMode = require('./projectMode');
 
 // Environment variables used to determine values of constants. Constants are
@@ -76,4 +77,4 @@ fs.writeFileSync(constantsScript,
 );
 
 
-console.log(`Generated ${__dirname}/${constantsScript}`);
+console.log(`Generated ${path.join(__dirname, constantsScript)}`);

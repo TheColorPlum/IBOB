@@ -6,7 +6,8 @@
   "scripts": {
     "browserify": "browserify requires.js -o public/bundle.js",
     "generateBrowserConstants": "cd lib && node generateBrowserConstants.js && cd ..",
-    "start": "npm run browserify && npm run generateBrowserConstants && node server.js"
+    "generateManifest": "cd lib && node generateManifest.js && cd ..",
+    "start": "npm run browserify && npm run generateBrowserConstants && npm run generateManifest && node server.js"
   },
   "repository": {
     "type": "git",
