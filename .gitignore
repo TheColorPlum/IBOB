@@ -41,3 +41,5 @@ jspm_packages
 *.sublime-project
 *.sublime-workspace
 TODO.txt
+app/public/constants.js
+app/public/manifest.json

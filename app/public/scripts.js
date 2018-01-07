@@ -12,26 +12,32 @@ $(document).ready(function() {
  * Constants
  ******************************************************************************/
 
-// Keys into sessionStorage for private key and user-server IP address
-const sessionStoragePrivateKey = 'privateKey';
-const sessionStorageIp = 'userServerIp';
+/*
+ * Note: window.blockstack, window.requests are available. Imported via
+ * browserify in app/requires.js.
+ *
+ * Also, the object `constants` is available, from constants.js. See docs
+ * for a list of constants it contains.
+ *
+ * More constants are added below.
+ */
 
-// Load user's Blockstack ID
-// TODO: Implement
-const bsid = 'alice.id';
+// User's Blockstack ID
+const defaultBsid = 'alice.id';
+if (blockstack.isUserSignedIn()) {
+    constants.bsid = blockstack.loadUserData().username || defaultBsid;
+} else {
+    constants.bsid = defaultBsid;
+}
 
-// Base URLs
-// TODO: Need to update userServerProtocol and userServerPort with real port
-// number when deployed
-const baseUrl = window.location.protocol + '//' + window.location.host;
-const userServerProtocol = 'http:';
-const userServerPort = 3000;
-const userServerBaseUrl = userServerProtocol + '//'
-  + sessionStorage.getItem(sessionStorageIp) + ':' + userServerPort;
-const directoryBaseUrl = 'http://localhost:4000';
+// URLs
+constants.appBaseUrl = window.location.protocol + '//' + window.location.host;
+constants.userServerBaseUrl = constants.makeUserServerBaseUrl(
+    sessionStorage.getItem(constants.userServerIpVarName)
+);
 
-// URL extensions
-const urls = {
+// App URL extensions
+constants.urls = {
     index: '/',
     manifest: '/manifest.json',
     initialization: '/initialization',
@@ -42,14 +48,8 @@ const urls = {
     newPost: '/new-post'
 };
 
-// Private key file
-const privateKeyFile = 'privateKey.json';
-
 // Timeout period in milliseconds
-const requestTimeout = 10000;
-
-// Note: window.blockstack and window.requests are also available. Imported via
-// browserify in app/requires.js
+constants.requestTimeout = 10000;
 
 /*
  * Helper function for making signed requests to the user-server or the
@@ -60,12 +60,12 @@ const requestTimeout = 10000;
  */
 var makeSignedRequest = function(url, body, successCallback, errorCallback) {
     var signedBody = requests.makeBody(body,
-      sessionStorage.getItem(sessionStoragePrivateKey));
+      sessionStorage.getItem(constants.privateKeyVarName));
     $.ajax({
         type: 'POST',
         url: url,
         data: signedBody,
-        timeout: requestTimeout,
+        timeout: constants.requestTimeout,
         success: successCallback,
         error: errorCallback
     });
@@ -79,7 +79,7 @@ var makeSignedRequest = function(url, body, successCallback, errorCallback) {
 $('#feed-button').click(function() {
     console.log('Going to feed page...');
 
-    window.location.href = baseUrl + urls.feed;
+    window.location.href = constants.appBaseUrl + constants.urls.feed;
 });
 
 
@@ -87,7 +87,8 @@ $('#feed-button').click(function() {
 $('#profile-button').click(function() {
     console.log('Going to profile page...');
 
-    window.location.href = baseUrl + urls.profile + bsid;
+    window.location.href = constants.appBaseUrl + constants.urls.profile
+      + constants.bsid;
 });
 
 
@@ -99,20 +100,75 @@ $('#signout-button').click(function() {
     blockstack.signUserOut();
 
     // Redirect to login page
-    window.location.href = baseUrl;
+    window.location.href = constants.appBaseUrl;
 });
 
 
 // New post button
 $('#new-post-button').click(function() {
-    window.location.href = baseUrl + urls.newPost;
+    window.location.href = constants.appBaseUrl + constants.urls.newPost;
 });
 
 /*******************************************************************************
  * Index/login page scripts
  ******************************************************************************/
 
-if (window.location.pathname === urls.index) {
+if (window.location.pathname === constants.urls.index) {
+
+
+/*
+ * Shows pending message on the sign-in button
+ */
+var showPendingMessage = function() {
+    var pendingMessage = 'Signing you in...';
+    $('#signin-button').prop('disabled', true);
+    $('#signin-button').text(pendingMessage);
+};
+
+
+/*
+ * Gets the user-server IP for this user. Tries to retrieve it from
+ * sessionStorage first, or makes a request to the directory if it's
+ * not in sessionStorage. Calls the callback with an object:
+ *   {success: true, ip: ip}      (if successful)
+ *   {success: false}             (if unsuccessful)
+ */
+var getMyIp = function(callback) {
+    // Check sessionStorage first
+    var potentialIp = sessionStorage.getItem(constants.userServerIpVarName);
+    if (potentialIp !== null) {
+        console.log("Got this user's user-server IP from sessionStorage");
+        callback({success: true, ip: potentialIp});
+        return;
+    }
+
+    // Not found in sessionStorage. Make request to directory instead.
+    var url = constants.directoryBaseUrl + '/api/get/' + constants.bsid;
+    $.ajax({
+        type: 'GET',
+        url: url,
+        timeout: constants.requestTimeout,
+
+        success: function(resp) {
+            var json = resp;
+            if (json.success) {
+                // Got their IP. Cache it and return it to callback
+                console.log("Got this user's user-server IP from directory.");
+                sessionStorage.setItem(constants.userServerIpVarName, json.ip);
+                callback({success: true, ip: json.ip});
+            } else {
+                // No entry for this user
+                callback({success: false});
+            }
+        },
+
+        error: function() {
+            // Request failed
+            callback({success: false});
+        }
+    });
+};
+
 
 
 /*
@@ -121,28 +177,25 @@ if (window.location.pathname === urls.index) {
 var handleSignedInUser = function() {
     console.log('User is signed in. Checking if they have a user-server...');
 
-    // Check if this user has been setup with a user-server yet by checking
-    // directory
-    $.get(directoryBaseUrl + '/api/get/' + bsid, (data, status) => {
-        var json = data;
+    // Check if this user has been set up with a user-server by seeing if
+    // they have a user-server IP
+    getMyIp(result => {
+        var json = result;
 
         if (json.success) { // user has been set up
             console.log('User has a user-server. Redirecting to feed...');
 
-            // Save IP in sessionStorage
-            sessionStorage.setItem(sessionStorageIp, json.ip);
-
             // Get private key from storage, save in sessionStorage
-            blockstack.getFile(privateKeyFile, false).then(contents => {
+            blockstack.getFile(constants.userPrivateKeyFile, false).then(contents => {
                 var json = JSON.parse(contents);
-                sessionStorage.setItem(sessionStoragePrivateKey, json.privateKey);
+                sessionStorage.setItem(constants.privateKeyVarName, json.privateKey);
 
                 // Redirect to feed
-                window.location.href = baseUrl + urls.feed;
+                window.location.href = constants.appBaseUrl + constants.urls.feed;
                 console.log('Redirected to feed');
             }).catch(err => {
                 console.log('This should never happen: Failed to get '
-                  + privateKeyFile + ' from Blockstack storage. Error: ' + err);
+                  + constants.userPrivateKeyFile + ' from Blockstack storage. Error: ' + err);
             });
         }
 
@@ -151,31 +204,32 @@ var handleSignedInUser = function() {
               + 'to initialization page...');
 
             // Redirect to initialization page
-            window.location.href = baseUrl + urls.initialization;
+            window.location.href = constants.appBaseUrl + constants.urls.initialization;
         }
 
     });
 };
 
 
-// Sign user in when they click the sign-in button
-$('#signin-button').click(function() {
+if (blockstack.isUserSignedIn()) {
+    showPendingMessage();
+    handleSignedInUser();
+}
 
-    if (blockstack.isUserSignedIn()) {
+else if (blockstack.isSignInPending()) {
+    showPendingMessage();
+    blockstack.handlePendingSignIn().then(userData => {
         handleSignedInUser();
-    }
+    });
+}
 
-    else if (blockstack.isSignInPending()) {
-        blockstack.handlePendingSignIn().then(userData => {
-            window.location = window.location.origin;
-        });
-    }
-
-    else {
-        // Not signed in yet
+else {
+    // Not signed in yet. Sign user in when they click the sign-in button.
+    $('#signin-button').click(function() {
+        showPendingMessage();
         blockstack.redirectToSignIn();
-    }
-});
+    });
+}
 
 
 }
@@ -185,14 +239,14 @@ $('#signin-button').click(function() {
  * Initialization page scripts
  ******************************************************************************/
 
-if (window.location.pathname === urls.initialization) {
+if (window.location.pathname === constants.urls.initialization) {
 
 
 // Process info when "Go" button is pressed
 
 $('#go-button').click(function() {
-    var processingMessage = 'Creating your cloud storage. Please wait (this '
-      + 'may take a little while)...';
+    var processingMessage = 'Putting in a request for your cloud storage. '
+      + 'Please wait...';
     var notSignedInMessage = 'You must sign in first! Redirecting to the '
       + 'login page...';
     var noPrivateKeyMessage = 'Please enter your private key.';
@@ -206,7 +260,7 @@ $('#go-button').click(function() {
     if (!blockstack.isUserSignedIn()) {
         $('#message').text(notSignedInMessage);
         alert(notSignedInMessage);
-        window.location.href = baseUrl;
+        window.location.href = constants.appBaseUrl;
         return;
     }
 
@@ -222,14 +276,16 @@ $('#go-button').click(function() {
 
 
     // Make request to create a user-server for this user
-    var reqBody = JSON.stringify({privateKey: privateKey});
-    $.post(urls.createUserServer + '?requester=' + bsid, reqBody, (data, status) => {
+    // TODO: Reimplement this to actually send a full request once you
+    // have finished gathering performance metrics.
+    var reqBody = "";
+    $.post(constants.urls.createUserServer + '?requester=' + constants.bsid, reqBody, (data, status) => {
         var json = data;
 
         if (!json.success) {
             // Request failed. Display failure message to user
             $('#message').text(failedMessage);
-            console.log(urls.createUserServer + ' request failed. Error message: '
+            console.log(constants.urls.createUserServer + ' request failed. Error message: '
               + json.msg);
             return;
         }
@@ -238,22 +294,22 @@ $('#go-button').click(function() {
         // Success!
         $('#message').text(successMessage);
 
-        // A few more things to do: store IP address and private key in browser
-        // for reference from other pages
-        sessionStorage.setItem(sessionStorageIp, json.ip);
-        sessionStorage.setItem(sessionStoragePrivateKey, privateKey);
+        // A few more things to do: initialize the value of user-server IP
+        // address to nothing. This will be retrieved on next sign-in.
+        sessionStorage.setItem(constants.userServerIpVarName, "");
 
-
-        // Store private key in Blockstack storage
+        // Store private key in browser for reference from other pages, and
+        // in Blockstack storage so we can pull it in future sessions.
+        sessionStorage.setItem(constants.privateKeyVarName, privateKey);
         var content = JSON.stringify({
             privateKey: privateKey
         });
-        blockstack.putFile(privateKeyFile, content, false)
+        blockstack.putFile(constants.userPrivateKeyFile, content, false)
         .then(() => {
 
             // Now we're done. Redirect to feed page
             console.log('Success! Redirecting to feed page');
-            window.location.href = baseUrl + urls.feed;
+            window.location.href = constants.appBaseUrl + constants.urls.feed;
 
 
         }).catch(() => {
@@ -272,7 +328,7 @@ $('#go-button').click(function() {
  * New-post page scripts
  ******************************************************************************/
 
-if (window.location.pathname === urls.newPost) {
+if (window.location.pathname === constants.urls.newPost) {
 
 const pendingMessage = 'Posting...';
 const failureMessage = "Oops! Looks like it didn't go through. Try again.";
@@ -280,7 +336,7 @@ const successMessage = 'Posted!';
 
 // Process server reply when photo is uploaded
 $('#new-post-form').ajaxForm({
-    url: userServerBaseUrl + '/api/add-photo',
+    url: constants.userServerBaseUrl + '/api/add-photo',
     dataType: 'json',
     beforeSubmit: function(arr, $form, options) {
         // Show pending message
@@ -296,7 +352,8 @@ $('#new-post-form').ajaxForm({
 
         // Now that photo is uploaded, make the request to add the post
         // itself
-        var url = userServerBaseUrl + '/api/add-post?requester=' + bsid;
+        var url = constants.userServerBaseUrl + '/api/add-post?requester='
+          + constants.bsid;
         var body = {photoId: resp.photo.id, timestamp: requests.makeTimestamp()};
         makeSignedRequest(url, body,
 
@@ -310,7 +367,8 @@ $('#new-post-form').ajaxForm({
 
             // Posted! Redirect to profile page
             $('#message').text(successMessage);
-            window.location.href = baseUrl + urls.profile + bsid;
+            window.location.href = constants.appBaseUrl + constants.urls.profile
+              + constants.bsid;
         },
 
         // Execute if didn't get a response
@@ -327,7 +385,7 @@ $('#new-post-form').ajaxForm({
  * Scripts shared by profile and feed pages
  ******************************************************************************/
 
-if (window.location.pathname.startsWith(urls.profile) || window.location.pathname === urls.feed) {
+if (window.location.pathname.startsWith(constants.urls.profile) || window.location.pathname === constants.urls.feed) {
 
 
 // Configure Masonry (tiling library for posts)
@@ -351,6 +409,8 @@ var msnry = $posts.data('masonry');
 /******************************************************************************/
 
 // Some helper constants/functions for adding posts
+
+var postsPerPage = 20;
 
 var postHtmlTemplate = $('#post-template').html();  // defined in profile.html
 
@@ -419,12 +479,12 @@ var appendPosts = function(json, userBsid, callback) {
  * Profile page-specific scripts
  ******************************************************************************/
 
-if (window.location.pathname.startsWith(urls.profile)) {
+if (window.location.pathname.startsWith(constants.urls.profile)) {
 
 
 // Load more posts when user clicks "More" button
 
-const count = 5;
+const count = postsPerPage;
 var offset = 0;
 
 // Makes request for more posts
@@ -437,7 +497,8 @@ var getNextPosts = function() {
     $('#more-posts-button').prop('disabled', true);
 
     // Get posts
-    var url = userServerBaseUrl + '/api/get-posts?requester=' + bsid;
+    var url = constants.userServerBaseUrl + '/api/get-posts?requester='
+      + constants.bsid;
     var body = {count: count, offset: offset, timestamp: requests.makeTimestamp()};
     makeSignedRequest(url, body,
 
@@ -460,7 +521,7 @@ var getNextPosts = function() {
             }
         }
 
-        appendPosts(json, bsid, function() {
+        appendPosts(json, constants.bsid, function() {
             // Clear the message and re-enable the button
             $('#more-posts-button').prop('disabled', false);
             $('#more-posts-button').text(defaultButtonText);
@@ -495,11 +556,9 @@ getNextPosts();
  * Feed page scripts
  ******************************************************************************/
 
-if (window.location.pathname === urls.feed) {
+if (window.location.pathname === constants.urls.feed) {
 
 // Some constants/helper functions
-
-const postsPerPage = 20;
 
 // Keeps track of stats for each user I'm following:
 //   - bsid
@@ -535,11 +594,11 @@ var getIpOf = function(index, followingStats, callback) {
     }
 
     // Not cached. Make request to directory instead.
-    var url = directoryBaseUrl + '/api/get/' + followingStats[index].bsid;
+    var url = constants.directoryBaseUrl + '/api/get/' + followingStats[index].bsid;
     $.ajax({
         type: 'GET',
         url: url,
-        timeout: requestTimeout,
+        timeout: constants.requestTimeout,
 
         success: function(resp) {
             var json = resp;
@@ -607,8 +666,8 @@ var getNextPosts = function() {
 
             // Make request to that user-server
             var ip = result.ip;
-            var url = userServerProtocol + '//' + ip + ':' + userServerPort
-              + '/api/get-posts?requester=' + bsid;
+            var url = constants.makeUserServerBaseUrl(ip)
+              + '/api/get-posts?requester=' + constants.bsid;
             var data = {count: stats.count, offset: stats.offset,
                 timestamp: requests.makeTimestamp()};
             makeSignedRequest(url, data,
@@ -649,7 +708,8 @@ var getNextPosts = function() {
 // Populate the page
 
 // Get list of users I'm following
-var url = userServerBaseUrl + '/api/get-profile-info?requester=' + bsid;
+var url = constants.userServerBaseUrl + '/api/get-profile-info?requester='
+  + constants.bsid;
 var data = {timestamp: requests.makeTimestamp()};
 makeSignedRequest(url, data,
 

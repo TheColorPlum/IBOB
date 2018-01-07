@@ -12,7 +12,7 @@ Below is the directory structure that makes up the front end, under the `app/` d
 - views/
   - 404.html
   - index.html
-  - inintialization.html
+  - intialization.html
   - feed.html
   - new-post.html
   - profile.html
