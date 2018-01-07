@@ -8,7 +8,7 @@
 // Check usage
 if (process.argv.length < 2) {
     console.error("Usage: node createDatabase.js");
-    process.exit();
+    process.exit(1);
 }
 
 /******************************************************************************/
