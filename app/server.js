@@ -6,9 +6,9 @@
 
 const express = require('express');
 const app = express();
-const port = 5000;
 
 const axios = require('axios');
+const constants = require('./lib/serverConstants');
 const debug = require('./lib/debug');
 const path = require('path');
 const requests = require('./lib/requests');
@@ -69,9 +69,6 @@ const urls = {
 // Base directory of views
 const viewsDir = path.join(__dirname, '/views');
 
-// User-server directory url
-const directoryBaseUrl = 'http://localhost:4000';
-
 /******************************************************************************/
 
 // Public pages, available to users
@@ -127,7 +124,7 @@ app.post(urls.createUserServer, function(req, res, next) {
 
     // Check that a user-server has not already been created for this user
     debug.log('Checking if ' + bsid + ' already has a user-server...');
-    axios.get(directoryBaseUrl + '/api/get/' + bsid)
+    axios.get(constants.directoryBaseUrl + '/api/get/' + bsid)
     .then(resp => {
 
         var json = resp.data;
@@ -149,7 +146,7 @@ app.post(urls.createUserServer, function(req, res, next) {
         debug.log('Adding entry (' + bsid + ', ' + ip + ') to directory...');
         var data = {bsid: bsid, ip: ip, timestamp: requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, privateKey);
-        axios.post(directoryBaseUrl + '/api/put?requester=' + bsid, reqBody)
+        axios.post(constants.directoryBaseUrl + '/api/put?requester=' + bsid, reqBody)
         .then(resp => {
 
             debug.log('Got response from directory');
@@ -187,7 +184,7 @@ app.get(urls.profile, function(req, res, next) {
     // Check that bsid requested has an account in the directory
     var bsid = req.params.bsid;
     var errorPage = path.join(viewsDir, '404.html');
-    axios.get(directoryBaseUrl + '/api/get/' + bsid)
+    axios.get(constants.directoryBaseUrl + '/api/get/' + bsid)
     .then(resp => {
 
         var json = resp.data;
@@ -231,6 +228,6 @@ app.get(urls.newPost, function(req, res, next) {
 /******************************************************************************/
 
 // Start server
-app.listen(port, function() {
-    console.log('App is running on port ' + port);
+app.listen(constants.port, function() {
+    console.log('App is running on port ' + constants.port);
 });

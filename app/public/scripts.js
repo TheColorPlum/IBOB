@@ -23,7 +23,12 @@ $(document).ready(function() {
  */
 
 // User's Blockstack ID
-constants.bsid = blockstack.loadUserData().username || 'alice.id';
+const defaultBsid = 'alice.id';
+if (blockstack.isUserSignedIn()) {
+    constants.bsid = blockstack.loadUserData().username || defaultBsid;
+} else {
+    constants.bsid = defaultBsid;
+}
 
 // URLs
 constants.appBaseUrl = window.location.protocol + '//' + window.location.host;
