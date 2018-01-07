@@ -76,6 +76,9 @@ var query = function(sql, msg, callback) {
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
+        // Close connection
+        closeConnection();
+
         // Success!
         if (msg !== "") {
             debug.log("Database query successful: " + msg);
@@ -116,11 +119,7 @@ var createDatabase = function(callback) {
         debug.log("Creating the database...");
         query(createDatabaseSql, "Created User_Server_Directory database", function() {
 
-        // Reset connection - now that database has been created, we can
-        // connect to it.
         isDatabaseCreated = true;
-        connection.end(() => {
-        connection = openConnection();
 
         // Create tables
         debug.log("Creating the table...");
@@ -129,7 +128,7 @@ var createDatabase = function(callback) {
         // Done. Callback.
         callback();
 
-        })})});
+        })});
     } else { // in production mode
         debug.log("Creating the database table...");
         query(createTableSql, "Created database table", function() {
@@ -207,10 +206,16 @@ var put = function(bsid, ip, callback) {
 }
 
 
-module.exports = {
-    closeConnection,
-    createDatabase,
-    clearDatabase,
-    get,
-    put
-};
+/******************************************************************************/
+
+// Close connection before exiting.
+closeConnection(() => {
+    module.exports = {
+        closeConnection,
+        createDatabase,
+        clearDatabase,
+        get,
+        put
+    };
+});
+
