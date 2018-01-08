@@ -1,5 +1,5 @@
 #!/bin/bash
-# main.sh
+# deploy.sh
 # Author: Oluwapelumi Odimayo
 #
 # The deployment script for the user directory. Automated deployment of the user server directory and it's database.
