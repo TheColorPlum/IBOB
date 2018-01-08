@@ -104,6 +104,34 @@ Misc. variables:
 - `DEBUG_FLAG`: A boolean indicating whether or not to enable debugging logs.
 
 
+### User-server
+
+The environment variables for the user-server are processed in `lib/constants.js`. This file is imported by all other files that use these shared constants.
+
+Main variable:
+
+- `PROJECT_MODE`: "development" or "production". Indicates to the server whether we're in production or not, and thus which values to use for the rest of the constants.
+
+Variables for the server:
+
+- `PORT`: The port number that the server runs on.
+
+Constant URLs:
+
+- `BLOCKSTACK_BASE_URL`: The base URL for the Blockstack API.
+- `DIRECTORY_BASE_URL`: The base URL for the directory when deployed.
+- `SERVER_BASE_URL`: The base URL for this user-server.
+
+Constants for the database:
+
+- `CLEARDB_DATABASE_URL`: In production, the user-servers use ClearDB as the host for the MySQL database. This is the URL of the ClearDB database to connect to.
+
+Misc:
+
+- `BLOCKSTACK_ZONEFILE_REGEX`: A regular expression that represents the format of Blockstack zonefile URLs.
+- `DEBUG_FLAG`: "true" or "false". Indicates whether to print debug logs from the code.
+
+
 ## Admin scripts
 
 This isn't directly related to deployment itself, but this is useful for testing the deployed instances.
