@@ -9,14 +9,13 @@ var assert = require("assert");
 var api = require("../routes/api");
 var aps = require("../lib/aps");
 var axios = require("axios");
+var constants = require("../lib/constants");
 var dal = require("../lib/dal");
 var debug = require("../lib/debug");
 var jsontokens = require("jsontokens");
 var requests = require("../lib/requests");
 
 /******************************************************************************/
-
-const baseUrl = "http://localhost:3000";
 
 const alice = "alice.id";
 const alicePrivateKey = "86fc2fd6b25e089ed7e277224d810a186e52305d105f95f23fd0e10c1f15854501";
@@ -95,7 +94,8 @@ describe("/api" + api.urls.getProfileInfo, function() {
         // Make request
         var data = {"timestamp": requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.getProfileInfo + "?requester=" + alice, reqBody)
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.getProfileInfo
+          + "?requester=" + alice, reqBody)
         .then(resp => {
             try {
                 var json = resp.data;
@@ -145,7 +145,8 @@ describe("/api" + api.urls.getPosts, function() {
         // Make request
         var data = {count: 2, offset: 1, timestamp: requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.getPosts + "?requester=" + alice, reqBody)
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.getPosts
+          + "?requester=" + alice, reqBody)
         .then(resp => {
 
             try {
@@ -199,7 +200,8 @@ describe("/api" + api.urls.getPosts, function() {
         // Make request
         var data = {count: 5, offset: 2, timestamp: requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.getPosts + "?requester=" + alice, reqBody)
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.getPosts
+          + "?requester=" + alice, reqBody)
         .then(resp => {
 
             try {
@@ -247,7 +249,8 @@ describe("/api" + api.urls.getPosts, function() {
         // Make request
         var data = {count: 10, offset: 10, timestamp: requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, alicePrivateKey);
-        axios.post(baseUrl + "/api" + api.urls.getPosts + "?requester=" + alice, reqBody)
+        axios.post(constants.serverBaseUrl + "/api" + api.urls.getPosts
+          + "?requester=" + alice, reqBody)
         .then(resp => {
 
             try {
@@ -326,7 +329,8 @@ describe("/api" + api.urls.updateProfileInfo, function() {
             }
             data.timestamp = requests.makeTimestamp();
             var reqBody = requests.makeBody(data, alicePrivateKey);
-            axios.post(baseUrl + "/api" + api.urls.updateProfileInfo + "?requester=" + alice, reqBody)
+            axios.post(constants.serverBaseUrl + "/api" + api.urls.updateProfileInfo
+              + "?requester=" + alice, reqBody)
             .then(resp => {
 
                 try {
@@ -404,7 +408,8 @@ describe("/api" + api.urls.updateProfileInfo, function() {
             }
             data.timestamp = requests.makeTimestamp();
             var reqBody = requests.makeBody(data, alicePrivateKey);
-            axios.post(baseUrl + "/api" + api.urls.updateProfileInfo + "?requester=" + alice, reqBody)
+            axios.post(constants.serverBaseUrl + "/api" + api.urls.updateProfileInfo
+              + "?requester=" + alice, reqBody)
             .then(resp => {
 
                 try {
@@ -453,7 +458,8 @@ describe("/api" + api.urls.followUser, function() {
             // Make request
             var data = {bsid: bob, timestamp: requests.makeTimestamp()};
             var reqBody = requests.makeBody(data, alicePrivateKey);
-            axios.post(baseUrl + "/api" + api.urls.followUser + "?requester=" + alice, reqBody)
+            axios.post(constants.serverBaseUrl + "/api" + api.urls.followUser
+              + "?requester=" + alice, reqBody)
             .then(resp => {
 
                 try {
@@ -500,7 +506,8 @@ describe("/api" + api.urls.addPost, function() {
             // Make request
             var data = {photoId: photo.id, timestamp: requests.makeTimestamp()};
             var reqBody = requests.makeBody(data, alicePrivateKey);
-            axios.post(baseUrl + "/api" + api.urls.addPost + "?requester=" + alice, reqBody)
+            axios.post(constants.serverBaseUrl + "/api" + api.urls.addPost
+              + "?requester=" + alice, reqBody)
             .then(resp => {
 
                 try {

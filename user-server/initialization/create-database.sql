@@ -32,13 +32,6 @@ CREATE TABLE IF NOT EXISTS profile_info (
   FOREIGN KEY (coverPhotoId) REFERENCES photos(id)
 );
 
-# Followers
-CREATE TABLE IF NOT EXISTS followers (
-  id int NOT NULL auto_increment,
-  bsid varchar(255),
-  PRIMARY KEY (id)
-);
-
 # Following
 CREATE TABLE IF NOT EXISTS following (
   id int NOT NULL auto_increment,

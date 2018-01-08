@@ -18,5 +18,4 @@ const bsid = process.argv[2];
 
 dal.setOwner(bsid, () => {
     console.log("Done setting owner to " + bsid);
-    dal.closeConnection();
 });

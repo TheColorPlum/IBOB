@@ -6,9 +6,15 @@
  * (see documentation for details).
  */
 
+var constants = require("./constants");
 var debug = require("./debug");
 var fs = require("fs");
 var mysql = require("mysql");
+
+// Constants for connecting to database while in development
+const host = "localhost";
+const user = "root";
+const password = "TuringP_lumRubik$9";
 
 /***********************************************************/
 
@@ -23,22 +29,30 @@ var isDatabaseCreated = true;
 // created, this will be a connection to that database. If not,
 // it will be a regular connection, outside that database.
 var openConnection = function() {
-    if (isDatabaseCreated) {
-        return mysql.createConnection({
-            host               : 'localhost',
-            user               : 'root',
-            password           : 'TuringP_lumRubik$9',
-            multipleStatements : true,
-            database           : 'The_Feed'
-        });
-    } else {
-        return mysql.createConnection({
-            host               : 'localhost',
-            user               : 'root',
-            password           : 'TuringP_lumRubik$9',
-            multipleStatements : true
-        });
+    if (constants.projectMode === constants.developmentMode) {
+        if (isDatabaseCreated) {
+            return mysql.createConnection({
+                host               : host,
+                user               : user,
+                password           : password,
+                multipleStatements : true,
+                database           : 'The_Feed'
+            });
+        } else {
+            return mysql.createConnection({
+                host               : host,
+                user               : user,
+                password           : password,
+                multipleStatements : true
+            });
+        }
     }
+
+    else {
+        // In production mode, make connection using the ClearDB database URL
+        return mysql.createConnection(constants.cleardbDatabaseUrl);
+    }
+
 }
 
 
@@ -68,6 +82,9 @@ var query = function(sql, msg, callback) {
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
+        // Close connection
+        closeConnection();
+
         // Success!
         if (msg !== "") {
             debug.log("Database query successful: " + msg);
@@ -85,44 +102,85 @@ var query = function(sql, msg, callback) {
 //
 // Callback is optional
 var closeConnection = function(callback) {
-    connection.end(() => {
-        connection = null;
+    // connection.end(() => {
+    //     connection = null;
 
-        if (callback) callback();
-    });
+    //     if (callback) callback();
+    // });
+    connection.destroy();
+    connection = null;
+    if (callback) callback();
 }
 
 
-// Creates The_Feed database and all its tables
+// Creates the database and its tables, if in development mode, or only creates
+// the tables if in production mode.
 var createDatabase = function(callback) {
-    var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
-
     // Read table creation SQL from file
-    fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {
-    if (err) {
-        debug.log("Failed to read create-database.sql. Did not create database.");
-        callback(err);
-        return;
+    // var createTablesSql = fs.readFileSync("create-database.sql", "utf8");
+
+    // Define tables
+    var createPhotosTable = "CREATE TABLE IF NOT EXISTS photos (\
+      id int NOT NULL auto_increment,\
+      path varchar(255),\
+      PRIMARY KEY (id)\
+    )";
+    var createPostsTable = "CREATE TABLE IF NOT EXISTS posts (\
+      id int NOT NULL auto_increment,\
+      photoId int,\
+      timestamp varchar(255),\
+      PRIMARY KEY (id),\
+      FOREIGN KEY (photoId) REFERENCES photos(id)\
+    )";
+    var createProfileInfoTable = "CREATE TABLE IF NOT EXISTS profile_info (\
+      id int NOT NULL auto_increment,\
+      bsid varchar(255),\
+      displayName varchar(255),\
+      bio varchar(255),\
+      profilePhotoId int,\
+      coverPhotoId int,\
+      PRIMARY KEY (id),\
+      FOREIGN KEY (profilePhotoId) REFERENCES photos(id),\
+      FOREIGN KEY (coverPhotoId) REFERENCES photos(id)\
+    )";
+    var createFollowingTable = "CREATE TABLE IF NOT EXISTS following (\
+      id int NOT NULL auto_increment,\
+      bsid varchar(255),\
+      PRIMARY KEY (id)\
+    )";
+
+    if (constants.projectMode === constants.developmentMode) {
+        var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
+
+        // Create database
+        debug.log("Creating the database...");
+        query(createDatabaseSql, "Created The_Feed database", function() {
+
+        isDatabaseCreated = true;
+
+        // Create tables
+        debug.log("Creating the tables...");
+        query(createPhotosTable, "Created photos table", function() {
+        query(createPostsTable, "Created posts table", function() {
+        query(createProfileInfoTable, "Created profile info table", function() {
+        query(createFollowingTable, "Created following table", function() {
+
+        // Done
+        callback();
+
+        })})})})});
+    } else { // in production mode
+        debug.log("Creating the database tables...");
+        query(createPhotosTable, "Created photos table", function() {
+        query(createPostsTable, "Created posts table", function() {
+        query(createProfileInfoTable, "Created profile info table", function() {
+        query(createFollowingTable, "Created following table", function() {
+
+        // Done
+        callback();
+
+        })})})});
     }
-
-    // Create database
-    debug.log("Creating the database...");
-    query(createDatabaseSql, "Created The_Feed database", function() {
-
-    // Reset connection - now that database has been created, we can
-    // connect to it.
-    isDatabaseCreated = true;
-    connection.end(() => {
-    connection = openConnection();
-
-    // Create tables
-    debug.log("Creating the tables...");
-    query(createTablesSql, "Created The_Feed's tables", function() {
-
-    // Done. Callback.
-    callback();
-
-    })})})});
 }
 
 
@@ -145,10 +203,6 @@ var clearDatabase = function(callback) {
     query(clearTable + "photos", "", function() {
     query(resetTable1 + "photos" + resetTable2, "", function() {
 
-    // Clear followers
-    query(clearTable + "followers", "", function() {
-    query(resetTable1 + "followers" + resetTable2, "", function() {
-
     // Clear following
     query(clearTable + "following", "", function() {
     query(resetTable1 + "following" + resetTable2, "", function() {
@@ -156,7 +210,7 @@ var clearDatabase = function(callback) {
     // Callback
     callback();
 
-    })})})})})})})})})});
+    })})})})})})})});
 }
 
 /***********************************************************
@@ -166,12 +220,6 @@ var clearDatabase = function(callback) {
 var followUser = function(bsid, callback) {
     var sql = "Insert INTO following (bsid) values (" + mysql.escape(bsid) + ")";
     var msg = "Started following " + bsid;
-    query(sql, msg, callback);
-}
-
-var addFollower = function(bsid, callback) {
-    var sql = "Insert INTO followers (bsid) values (" + mysql.escape(bsid) + ")";
-    var msg = "Added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
@@ -326,42 +374,21 @@ var getFollowing = function(callback) {
     query(sql, msg, callback);
 }
 
-var getFollowers = function(callback) {
-    var sql = "SELECT * FROM followers";
-    var msg = "Got list of my followers";
-    query(sql, msg, callback);
-}
+/******************************************************************************/
 
-
-/***********************************************************
- * Some tests
- **********************************************************/
-
-// var response;
-// var user_id = "mike.id";
-
-// followUser(user_id, function(result) {
-//     if(result) {
-//         response = result;
-//         console.log(response);
-//     }
-// });
-
-
-
-module.exports = {
-    closeConnection,
-    createDatabase,
-    clearDatabase,
-    followUser,
-    addFollower,
-    addPhoto,
-    addPost,
-    updateProfileInfo,
-    setOwner,
-    getPhoto,
-    getPosts,
-    getProfileInfo,
-    getFollowing,
-    getFollowers,
-};
+closeConnection(() => {
+    module.exports = {
+        closeConnection,
+        createDatabase,
+        clearDatabase,
+        followUser,
+        addPhoto,
+        addPost,
+        updateProfileInfo,
+        setOwner,
+        getPhoto,
+        getPosts,
+        getProfileInfo,
+        getFollowing
+    };
+});
