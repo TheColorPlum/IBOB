@@ -28,6 +28,7 @@ const envVars = {
     serverBaseUrl: "SERVER_BASE_URL",
 
     // For the database
+    cleardbDatabaseUrl: "CLEARDB_DATABASE_URL",
     mysqlHost: "MYSQL_HOST",
     mysqlUser: "MYSQL_USER",
     mysqlPassword: "MYSQL_PASSWORD",
@@ -55,8 +56,9 @@ or " + productionMode + " if in production.";
 
 // Set values for the constants
 
-const isDevelopmentMode = (process.env[envVars.projectMode] === developmentMode);
-const isProductionMode = (process.env[envVars.projectMode] === productionMode);
+const projectMode = process.env[envVars.projectMode];
+const isDevelopmentMode = (projectMode === developmentMode);
+const isProductionMode = (projectMode === productionMode);
 
 if (!isDevelopmentMode && !isProductionMode) {
     // Invalid value for project mode
@@ -65,11 +67,11 @@ if (!isDevelopmentMode && !isProductionMode) {
 }
 
 // Helper function to cast string to boolean
-var parseBool = function(s) {
+var parseDebugFlag = function(s) {
     if (s === "true") return true;
     else if (s === "false") return false;
     else {
-        console.error("Error: cannot parse " + s + " to a boolean");
+        console.error("Error: invalid boolean value for " + envVars.debugFlag);
         process.exit(1);
     }
 };
@@ -81,6 +83,7 @@ const adminPrivateKey         = (isProductionMode) ? process.env[envVars.adminPr
 const blockstackBaseUrl       = (isProductionMode) ? process.env[envVars.blockstackBaseUrl] : "http://localhost:6000";
 const blockstackZonefileRegex = (isProductionMode) ? process.env[envVars.blockstackZonefileRegex] : "http://localhost:6000/zonefile/[A-Za-z]+.id";
 const serverBaseUrl           = (isProductionMode) ? process.env[envVars.serverBaseUrl] : "http://localhost:" + serverPort;
+const cleardbDatabaseUrl      = (isProductionMode) ? process.env[envVars.cleardbDatabaseUrl] : '';
 const mysqlHost               = (isProductionMode) ? process.env[envVars.mysqlHost] : "localhost";
 const mysqlUser               = (isProductionMode) ? process.env[envVars.mysqlUser] : "root";
 const mysqlPassword           = (isProductionMode) ? process.env[envVars.mysqlPassword] : "TuringP_lumRubik$9";
@@ -93,17 +96,21 @@ const malloryPrivateKey       = (isProductionMode) ? process.env[envVars.mallory
 
 // NOTE: You can manually set the alternative (development) value to false if you
 // want to disable debug logs.
-const debugFlag               = (isProductionMode) ? parseBool(process.env[envVars.debugFlag]) : true;
+const debugFlag               = (isProductionMode) ? parseDebugFlag(process.env[envVars.debugFlag]) : true;
 
 
 // Expose the constants
 module.exports = {
+    projectMode,
+    developmentMode,
+    productionMode,
     serverPort,
     adminBsid,
     adminPrivateKey,
     blockstackBaseUrl,
     blockstackZonefileRegex,
     serverBaseUrl,
+    cleardbDatabaseUrl,
     mysqlHost,
     mysqlUser,
     mysqlPassword,

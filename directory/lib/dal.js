@@ -24,21 +24,29 @@ var isDatabaseCreated = true;
 // created, this will be a connection to that database. If not,
 // it will be a regular connection, outside that database.
 var openConnection = function() {
-    if (isDatabaseCreated) {
-        return mysql.createConnection({
-            host               : constants.mysqlHost,
-            user               : constants.mysqlUser,
-            password           : constants.mysqlPassword,
-            multipleStatements : true,
-            database           : 'User_Server_Directory'
-        });
-    } else {
-        return mysql.createConnection({
-            host               : constants.mysqlHost,
-            user               : constants.mysqlUser,
-            password           : constants.mysqlPassword,
-            multipleStatements : true
-        });
+    if (constants.projectMode === constants.developmentMode) {
+        // Make a manual connection
+        if (isDatabaseCreated) {
+            return mysql.createConnection({
+                host               : constants.mysqlHost,
+                user               : constants.mysqlUser,
+                password           : constants.mysqlPassword,
+                multipleStatements : true,
+                database           : 'User_Server_Directory'
+            });
+        } else {
+            return mysql.createConnection({
+                host               : constants.mysqlHost,
+                user               : constants.mysqlUser,
+                password           : constants.mysqlPassword,
+                multipleStatements : true
+            });
+        }
+    }
+
+    else {
+        // In production mode, make connection using the database URL
+        return mysql.createConnection(constants.cleardbDatabaseUrl);
     }
 }
 
@@ -68,6 +76,9 @@ var query = function(sql, msg, callback) {
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
+        // Close connection
+        closeConnection();
+
         // Success!
         if (msg !== "") {
             debug.log("Database query successful: " + msg);
@@ -84,44 +95,47 @@ var query = function(sql, msg, callback) {
 //
 // Callback is optional
 var closeConnection = function(callback) {
-    connection.end(() => {
-        connection = null;
+    // connection.end(() => {
+    //     connection = null;
 
-        if (callback) callback();
-    });
+    //     if (callback) callback();
+    // });
+    connection.destroy();
+    connection = null;
+    if (callback) callback();
 }
 
 
-// Creates the User_Server_Directory database and its table
+// Creates the database and its table, if in development mode, or only creates
+// the table if in production mode.
 var createDatabase = function(callback) {
-    var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS User_Server_Directory";
-
     // Read table creation SQL from file
-    fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {
-    if (err) {
-        debug.log("Failed to read create-database.sql. Did not create database.");
-        callback(err);
-        return;
+    var createTableSql = fs.readFileSync("create-database.sql", "utf8");
+
+    if (constants.projectMode === constants.developmentMode) {
+        var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS User_Server_Directory";
+
+        // Create database
+        debug.log("Creating the database...");
+        query(createDatabaseSql, "Created User_Server_Directory database", function() {
+
+        isDatabaseCreated = true;
+
+        // Create tables
+        debug.log("Creating the table...");
+        query(createTableSql, "Created User_Server_Directory's table", function() {
+
+        // Done. Callback.
+        callback();
+
+        })});
+    } else { // in production mode
+        debug.log("Creating the database table...");
+        query(createTableSql, "Created database table", function() {
+            // Done
+            callback();
+        });
     }
-
-    // Create database
-    debug.log("Creating the database...");
-    query(createDatabaseSql, "Created User_Server_Directory database", function() {
-
-    // Reset connection - now that database has been created, we can
-    // connect to it.
-    isDatabaseCreated = true;
-    connection.end(() => {
-    connection = openConnection();
-
-    // Create tables
-    debug.log("Creating the table...");
-    query(createTablesSql, "Created User_Server_Directory's table", function() {
-
-    // Done. Callback.
-    callback();
-
-    })})})});
 }
 
 
@@ -192,10 +206,16 @@ var put = function(bsid, ip, callback) {
 }
 
 
-module.exports = {
-    closeConnection,
-    createDatabase,
-    clearDatabase,
-    get,
-    put
-};
+/******************************************************************************/
+
+// Close connection before exiting.
+closeConnection(() => {
+    module.exports = {
+        closeConnection,
+        createDatabase,
+        clearDatabase,
+        get,
+        put
+    };
+});
+
