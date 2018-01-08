@@ -158,9 +158,9 @@ var clearDatabase = function(callback) {
  * Gets the IP address corresponding to bsid (a user)
  */
 var get = function(bsid, callback) {
-    var sql = "SELECT bsid, INET_NTOA(ip) AS ip FROM user_servers WHERE bsid = "
+    var sql = "SELECT bsid, ip FROM user_servers WHERE bsid = "
       + mysql.escape(bsid);
-    var msg = "Made query for " + bsid + "'s IP address";
+    var msg = "Made query for " + bsid + "'s ip";
     query(sql, msg, function(rows) {
         if (rows.length == 0) {
             // No entry for that user
@@ -175,8 +175,7 @@ var get = function(bsid, callback) {
 
 
 /*
- * Adds a mapping from bsid to ip (given in decimal notation as a string),
- * or overwrites it if there already is one.
+ * Adds a mapping from bsid to ip, or overwrites it if there already is one.
  */
 var put = function(bsid, ip, callback) {
     // Check if entry exists for this user
@@ -186,15 +185,13 @@ var put = function(bsid, ip, callback) {
     var msg = "";
     if (result.success) {
         // Entry for this user already exists. Make an overwrite query.
-        sql = "UPDATE user_servers SET ip = INET_ATON(" + mysql.escape(ip) + ") "
+        sql = "UPDATE user_servers SET ip = " + mysql.escape(ip) + " "
           + "WHERE bsid = " + mysql.escape(bsid);
         msg = "Overwrote entry for " + bsid + " with " + ip;
     } else {
         // Entry does not exist. Make a query to add a new entry.
         sql = "INSERT INTO user_servers (bsid, ip) VALUES ("
-          + mysql.escape(bsid) + ", "
-          + "INET_ATON(" + mysql.escape(ip) + ")"
-          + ")";
+          + mysql.escape(bsid) + ", " + mysql.escape(ip) + ")";
         msg = "Inserted new entry: (" + bsid + ", " + ip + ")";
     }
 

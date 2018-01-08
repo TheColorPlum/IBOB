@@ -11,7 +11,7 @@ const constants = require("./constants");
 
 // A print statement toggled by the debug flag above. Prints msg to stderr.
 var log = function(msg) {
-    if (constants.debug) console.error(msg);
+    if (constants.debugFlag) console.error(msg);
 }
 
 
