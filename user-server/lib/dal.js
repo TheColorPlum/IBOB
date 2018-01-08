@@ -117,7 +117,37 @@ var closeConnection = function(callback) {
 // the tables if in production mode.
 var createDatabase = function(callback) {
     // Read table creation SQL from file
-    var createTablesSql = fs.readFileSync("create-database.sql", "utf8");
+    // var createTablesSql = fs.readFileSync("create-database.sql", "utf8");
+
+    // Define tables
+    var createPhotosTable = "CREATE TABLE IF NOT EXISTS photos (\
+      id int NOT NULL auto_increment,\
+      path varchar(255),\
+      PRIMARY KEY (id)\
+    )";
+    var createPostsTable = "CREATE TABLE IF NOT EXISTS posts (\
+      id int NOT NULL auto_increment,\
+      photoId int,\
+      timestamp varchar(255),\
+      PRIMARY KEY (id),\
+      FOREIGN KEY (photoId) REFERENCES photos(id)\
+    )";
+    var createProfileInfoTable = "CREATE TABLE IF NOT EXISTS profile_info (\
+      id int NOT NULL auto_increment,\
+      bsid varchar(255),\
+      displayName varchar(255),\
+      bio varchar(255),\
+      profilePhotoId int,\
+      coverPhotoId int,\
+      PRIMARY KEY (id),\
+      FOREIGN KEY (profilePhotoId) REFERENCES photos(id),\
+      FOREIGN KEY (coverPhotoId) REFERENCES photos(id)\
+    )";
+    var createFollowingTable = "CREATE TABLE IF NOT EXISTS following (\
+      id int NOT NULL auto_increment,\
+      bsid varchar(255),\
+      PRIMARY KEY (id)\
+    )";
 
     if (constants.projectMode === constants.developmentMode) {
         var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
@@ -130,18 +160,26 @@ var createDatabase = function(callback) {
 
         // Create tables
         debug.log("Creating the tables...");
-        query(createTablesSql, "Created The_Feed's tables", function() {
+        query(createPhotosTable, "Created photos table", function() {
+        query(createPostsTable, "Created posts table", function() {
+        query(createProfileInfoTable, "Created profile info table", function() {
+        query(createFollowingTable, "Created following table", function() {
 
-        // Done. Callback.
+        // Done
         callback();
 
-        })});
+        })})})})});
     } else { // in production mode
         debug.log("Creating the database tables...");
-        query(createTablesSql, "Created database tables", function() {
-            // Done
-            callback();
-        });
+        query(createPhotosTable, "Created photos table", function() {
+        query(createPostsTable, "Created posts table", function() {
+        query(createProfileInfoTable, "Created profile info table", function() {
+        query(createFollowingTable, "Created following table", function() {
+
+        // Done
+        callback();
+
+        })})})});
     }
 }
 
@@ -165,10 +203,6 @@ var clearDatabase = function(callback) {
     query(clearTable + "photos", "", function() {
     query(resetTable1 + "photos" + resetTable2, "", function() {
 
-    // Clear followers
-    query(clearTable + "followers", "", function() {
-    query(resetTable1 + "followers" + resetTable2, "", function() {
-
     // Clear following
     query(clearTable + "following", "", function() {
     query(resetTable1 + "following" + resetTable2, "", function() {
@@ -176,7 +210,7 @@ var clearDatabase = function(callback) {
     // Callback
     callback();
 
-    })})})})})})})})})});
+    })})})})})})})});
 }
 
 /***********************************************************
@@ -186,12 +220,6 @@ var clearDatabase = function(callback) {
 var followUser = function(bsid, callback) {
     var sql = "Insert INTO following (bsid) values (" + mysql.escape(bsid) + ")";
     var msg = "Started following " + bsid;
-    query(sql, msg, callback);
-}
-
-var addFollower = function(bsid, callback) {
-    var sql = "Insert INTO followers (bsid) values (" + mysql.escape(bsid) + ")";
-    var msg = "Added " + bsid + " to followers";
     query(sql, msg, callback);
 }
 
@@ -346,12 +374,6 @@ var getFollowing = function(callback) {
     query(sql, msg, callback);
 }
 
-var getFollowers = function(callback) {
-    var sql = "SELECT * FROM followers";
-    var msg = "Got list of my followers";
-    query(sql, msg, callback);
-}
-
 /******************************************************************************/
 
 closeConnection(() => {
@@ -360,7 +382,6 @@ closeConnection(() => {
         createDatabase,
         clearDatabase,
         followUser,
-        addFollower,
         addPhoto,
         addPost,
         updateProfileInfo,
@@ -368,7 +389,6 @@ closeConnection(() => {
         getPhoto,
         getPosts,
         getProfileInfo,
-        getFollowing,
-        getFollowers
+        getFollowing
     };
 });

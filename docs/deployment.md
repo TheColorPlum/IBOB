@@ -125,6 +125,7 @@ Constant URLs:
 Constants for the database:
 
 - `CLEARDB_DATABASE_URL`: In production, the user-servers use ClearDB as the host for the MySQL database. This is the URL of the ClearDB database to connect to.
+- `BSID`: The Blockstack ID of the user who owns this user-server.
 
 Misc:
 

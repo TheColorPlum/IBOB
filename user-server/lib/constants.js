@@ -59,7 +59,7 @@ if (isProductionMode) {
         let varName = envVars[attr];
         let errorMessage = "Error: Environment variable " + varName
           + " is not set.";
-        if (process.env[varName] === undefined) {
+        if (!process.env[varName]) {
             console.error(errorMessage);
             process.exit(1);
         }

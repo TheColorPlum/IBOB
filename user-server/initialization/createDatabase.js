@@ -17,5 +17,4 @@ const dal = require("../lib/dal");
 
 dal.createDatabase(() => {
     console.log("Done creating database");
-    dal.closeConnection();
 });
