@@ -4,10 +4,11 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "addPosts": "cd initialization && ./addPosts 20 && cd ..",
     "createDatabase": "cd initialization && node createDatabase.js && cd ..",
     "devstart": "nodemon node server.js",
     "setOwner": "cd initialization && node setOwner.js $BSID && cd ..",
-    "start": "npm run createDatabase && npm run setOwner && node server.js",
+    "start": "npm run createDatabase && npm run setOwner && npm run addPosts && node server.js",
     "test": "./node_modules/.bin/mocha --exit"
   },
   "author": "",
