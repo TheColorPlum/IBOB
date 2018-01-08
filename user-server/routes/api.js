@@ -6,6 +6,7 @@
  */
 
 var aps = require('../lib/aps');
+var constants = require('../lib/constants');
 var dal = require('../lib/dal');
 var debug = require('../lib/debug');
 var express = require('express');
@@ -18,9 +19,6 @@ var app = express();
 /******************************************************************************/
 
 // Constants
-
-// TODO: This will need to be changed when deployed at a domain name
-const baseUrl = "http://localhost:3000";
 
 const urls = {
     getProfileInfo: "/get-profile-info",
@@ -264,7 +262,7 @@ app.post(urls.addPhoto, function(req, res, next) {
         }
 
         // Photo is stored. Now add its URL to the database.
-        var photoUrl = baseUrl + "/api/get-photo/" + photoName;
+        var photoUrl = constants.serverBaseUrl + "/api/get-photo/" + photoName;
         dal.addPhoto(photoUrl, function(result) {
             if (result.affectedRows == 0) {
                 // Error storing photo in database.

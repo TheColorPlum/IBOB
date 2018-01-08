@@ -4,9 +4,9 @@
  * Configures and starts the user-server.
  */
 
+const constants = require("./lib/constants");
 const express = require("express");
 const app = express();
-const port = 3000;
 
 const api = require("./routes/api");
 
@@ -67,6 +67,6 @@ app.use(apiPrefix, api.app);
 /******************************************************************************/
 
 // Start server
-app.listen(port, function() {
-    console.log("User-server is running on port " + port);
+app.listen(constants.port, function() {
+    console.log("User-server is running on port " + constants.port);
 });

@@ -8,9 +8,6 @@
 const aps = require("./aps");
 const jsontokens = require("jsontokens");
 
-// User-server directory URL
-const directoryBaseUrl = "http://localhost:4000";
-
 /*
  * Returns an encoded and signed version of `data` (JS object), which
  * you can use directly as the body of a request. Also requires the private
@@ -29,7 +26,6 @@ var makeTimestamp = function() {
 }
 
  module.exports = {
-    directoryBaseUrl,
     makeBody,
     makeTimestamp
  };

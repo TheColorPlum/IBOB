@@ -7,6 +7,7 @@
  */
 
 var axios = require("axios");
+var constants = require("./constants");
 var dal = require("./dal");
 var debug = require('./debug');
 var jsontokens = require("jsontokens");
@@ -21,13 +22,8 @@ const permissions = {
 // JWT encoding algorithm
 const encAlg = "ES256k";
 
-// Blockstack core API url
-const blockstackBaseUrl = "http://localhost:6000"; // dummy-blockstack-core
+// Blockstack core API profile URL
 const blockstackProfileExt = "/v1/names/";
-
-// Regex for Blockstack zonefiles
-// const zonefileRegex = "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profile.json"; // real one
-const zonefileRegex = "http://localhost:6000/zonefile/[A-za-z]+.id"; // dummy-blockstack-core
 
 // Time delta (ms) allowed between a request's send time and receive time to
 // consider it valid.
@@ -80,7 +76,7 @@ var verifyRequest = function(encData, requester, reqPermission) {
 
     // Get user's public key from blockstack. First, get
     // their profile.
-    var profileUrl = blockstackBaseUrl + blockstackProfileExt + requester;
+    var profileUrl = constants.blockstackBaseUrl + blockstackProfileExt + requester;
     return axios.get(profileUrl).then(response => {
 
         var json = response.data;
@@ -93,7 +89,7 @@ var verifyRequest = function(encData, requester, reqPermission) {
 
         // Get user's zone file
         debug.log("Getting " + requester + "'s zonefile");
-        var zonefileUrl = json.zonefile.match(zonefileRegex)[0];
+        var zonefileUrl = json.zonefile.match(constants.blockstackZonefileRegex)[0];
         return axios.get(zonefileUrl).then(response => {
 
             debug.log("Parsing " + requester + "'s zonefile");

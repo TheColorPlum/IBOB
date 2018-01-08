@@ -6,9 +6,15 @@
  * (see documentation for details).
  */
 
+var constants = require("./constants");
 var debug = require("./debug");
 var fs = require("fs");
 var mysql = require("mysql");
+
+// Constants for connecting to database while in development
+const host = "localhost";
+const user = "root";
+const password = "TuringP_lumRubik$9";
 
 /***********************************************************/
 
@@ -25,17 +31,17 @@ var isDatabaseCreated = true;
 var openConnection = function() {
     if (isDatabaseCreated) {
         return mysql.createConnection({
-            host               : 'localhost',
-            user               : 'root',
-            password           : 'TuringP_lumRubik$9',
+            host               : host,
+            user               : user,
+            password           : password,
             multipleStatements : true,
             database           : 'The_Feed'
         });
     } else {
         return mysql.createConnection({
-            host               : 'localhost',
-            user               : 'root',
-            password           : 'TuringP_lumRubik$9',
+            host               : host,
+            user               : user,
+            password           : password,
             multipleStatements : true
         });
     }
