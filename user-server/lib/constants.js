@@ -18,7 +18,6 @@ const envVars = {
 
     // URLs
     blockstackBaseUrl: "BLOCKSTACK_BASE_URL",
-    directoryBaseUrl: "DIRECTORY_BASE_URL",
     serverBaseUrl: "SERVER_BASE_URL",
 
     // For the database
@@ -82,7 +81,6 @@ var parseDebugFlag = function(flagStr) {
 // Set values
 const port = (isProductionMode) ? parseInt(process.env[envVars.port]) : 3000;
 const blockstackBaseUrl = (isProductionMode) ? process.env[envVars.blockstackBaseUrl] : "http://localhost:6000";
-const directoryBaseUrl = (isProductionMode) ? process.env[envVars.directoryBaseUrl] : "http://localhost:4000";
 const serverBaseUrl = (isProductionMode) ? process.env[envVars.serverBaseUrl] : "http://localhost:" + port;
 const cleardbDatabaseUrl = (isProductionMode) ? process.env[envVars.cleardbDatabaseUrl] : "";
 const blockstackZonefileRegex = (isProductionMode) ? process.env[envVars.blockstackZonefileRegex] : "http://localhost:6000/zonefile/[A-Za-z]+.id";
@@ -100,7 +98,6 @@ module.exports = {
     productionMode,
     port,
     blockstackBaseUrl,
-    directoryBaseUrl,
     serverBaseUrl,
     cleardbDatabaseUrl,
     blockstackZonefileRegex,

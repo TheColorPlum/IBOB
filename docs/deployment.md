@@ -119,7 +119,6 @@ Variables for the server:
 Constant URLs:
 
 - `BLOCKSTACK_BASE_URL`: The base URL for the Blockstack API.
-- `DIRECTORY_BASE_URL`: The base URL for the directory when deployed.
 - `SERVER_BASE_URL`: The base URL for this user-server.
 
 Constants for the database:
