@@ -29,22 +29,30 @@ var isDatabaseCreated = true;
 // created, this will be a connection to that database. If not,
 // it will be a regular connection, outside that database.
 var openConnection = function() {
-    if (isDatabaseCreated) {
-        return mysql.createConnection({
-            host               : host,
-            user               : user,
-            password           : password,
-            multipleStatements : true,
-            database           : 'The_Feed'
-        });
-    } else {
-        return mysql.createConnection({
-            host               : host,
-            user               : user,
-            password           : password,
-            multipleStatements : true
-        });
+    if (constants.projectMode === constants.developmentMode) {
+        if (isDatabaseCreated) {
+            return mysql.createConnection({
+                host               : host,
+                user               : user,
+                password           : password,
+                multipleStatements : true,
+                database           : 'The_Feed'
+            });
+        } else {
+            return mysql.createConnection({
+                host               : host,
+                user               : user,
+                password           : password,
+                multipleStatements : true
+            });
+        }
     }
+
+    else {
+        // In production mode, make connection using the ClearDB database URL
+        return mysql.createConnection(constants.cleardbDatabaseUrl);
+    }
+
 }
 
 
@@ -74,6 +82,9 @@ var query = function(sql, msg, callback) {
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
+        // Close connection
+        closeConnection();
+
         // Success!
         if (msg !== "") {
             debug.log("Database query successful: " + msg);
@@ -91,44 +102,47 @@ var query = function(sql, msg, callback) {
 //
 // Callback is optional
 var closeConnection = function(callback) {
-    connection.end(() => {
-        connection = null;
+    // connection.end(() => {
+    //     connection = null;
 
-        if (callback) callback();
-    });
+    //     if (callback) callback();
+    // });
+    connection.destroy();
+    connection = null;
+    if (callback) callback();
 }
 
 
-// Creates The_Feed database and all its tables
+// Creates the database and its tables, if in development mode, or only creates
+// the tables if in production mode.
 var createDatabase = function(callback) {
-    var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
-
     // Read table creation SQL from file
-    fs.readFile("create-database.sql", "utf8", (err, createTablesSql) => {
-    if (err) {
-        debug.log("Failed to read create-database.sql. Did not create database.");
-        callback(err);
-        return;
+    var createTablesSql = fs.readFileSync("create-database.sql", "utf8");
+
+    if (constants.projectMode === constants.developmentMode) {
+        var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
+
+        // Create database
+        debug.log("Creating the database...");
+        query(createDatabaseSql, "Created The_Feed database", function() {
+
+        isDatabaseCreated = true;
+
+        // Create tables
+        debug.log("Creating the tables...");
+        query(createTablesSql, "Created The_Feed's tables", function() {
+
+        // Done. Callback.
+        callback();
+
+        })});
+    } else { // in production mode
+        debug.log("Creating the database tables...");
+        query(createTablesSql, "Created database tables", function() {
+            // Done
+            callback();
+        });
     }
-
-    // Create database
-    debug.log("Creating the database...");
-    query(createDatabaseSql, "Created The_Feed database", function() {
-
-    // Reset connection - now that database has been created, we can
-    // connect to it.
-    isDatabaseCreated = true;
-    connection.end(() => {
-    connection = openConnection();
-
-    // Create tables
-    debug.log("Creating the tables...");
-    query(createTablesSql, "Created The_Feed's tables", function() {
-
-    // Done. Callback.
-    callback();
-
-    })})})});
 }
 
 
@@ -338,36 +352,23 @@ var getFollowers = function(callback) {
     query(sql, msg, callback);
 }
 
+/******************************************************************************/
 
-/***********************************************************
- * Some tests
- **********************************************************/
-
-// var response;
-// var user_id = "mike.id";
-
-// followUser(user_id, function(result) {
-//     if(result) {
-//         response = result;
-//         console.log(response);
-//     }
-// });
-
-
-
-module.exports = {
-    closeConnection,
-    createDatabase,
-    clearDatabase,
-    followUser,
-    addFollower,
-    addPhoto,
-    addPost,
-    updateProfileInfo,
-    setOwner,
-    getPhoto,
-    getPosts,
-    getProfileInfo,
-    getFollowing,
-    getFollowers,
-};
+closeConnection(() => {
+    module.exports = {
+        closeConnection,
+        createDatabase,
+        clearDatabase,
+        followUser,
+        addFollower,
+        addPhoto,
+        addPost,
+        updateProfileInfo,
+        setOwner,
+        getPhoto,
+        getPosts,
+        getProfileInfo,
+        getFollowing,
+        getFollowers
+    };
+});
