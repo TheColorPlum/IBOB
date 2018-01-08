@@ -1,8 +1,8 @@
 {
-  "name": "hello-blockstack",
+  "name": "the-feed",
   "version": "0.0.0",
-  "description": "A simple Blockstack app",
-  "main": "index.js",
+  "description": "A photo-sharing social network where you own your data",
+  "main": "server.js",
   "scripts": {
     "browserify": "browserify requires.js -o public/bundle.js",
     "generateBrowserConstants": "cd lib && node generateBrowserConstants.js && cd ..",
@@ -11,14 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/blockstack/hello-blockstack.git"
+    "url": "https://github.com/michaeljfriedman/IBOB.git"
   },
   "author": "",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/blockstack/hello-blockstack/issues"
-  },
-  "homepage": "https://github.com/blockstack/hello-blockstack#readme",
   "dependencies": {
     "axios": "^0.17.1",
     "blockstack": "^0.11.2",
@@ -27,5 +23,8 @@
     "fs": "0.0.1-security",
     "jsontokens": "^0.7.6",
     "path": "^0.12.7"
+  },
+  "engines": {
+    "node": "6.12.2"
   }
 }
