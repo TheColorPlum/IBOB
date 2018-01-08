@@ -3,6 +3,9 @@
 #
 # Automated deploy script.
 
+project=the-feed-web-app
+url=https://$project.appspot.com
+
 # Check whether we need to pull app.yaml
 echo "Checking for app.yaml..."
 if [ ! -f app.yaml ]; then
@@ -26,5 +29,9 @@ fi
 # Deploy
 echo "Deploying..."
 sleep 2
-gcloud app deploy
-echo "Done deploying"
+gcloud config set project $project
+gcloud app deploy --quiet
+echo "Done deploying!"
+echo
+
+echo "App is available at $url"
