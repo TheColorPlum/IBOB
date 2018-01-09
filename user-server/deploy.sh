@@ -11,6 +11,8 @@ if [ $# -ne 1 ]; then
   exit
 fi
 
+rm -f app.yaml
+
 export user_server_id=$1
 export project=the-feed-user-server$user_server_id
 export user_server_url=https://$project.appspot.com
