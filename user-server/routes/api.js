@@ -31,6 +31,7 @@ const urls = {
     addPhoto: "/add-photo",
 
     // [METRICS]
+    getTimeTrials: "/get-time-trials",
     resetTimeTrials: "/reset-time-trials"
 };
 
@@ -52,6 +53,10 @@ var generateNewPhotoName = function(file) {
 // Array to hold results of all time trials for adding posts.
 var timeTrials = [];
 
+
+app.get(urls.getTimeTrials, function(req, res) {
+    res.json(timeTrials);
+});
 
 /*
  * Resets the timeTrials array above, and returns {success: true}
@@ -259,7 +264,7 @@ app.post(urls.addPost, function(req, res, next) {
                 timer.recordTime();
                 var results = timer.stop();
                 timeTrials.push(results);
-                metrics.log(JSON.stringify(timeTrials));
+                metrics.log("Finished trial " + timeTrials.length);
 
                 res.json({success: true, post: {id: result.insertId, timestamp: timestamp, photo: {id: photoId, path: path}}});
             });
