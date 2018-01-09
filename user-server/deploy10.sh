@@ -5,8 +5,16 @@
 # Automated deployment of 10 user-server instance and their database, given its ID number.
 # See Backend docs for details.
 
-counter=11
-while [ $counter -le 20 ]
+# Check usage
+if [ $# -ne 1 ]; then
+  echo "Usage: ./deploy10.sh START-NUM"
+  exit 1
+fi
+
+# Deploy 10
+counter=$1
+max=$(($counter+9))
+while [ $counter -le $max ]
 do
     ./deploy.sh $counter
     ((counter++))
