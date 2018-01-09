@@ -126,12 +126,13 @@ curl \
 
 echo "Denied: Signature is invalid" > $expected_output
 
-if [ ! diff $test_output $expected_output ]; then
+if [ diff $test_output $expected_output ]; then
   echo "TEST FAILED: Expected '$(cat $expected_output) from request, but got $(cat $test_output)"
 else
   echo "TEST PASSED!"
 fi
 echo
+rm -f $test_output $expected_output
 
 echo "==============================================="
 echo

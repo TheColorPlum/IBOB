@@ -18,54 +18,23 @@ const password = "TuringP_lumRubik$9";
 
 /***********************************************************/
 
-// Determine whether database has been created yet or not,
-// so we know what type of connection to make.
-
-
-// At first, assume it has been created
-var isDatabaseCreated = true;
-
-// Returns a connection to MySQL. If The_Feed database has been
-// created, this will be a connection to that database. If not,
-// it will be a regular connection, outside that database.
-var openConnection = function() {
+// Returns a connection to MySQL, based on project mode.
+var getConnection = function() {
     if (constants.projectMode === constants.developmentMode) {
-        if (isDatabaseCreated) {
-            return mysql.createConnection({
-                host               : host,
-                user               : user,
-                password           : password,
-                multipleStatements : true,
-                database           : 'The_Feed'
-            });
-        } else {
-            return mysql.createConnection({
-                host               : host,
-                user               : user,
-                password           : password,
-                multipleStatements : true
-            });
-        }
+         return mysql.createConnection({
+            host               : host,
+            user               : user,
+            password           : password,
+            multipleStatements : true,
+            database           : 'The_Feed'
+        });
     }
 
     else {
         // In production mode, make connection using the ClearDB database URL
         return mysql.createConnection(constants.cleardbDatabaseUrl);
     }
-
 }
-
-
-// Now check if we need to change this assumption
-connection = openConnection();
-connection.connect(err => {
-    if (err) {
-        // Couldn't connect - database must not have been
-        // created yet
-        isDatabaseCreated = false;
-        connection = openConnection();
-    }
-});
 
 
 /***********************************************************/
@@ -74,16 +43,14 @@ connection.connect(err => {
 // `sql`, a message to print once the query succeeds, and the callback
 // function to process the results from the database (if there are any).
 var query = function(sql, msg, callback) {
-    if (connection === null) {
-        // First open a connection
-        connection = openConnection();
-    }
+    var connection = getConnection();
+    connection.connect();
 
     connection.query(sql, (err, result) => {
         if (err) throw err;
 
         // Close connection
-        closeConnection();
+        connection.end();
 
         // Success!
         if (msg !== "") {
@@ -91,25 +58,6 @@ var query = function(sql, msg, callback) {
         }
         callback(result);
     });
-}
-
-
-// Closes the current connection to the database. In the server (which runs
-// forever) you never need to close the connection. However, any code that
-// terminates must call this before it finishes, or it will hang at the end.
-// You can keep making queries even after calling this though; a new
-// connection will be made.
-//
-// Callback is optional
-var closeConnection = function(callback) {
-    // connection.end(() => {
-    //     connection = null;
-
-    //     if (callback) callback();
-    // });
-    connection.destroy();
-    connection = null;
-    if (callback) callback();
 }
 
 
@@ -150,13 +98,11 @@ var createDatabase = function(callback) {
     )";
 
     if (constants.projectMode === constants.developmentMode) {
-        var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
+        // var createDatabaseSql = "CREATE DATABASE IF NOT EXISTS The_Feed";
 
         // Create database
-        debug.log("Creating the database...");
-        query(createDatabaseSql, "Created The_Feed database", function() {
-
-        isDatabaseCreated = true;
+        // debug.log("Creating the database...");
+        // query(createDatabaseSql, "Created The_Feed database", function() {
 
         // Create tables
         debug.log("Creating the tables...");
@@ -168,7 +114,8 @@ var createDatabase = function(callback) {
         // Done
         callback();
 
-        })})})})});
+        })})})});
+        // })})})})});
     } else { // in production mode
         debug.log("Creating the database tables...");
         query(createPhotosTable, "Created photos table", function() {
@@ -376,19 +323,16 @@ var getFollowing = function(callback) {
 
 /******************************************************************************/
 
-closeConnection(() => {
-    module.exports = {
-        closeConnection,
-        createDatabase,
-        clearDatabase,
-        followUser,
-        addPhoto,
-        addPost,
-        updateProfileInfo,
-        setOwner,
-        getPhoto,
-        getPosts,
-        getProfileInfo,
-        getFollowing
-    };
-});
+module.exports = {
+    createDatabase,
+    clearDatabase,
+    followUser,
+    addPhoto,
+    addPost,
+    updateProfileInfo,
+    setOwner,
+    getPhoto,
+    getPosts,
+    getProfileInfo,
+    getFollowing
+};

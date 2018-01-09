@@ -25,7 +25,6 @@ dal.addPhoto(photoUrl, result => {
     if (result.affectedRows == 0) {
         // Something went wrong. Crash.
         console.error("Error: Unable to add entry for photo " + filename);
-        dal.closeConnection();
         process.exit(1);
     }
 
@@ -36,7 +35,6 @@ dal.addPhoto(photoUrl, result => {
         if (result.affectedRows == 0) {
             // Something went wrong. Crash.
             console.error("Error: Unable to add entry for post" + filename);
-            dal.closeConnection();
             process.exit(1);
         }
 
