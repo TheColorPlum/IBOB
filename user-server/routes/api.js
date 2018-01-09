@@ -212,6 +212,8 @@ app.post(urls.addPost, function(req, res, next) {
     // [METRICS] Start timer
     var timer = new metrics.Timer();
 
+    debug.log("Processing " + urls.addPost + " request...");
+
     // Verify
     aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular, timer).then(verification => {
         if(!verification.ok) {
@@ -220,7 +222,6 @@ app.post(urls.addPost, function(req, res, next) {
         }
 
         // Process request
-        debug.log("Processing " + urls.addPost + " request...");
         var body = JSON.parse(verification.decodedData);
         var photoId = body.photoId;
         var timestamp = (new Date()).toJSON();

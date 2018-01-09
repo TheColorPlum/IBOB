@@ -23,7 +23,7 @@ $(document).ready(function() {
  */
 
 // User's Blockstack ID
-const defaultBsid = 'alice.id';
+const defaultBsid = 'thefeed.id';
 if (blockstack.isUserSignedIn()) {
     constants.bsid = blockstack.loadUserData().username || defaultBsid;
 } else {
