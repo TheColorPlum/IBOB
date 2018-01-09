@@ -28,7 +28,10 @@ const urls = {
     updateProfileInfo: "/update-profile-info",
     followUser: "/follow-user",
     addPost: "/add-post",
-    addPhoto: "/add-photo"
+    addPhoto: "/add-photo",
+
+    // [METRICS]
+    resetTimeTrials: "/reset-time-trials"
 };
 
 const photosDir = path.join(__dirname, "../photos");
@@ -48,6 +51,15 @@ var generateNewPhotoName = function(file) {
 
 // Array to hold results of all time trials for adding posts.
 var timeTrials = [];
+
+
+/*
+ * Resets the timeTrials array above, and returns {success: true}
+ */
+app.get(urls.resetTimeTrials, function(req, res) {
+    timeTrials = [];
+    res.json({success: true});
+});
 
 /******************************************************************************/
 
@@ -237,6 +249,11 @@ app.post(urls.addPost, function(req, res, next) {
 
             // Add a post with that photo
             dal.addPost(photoId, timestamp, function(result) {
+                if(result.affectedRows == 0) {
+                    res.json({success: false});
+                    return;
+                }
+
                 // [METRICS] Record time to here - database query
                 timer.recordLap();
                 timer.recordTime();
@@ -244,10 +261,6 @@ app.post(urls.addPost, function(req, res, next) {
                 timeTrials.push(results);
                 metrics.log(JSON.stringify(timeTrials));
 
-                if(result.affectedRows == 0) {
-                    res.json({success: false});
-                    return;
-                }
                 res.json({success: true, post: {id: result.insertId, timestamp: timestamp, photo: {id: photoId, path: path}}});
             });
         });
