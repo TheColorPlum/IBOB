@@ -12,6 +12,7 @@ var debug = require('../lib/debug');
 var express = require('express');
 var fs = require("fs");
 var hasha = require("hasha");  // ref: https://github.com/sindresorhus/hasha
+var metrics = require("../lib/metrics");
 var path = require("path");
 
 var app = express();
@@ -40,6 +41,13 @@ var generateNewPhotoName = function(file) {
     var hash = hasha(file.data, {algorithm: "sha512"});
     return hash + "-" + Date.now() + ext;
 };
+
+/******************************************************************************/
+
+// [METRICS] Some variables for metrics
+
+// Array to hold results of all time trials for adding posts.
+var timeTrials = [];
 
 /******************************************************************************/
 
@@ -201,8 +209,11 @@ app.post(urls.followUser, function(req, res, next) {
  * Makes a post on this user's account.
  */
 app.post(urls.addPost, function(req, res, next) {
+    // [METRICS] Start timer
+    var timer = new metrics.Timer();
+
     // Verify
-    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular).then(verification => {
+    aps.verifyRequest(req.body, req.query.requester, aps.permissions.regular, timer).then(verification => {
         if(!verification.ok) {
             res.send(verification.errorMsg);
             return;
@@ -224,6 +235,13 @@ app.post(urls.addPost, function(req, res, next) {
 
             // Add a post with that photo
             dal.addPost(photoId, timestamp, function(result) {
+                // [METRICS] Record time to here - database query
+                timer.recordLap();
+                timer.recordTime();
+                var results = timer.stop();
+                timeTrials.push(results);
+                metrics.log(JSON.stringify(timeTrials));
+
                 if(result.affectedRows == 0) {
                     res.json({success: false});
                     return;

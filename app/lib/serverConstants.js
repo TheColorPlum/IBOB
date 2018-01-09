@@ -36,7 +36,7 @@ const directoryBaseUrl = (projectMode.isProduction) ? process.env[envVars.direct
 
 // Note: You can manually set the "development" value to false if you want
 // to disable debug logs.
-const debugFlag = (projectMode.isProduction) ? parseDebugFlag(process.env[envVars.debugFlag]) : true;
+const debugFlag = (projectMode.isProduction) ? parseDebugFlag(process.env[envVars.debugFlag]) : false;
 
 // Expose the constants
 module.exports = {

@@ -19,6 +19,7 @@
     "fs": "0.0.1-security",
     "hasha": "^3.0.0",
     "jsontokens": "^0.7.6",
+    "microtime": "^2.1.7",
     "mysql": "^2.15.0",
     "path": "^0.12.7"
   },

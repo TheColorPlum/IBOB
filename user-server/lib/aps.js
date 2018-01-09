@@ -11,6 +11,7 @@ var constants = require("./constants");
 var dal = require("./dal");
 var debug = require('./debug');
 var jsontokens = require("jsontokens");
+var metrics = require("./metrics");
 
 
 // Permission levels
@@ -66,7 +67,7 @@ var checkIsOwner = function(user) {
  *
  * See documentation for more details.
  */
-var verifyRequest = function(encData, requester, reqPermission) {
+var verifyRequest = function(encData, requester, reqPermission, timer) {
     //-----------------------------
     // Step 1: Authenticate user
     //-----------------------------
@@ -96,12 +97,19 @@ var verifyRequest = function(encData, requester, reqPermission) {
             var json = response.data;
             var publicKey = json[0].decodedToken.payload.subject.publicKey;
 
+            // [METRICS] Record time up to here - get PK
+            if (timer) timer.recordLap();
+
+
             // Check signature on request
             debug.log("Checking signature on " + requester +"'s request");
             var verified = new jsontokens.TokenVerifier(encAlg, publicKey).verify(encData);
             if (!verified) {
                 return {ok: false, decodedData: "", errorMsg: "Denied: Signature is invalid"};
             }
+
+            // [METRICS] Record time to here - signature check
+            if (timer) timer.recordLap();
 
             //-----------------------------
             // Step 2: Check permissions

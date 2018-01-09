@@ -87,7 +87,7 @@ const blockstackZonefileRegex = (isProductionMode) ? process.env[envVars.blockst
 
 // Note: You can manually set the development value for this (on the right side
 // of the ":") to false to disable debug logs.
-const debugFlag = (isProductionMode) ? parseDebugFlag(process.env[envVars.debugFlag]) : true;
+const debugFlag = (isProductionMode) ? parseDebugFlag(process.env[envVars.debugFlag]) : false;
 
 /******************************************************************************/
 
