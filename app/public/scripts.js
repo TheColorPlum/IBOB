@@ -13,7 +13,7 @@ $(document).ready(function() {
  ******************************************************************************/
 
 /*
- * Note: window.blockstack, window.requests, and window.metrics are available.
+ * Note: window.blockstack, window.requests, are available.
  * Imported via browserify in app/requires.js.
  *
  * Also, the object `constants` is available, from constants.js. See docs
@@ -51,8 +51,92 @@ constants.urls = {
 // Timeout period in milliseconds
 constants.requestTimeout = 10000;
 
-// [METRICS] Array to hold all recorded times for /new-post requests
+
+/*******************************************************************************
+ * [METRICS] Some tools for gathering metrics
+ ******************************************************************************/
+
+// Array to hold all recorded times for /new-post requests
 var sessionStorageTimeTrialsVar = 'timeTrials';
+
+// Timer with precision to 5 microseconds
+
+/*
+ * Starts and returns a new timer. Counts in milliseconds. (Timers can only be
+ * used once. You have to make a new timer to time more than once.)
+ */
+function Timer() {
+
+    // Start time in milliseconds since Jan 1 1970.
+    this.startTime;
+
+    // Start time for the current lap. Updated on every call to a startTime() or
+    // recordLap().
+    this.lapStartTime;
+
+    // Times are times since the timer was started.
+    this.recordedTimes = [];
+
+    // Laps are times since the *last* time a startTimer() or recordLap()
+    // was called.
+    this.recordedLaps = [];
+
+    // Indicates whether the timer is finished running.
+    this.isDone = false;
+
+
+    // Start the timer
+    this.startTime = performance.now();
+    this.lapStartTime = this.startTime;
+
+    /*
+     * Records the time since the timer was started. Returns that time.
+     */
+    this.recordTime = function() {
+        if (this.isDone) {
+            throw new Error('Timer is stopped! Make a new timer to record more.');
+        }
+
+        let newTime = performance.now();
+        let diff = newTime - this.startTime;
+        this.recordedTimes.push(diff);
+        return diff;
+    };
+
+
+    /*
+     * Records the time since the last lap was started. Returns that time.
+     */
+    this.recordLap = function() {
+        if (this.isDone) {
+            throw new Error('Timer is stopped! Make a new timer to record more.');
+        }
+
+        let newTime = performance.now();
+        let diff = newTime - this.lapStartTime;
+        this.recordedLaps.push(diff);
+        this.lapStartTime = newTime;
+        return diff;
+    };
+
+    /*
+     * Stops/destroys the timer. Returns the obj:
+     *   {recordedTimes: [...], recordedLaps: [...]}
+     * Note that this does *not* record the final time. You do that with a
+     * final call to recordTime() or recordLap() before calling this.
+     */
+    this.stop = function() {
+        if (this.isDone) {
+            throw new Error('Timer is stopped! Make a new timer to record more.');
+        }
+
+        // Stop
+        this.isDone = true;
+
+        return {recordedTimes: this.recordedTimes, recordedLaps: this.recordedLaps};
+    };
+}
+
 
 /*
  * Helper function for making signed requests to the user-server or the
@@ -350,7 +434,7 @@ $('#new-post-form').ajaxForm({
     dataType: 'json',
     beforeSubmit: function(arr, $form, options) {
         // [METRICS] Start timer
-        newPostTimer = new metrics.Timer();
+        newPostTimer = new Timer();
 
         // Show pending message
         $('#message').text(pendingMessage);

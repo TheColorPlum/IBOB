@@ -5,9 +5,15 @@
  * Some tools for gathering performance metrics. Namely a timer.
  */
 
+const microtime = require('microtime');
+
 /******************************************************************************/
 
 // Timer
+
+var secondsToMilliseconds = function(s) {
+    return s * 1000;
+}
 
 /*
  * Starts and returns a new timer. Counts in milliseconds. (Timers can only be
@@ -34,7 +40,7 @@ function Timer() {
 
 
     // Start the timer
-    this.startTime = new Date().getTime();
+    this.startTime = secondsToMilliseconds(microtime.nowDouble());
     this.lapStartTime = this.startTime;
 
     /*
@@ -45,7 +51,7 @@ function Timer() {
             throw new Error('Timer is stopped! Make a new timer to record more.');
         }
 
-        let newTime = new Date().getTime();
+        let newTime = secondsToMilliseconds(microtime.nowDouble());
         let diff = newTime - this.startTime;
         this.recordedTimes.push(diff);
         return diff;
@@ -60,7 +66,7 @@ function Timer() {
             throw new Error('Timer is stopped! Make a new timer to record more.');
         }
 
-        let newTime = new Date().getTime();
+        let newTime = secondsToMilliseconds(microtime.nowDouble());
         let diff = newTime - this.lapStartTime;
         this.recordedLaps.push(diff);
         this.lapStartTime = newTime;

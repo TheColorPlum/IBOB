@@ -22,6 +22,7 @@
     "express": "^4.15.2",
     "fs": "0.0.1-security",
     "jsontokens": "^0.7.6",
+    "microtime": "^2.1.7",
     "path": "^0.12.7"
   },
   "engines": {
