@@ -7,7 +7,8 @@
 
 // Constructs the URL of a user-server given its ID (one of those above)
 const getUrl = function(id) {
-    return `https://the-feed-user-server${id}.appspot.com`;
+    // return `https://the-feed-user-server${id}.appspot.com`;
+    return 'http://localhost:3000';
 };
 
 
@@ -39,7 +40,9 @@ dal.put('118.id', getUrl('118'), () => {
 dal.put('119.id', getUrl('119'), () => {
 dal.put('120.id', getUrl('120'), () => {
 dal.put('121.id', getUrl('121'), () => {
+dal.put('thefeed.id', getUrl('thefeed.id'), () => {
 
+})
 })
 })
 })

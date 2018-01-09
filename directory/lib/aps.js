@@ -71,7 +71,13 @@ var verifyRequest = function(encData, requester, reqPermission) {
 
             debug.log("Parsing " + requester + "'s zonefile");
             var json = response.data;
-            var publicKey = json[0].decodedToken.payload.subject.publicKey;
+
+            // [METRICS] Use a hard-coded public key instead of the one we
+            // got from Blockstack (since we can't find our private key for
+            // Blockstack). But still make the request to Blockstack so we
+            // can record how long it would have taken.
+            //var publicKey = json[0].decodedToken.payload.subject.publicKey;
+            var publicKey = "034c74b8655ecd8b7f06ffda76baa5c8ba6bc9bbd8ea3be4b265904b29c9f0eb15";
 
             // Check signature on request
             debug.log("Checking signature on " + requester +"'s request");
