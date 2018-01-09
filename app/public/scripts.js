@@ -463,6 +463,15 @@ $('#new-post-form').ajaxForm({
 
         // Execute if got a response
         function(resp) {
+            // Check if it worked
+            if (!resp.success) {
+                // [METRICS] Print trial failed.
+                console.error('Trial failed!');
+
+                $('#message').text(failureMessage);
+                return;
+            }
+
             // [METRICS] Record time to make second request and end time. Print results
             newPostTimer.recordLap();
             newPostTimer.recordTime();
@@ -476,12 +485,6 @@ $('#new-post-form').ajaxForm({
             console.error('Finished trial ' + (timeTrials.length+1));
             timeTrials.push(results);
             sessionStorage.setItem(sessionStorageTimeTrialsVar, JSON.stringify(timeTrials));
-
-            // Check if it worked
-            if (!resp.success) {
-                $('#message').text(failureMessage);
-                return;
-            }
 
             // Posted! Redirect to profile page
             $('#message').text(successMessage);
