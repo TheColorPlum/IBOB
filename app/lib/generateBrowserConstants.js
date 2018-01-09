@@ -69,8 +69,7 @@ fs.writeFileSync(constantsScript,
     // Helper function for constructing the base URLs of a user-server from its
     // IP address
     makeUserServerBaseUrl: function(ip) {
-        return constants.userServerProtocol + '://' + ip + ':'
-          + constants.userServerPort;
+        return ip;
     }
 };`
 
