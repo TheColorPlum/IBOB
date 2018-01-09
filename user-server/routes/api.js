@@ -246,25 +246,32 @@ app.post(urls.addPost, function(req, res, next) {
         dal.getPhoto(photoId, photo => {
 
             if (!photo.success) {
-                res.json({success: false});
-                res.end("Error: photo does not exist. Cannot make a post with it.");
-            }
-
-            var path = photo.path;
-
-            // Add a post with that photo
-            dal.addPost(photoId, timestamp, function(result) {
-                if(result.affectedRows == 0) {
-                    res.json({success: false});
-                    return;
-                }
-
                 // [METRICS] Record time to here - database query
                 timer.recordLap();
                 timer.recordTime();
                 var results = timer.stop();
                 timeTrials.push(results);
                 metrics.log("Finished trial " + timeTrials.length);
+
+                res.json({success: false});
+                return;
+            }
+
+            var path = photo.path;
+
+            // Add a post with that photo
+            dal.addPost(photoId, timestamp, function(result) {
+                // [METRICS] Record time to here - database query
+                timer.recordLap();
+                timer.recordTime();
+                var results = timer.stop();
+                timeTrials.push(results);
+                metrics.log("Finished trial " + timeTrials.length);
+
+                if(result.affectedRows == 0) {
+                    res.json({success: false});
+                    return;
+                }
 
                 res.json({success: true, post: {id: result.insertId, timestamp: timestamp, photo: {id: photoId, path: path}}});
             });
