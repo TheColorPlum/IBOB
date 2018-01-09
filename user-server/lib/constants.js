@@ -80,14 +80,14 @@ var parseDebugFlag = function(flagStr) {
 
 // Set values
 const port = (isProductionMode) ? parseInt(process.env[envVars.port]) : 3000;
-const blockstackBaseUrl = (isProductionMode) ? process.env[envVars.blockstackBaseUrl] : "http://localhost:6000";
+const blockstackBaseUrl = (isProductionMode) ? process.env[envVars.blockstackBaseUrl] : "https://core.blockstack.org";
 const serverBaseUrl = (isProductionMode) ? process.env[envVars.serverBaseUrl] : "http://localhost:" + port;
 const cleardbDatabaseUrl = (isProductionMode) ? process.env[envVars.cleardbDatabaseUrl] : "";
-const blockstackZonefileRegex = (isProductionMode) ? process.env[envVars.blockstackZonefileRegex] : "http://localhost:6000/zonefile/[A-Za-z]+.id";
+const blockstackZonefileRegex = (isProductionMode) ? process.env[envVars.blockstackZonefileRegex] : "https://gaia.blockstack.org/hub/[A-Za-z0-9]+/[0-9]+/profile.json";
 
 // Note: You can manually set the development value for this (on the right side
 // of the ":") to false to disable debug logs.
-const debugFlag = (isProductionMode) ? parseDebugFlag(process.env[envVars.debugFlag]) : true;
+const debugFlag = (isProductionMode) ? parseDebugFlag(process.env[envVars.debugFlag]) : false;
 
 /******************************************************************************/
 

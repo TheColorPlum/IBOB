@@ -6,14 +6,14 @@
 # See Backend docs for details.
 
 # Check usage
-if [ $# -ne 1 ]; then
-  echo "Usage: ./deploy10.sh START-NUM"
+if [ $# -ne 2 ]; then
+  echo "Usage: ./deploy10.sh MIN MAX"
   exit 1
 fi
 
 # Deploy 10
 counter=$1
-max=$(($counter+9))
+max=$2
 while [ $counter -le $max ]
 do
     ./deploy.sh $counter

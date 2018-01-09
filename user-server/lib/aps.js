@@ -11,6 +11,7 @@ var constants = require("./constants");
 var dal = require("./dal");
 var debug = require('./debug');
 var jsontokens = require("jsontokens");
+var metrics = require("./metrics");
 
 
 // Permission levels
@@ -66,7 +67,7 @@ var checkIsOwner = function(user) {
  *
  * See documentation for more details.
  */
-var verifyRequest = function(encData, requester, reqPermission) {
+var verifyRequest = function(encData, requester, reqPermission, timer) {
     //-----------------------------
     // Step 1: Authenticate user
     //-----------------------------
@@ -77,6 +78,7 @@ var verifyRequest = function(encData, requester, reqPermission) {
     // Get user's public key from blockstack. First, get
     // their profile.
     var profileUrl = constants.blockstackBaseUrl + blockstackProfileExt + requester;
+    debug.log("Making request to " + profileUrl);
     return axios.get(profileUrl).then(response => {
 
         var json = response.data;
@@ -94,7 +96,17 @@ var verifyRequest = function(encData, requester, reqPermission) {
 
             debug.log("Parsing " + requester + "'s zonefile");
             var json = response.data;
-            var publicKey = json[0].decodedToken.payload.subject.publicKey;
+
+            // [METRICS] Use a hard-coded public key instead of the one we
+            // got from Blockstack (since we can't find our private key for
+            // Blockstack). But still make the request to Blockstack so we
+            // can record how long it would have taken.
+            //var publicKey = json[0].decodedToken.payload.subject.publicKey;
+            var publicKey = "034c74b8655ecd8b7f06ffda76baa5c8ba6bc9bbd8ea3be4b265904b29c9f0eb15";
+
+            // [METRICS] Record time up to here - get PK
+            if (timer) timer.recordLap();
+
 
             // Check signature on request
             debug.log("Checking signature on " + requester +"'s request");
@@ -102,6 +114,9 @@ var verifyRequest = function(encData, requester, reqPermission) {
             if (!verified) {
                 return {ok: false, decodedData: "", errorMsg: "Denied: Signature is invalid"};
             }
+
+            // [METRICS] Record time to here - signature check
+            if (timer) timer.recordLap();
 
             //-----------------------------
             // Step 2: Check permissions
@@ -145,10 +160,12 @@ var verifyRequest = function(encData, requester, reqPermission) {
             });
 
         }).catch(error => { // failed to get requester's zonefile
+            debug.log("Failed to get requester's zonefile");
             return {ok: false, decodedData: "", errorMsg: "Failed while getting/processing zonefile. " + error.toString()};
         });
 
     }).catch(error => { // failed to get requester's profile
+        debug.log("Failed to get requester's profile");
         return {ok: false, decodedData: "", errorMsg: "Error: Request to Blockstack for " + requester + "'s profile failed."};
     });
 
