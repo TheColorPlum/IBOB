@@ -47,7 +47,9 @@ var query = function(sql, msg, callback) {
         if (err) throw err;
 
         // Close connection
-        connection.end();
+        connection.end(err => {
+            // Ignore error
+        });
 
         // Success!
         if (msg !== "") {
