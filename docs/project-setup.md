@@ -25,7 +25,17 @@ However, the browser application still requires Blockstack so users can log in. 
 
 ### Our project
 
-Most of our project setup is automated in a script. But before you can run it, you first need to add a MySQL user named "root" with the password "TuringP_lumRubik$9" (sorry, it's an odd password).
+**Project mode environment variable.** First, you need to set the environment variable `PROJECT_MODE` in your terminal. Set this to `development` when working on the project locally:
+
+```bash
+$ export PROJECT_MODE="development"
+```
+
+*You need to set this variable every time you go to work on the project (every terminal session).*
+
+More details on the purpose of this variable are in the [Deployment](deployment.md) page. But for now, what you need to know is that the servers will *not* run unless this variable is set.
+
+**Automated setup.** Most of the rest of our project setup is automated in a script. But before you can run it, you first need to add a MySQL user named "root" with the password "TuringP_lumRubik$9" (sorry, it's an odd password).
 
 Now, change into the `setup-scripts/` directory and run the `setup-project.sh` script:
 
@@ -35,13 +45,5 @@ $ ./setup-project.sh
 ```
 
 This will install the npm dependencies required for the project, set up the database, and run our tests to ensure that everything is working.
-
-**Project mode environment variable.** Lastly, whenever you work on the project, you will need to set the environment variable `PROJECT_MODE` in your terminal. Set this to `development` when working on the project locally:
-
-```bash
-$ export PROJECT_MODE="development"
-```
-
-More details on the purpose of this variable are in the [Deployment](deployment.md) page. But for now, what you need to know is that the servers will *not* run unless this variable is set.
 
 **You should be all set!** See the [Frontend](frontend.md) and [Backend](backend.md) sections for details on how the project is built and how to work on it.
