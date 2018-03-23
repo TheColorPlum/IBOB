@@ -80,13 +80,13 @@ The first time:
 
   > Although this environment technically simluates Blockstack, we only use it to simulate a login in the browser. We do *not* use it in the user-server to get alice.id's public key when it needs to verify signatures. This is because we do not know what the Blockstack Docker environment's private key for alice.id is (we have not been able to figure out where it's stored.) So instead, we just made up a sample private key that we sign requests with, the dummy Blockstack core knows the corresponding public key, and the user-server asks the dummy Blockstack core for this public key when it needs to verify signatures.
 
-- **Finally, initialize alice.id's user-server.** Run the script below. You will need to fill in private key argument (find this in `dummy-blockstack-core/private-keys.txt`).
+- **Finally, initialize alice.id's user-server.** Run the script below, and then start the server:
   ```bash
   $ cd user-server/initialization
-  $ ./main.sh alice.id <private-key> 127.0.0.1
+  $ ./main.sh alice.id
+  $ cd ..
+  $ start.sh
   ```
-  > Note: This will automatically start running the user-server in the background once it has been configured. Its process id (PID) will be printed for you. *Make sure to take note of it*. Then, when you want to kill the server, use this process ID: `$ kill <pid>`.
-
 
 Subsequent times:
 
@@ -120,7 +120,7 @@ Any requests to the user-server or directory (except the directory's `/get` requ
 
 ```javascript
 var url = ...
-var body = {attr1: value1, attr2: value2, timestamp: requests.makeTimestamp()};
+var body = {timestamp: requests.makeTimestamp(), ...};
 makeSignedRequest(url, body,
 
 // Executed if got a response. `resp` is the parsed JSON response
