@@ -1,27 +1,18 @@
 # Deployment
 
-All components (app, user-server, directory) are deployed as Google App Engine instances. You'll need to have the [Google Cloud SDK](https://cloud.google.com/sdk/docs/) (command-line tools) installed for this.
-
-Below we document what you need to know to *re-deploy* the app, assuming we have already initially set up the project(s) and deployed on Google App Engine. Refer to [this Google doc](https://docs.google.com/document/d/1HEz8ke7DDHz3HShVo8a9Hojq1TtEkDl_qS5K6n7w0hc/edit) for instructions doing the initial setup/deployment. Also you can refer to GAE's ["Hello World" app tutorial](https://cloud.google.com/nodejs/getting-started/hello-world) and [Complex app tutorial](https://cloud.google.com/nodejs/getting-started/hello-world) for more depth.
+All components (app, user-server, directory) are deployed as Google App Engine instances. You'll need to have the [Google Cloud SDK](https://cloud.google.com/sdk/docs/) (command-line tools) installed for this. You can refer to GAE's ["Hello World" app tutorial](https://cloud.google.com/nodejs/getting-started/hello-world) and [Complex app tutorial](https://cloud.google.com/nodejs/getting-started/hello-world) for more depth.
 
 ## Automated deployment
 
-Each component of the app has its own `deploy.sh` script, which automates re-deployment. Just run this to re-deploy (e.g. after you've updated the code, or something):
+**Currently, this is not implemented.** Each component of the app will eventually have its own automated deployment script. Several of these are actually written on other branches, but they have not been merged and/or may be outdated.
 
-```bash
-$ cd [whichever component you are working on]
-$ ./deploy.sh
-```
-
-> Note: Currently, `deploy.sh` is only implemented for the app. Scripts for the directory and user-server are coming soon.
+We have instructions for manual deployment written in [this Google doc](https://docs.google.com/document/d/1HEz8ke7DDHz3HShVo8a9Hojq1TtEkDl_qS5K6n7w0hc/edit).
 
 ## Environment variables
 
 Each component of the project also requires that we set several environment variables. These define the values for various constants used throughout the code. In production, these constants take their values from the environment variables, while in development, some of them do, and others are hard-coded in the source code.
 
 It is better to set these with environment variables in production, as opposed to hard-coding them into the source code because (1) this makes it easier to change their values on the fly without having to change/commit/push the code; and (2) many of the variables contain sensitive information that we should keep private (e.g. private keys), and thus cannot put in the source code.
-
-You won't really have to worry about these variables if you're just running the `deploy.sh` script, since it pulls the values for you from a private GitHub repo. But if you're configuring the production server, you'll need to deal with them.
 
 So environment variables that need to be set for each component of the project are specified below:
 
