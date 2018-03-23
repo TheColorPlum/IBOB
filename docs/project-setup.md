@@ -18,7 +18,7 @@ Whenever you go to work on the project, make sure to start the "Dummy Blockstack
 
 ```bash
 $ cd dummy-blockstack-core
-$ ./start.sh
+$ npm run devstart
 ```
 
 However, the browser application still requires Blockstack so users can log in. You can get a simulated version of Blockstack running by setting up the Blockstack Docker environment. See [this page](blockstack.md) for details on that.

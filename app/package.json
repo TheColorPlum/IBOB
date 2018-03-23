@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "browserify": "browserify requires.js -o public/bundle.js",
+    "devstart": "npm run start",
     "generateBrowserConstants": "cd lib && node generateBrowserConstants.js && cd ..",
     "generateManifest": "cd lib && node generateManifest.js && cd ..",
     "start": "npm run browserify && npm run generateBrowserConstants && npm run generateManifest && node server.js"

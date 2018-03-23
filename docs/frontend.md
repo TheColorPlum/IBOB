@@ -18,10 +18,9 @@ Below is the directory structure that makes up the front end, under the `app/` d
   - profile.html
 - requires.js
 - server.js
-- start.sh
 ```
 
-The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory. `server.js` is the web server that servers the pages, and `start.sh` is a shortcut script that runs the server.
+The front end is written in HTML/CSS with the Bootstrap v4.0.0 styling framework, and JavaScript/jQuery v3.1.1 for handling dynamic content. The HTML pages ("views") are in the `views/` directory. The CSS/JS ("static files") are in the `public/` directory. `server.js` is the web server that servers the pages.
 
 `requires.js` is a file where we specify libraries we need to import into the *browser* using Browserify. Namely, this includes the *Blockstack library* and one of our own small libraries containing some helper functions (`lib/requests.js`). See the [Blockstack.js documentation](http://blockstack.github.io/blockstack.js/) for a reference on Blockstack.
 
@@ -50,7 +49,7 @@ JavaScript:
 To run the app, first run the web server:
 
 ```bash
-$ ./start.sh
+$ npm run devstart
 ```
 
 and then open [http://localhost:5000](http://localhost:5000) in your browser.
@@ -66,13 +65,13 @@ The first time:
 - **Start the dummy Blockstack core** if it's not already running.
   ```bash
   $ cd dummy-blockstack-core
-  $ ./start.sh
+  $ npm run devstart
   ```
 
 - **Start the directory** if it's not already running.
   ```bash
   $ cd directory
-  $ ./start.sh
+  $ npm run devstart
   ```
 
 - **Create a Blockstack ID alice.id** in the Blockstack Docker environment. This process is kind of long (sorry! can't be automated), so we document it in a separate page: [The Blockstack Docker Environment](blockstack.md).
@@ -85,15 +84,15 @@ The first time:
   $ cd user-server/initialization
   $ ./main.sh alice.id
   $ cd ..
-  $ start.sh
+  $ npm run devstart
   ```
 
 Subsequent times:
 
 - Start each of the servers:
-  - Dummy Blockstack Core: `$ cd dummy-blockstack-core && ./start.sh`
-  - User-Server Directory: `$ cd directory && ./start.sh`
-  - User-Server: `$ cd user-server && ./start.sh`
+  - Dummy Blockstack Core: `$ cd dummy-blockstack-core && npm run devstart`
+  - User-Server Directory: `$ cd directory && npm run devstart`
+  - User-Server: `$ cd user-server && npm run devstart`
 
 
 ### Logging into the app

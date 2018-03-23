@@ -18,10 +18,9 @@ Code for the app is located in `app/`. The general layout of this directory is s
 - views/
   - ...
 - server.js
-- start.sh
 ```
 
-The `lib/` directory contains some JS libraries written by us (e.g. helper functions, global variables, etc.). The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below). `start.sh` is a shortcut script for running the server.
+The `lib/` directory contains some JS libraries written by us (e.g. helper functions, global variables, etc.). The `public/` and `views/` directories contain all the frontend files (see [Frontend](frontend.md)). The crux of this app is `server.js`, which is the web server that serves all the pages (more details below).
 
 ### Main Web Server
 
@@ -85,7 +84,6 @@ The user-server code is located in the `user-server/` directory. We show the str
   - ...
   - ...
 - server.js
-- start.sh
 - test.sh
 ```
 
@@ -212,7 +210,6 @@ The code is located in the `directory/` folder. Within that is the following str
   - ...
   - ...
 - server.js
-- start.sh
 - test.sh
 ```
 
