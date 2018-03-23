@@ -34,15 +34,15 @@ The app defines the following URL endpoints. All of them are implemented in `ser
 - `GET /`: Returns the sign-in page.
 - `GET /manifest.json`: Returns the app's Blockstack manifest. Blockstack requires that this URL is defined in order to log users in.
 - `GET /initialization`: Returns a page to start up the user's user-server. They have to enter some info, and then click a button to spin it up.
-- `POST /create-user-server?requester=<requester>`: Upon receiving this request, the app send the site admins (i.e. us) a message to spin up a new user-server for the sender. The admins will send back an email to the provided email address when the user-server is ready. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
+- `POST /create-user-server?requester=<requester>`: **Currently, this request is not implemented.** However, it will eventually spin up a new user-server for the requester. Specifically, it deploys a new user-server, registers it with the directory, and returns its URL. This request must be *signed* by the sender, to ensure that only that user can create their user-server.
   - Request body (sample):
     ```json
-    {"email": "bob@gmail.com", "timestamp": "2017-10-23T18:25:43.511Z"}
+    {"bsid": "alice.id", "timestamp": "2017-10-23T18:25:43.511Z"}
     ```
 
   - Response (sample), if successful.
     ```json
-    {"success": true}
+    {"success": true, "url": "https://example.herokuapp.com"}
     ```
 
   - Response (sample), if failed. The response will fail if either the signature was invalid, or the user-server has already been created. The reason will be specified in `msg`.
@@ -50,9 +50,7 @@ The app defines the following URL endpoints. All of them are implemented in `ser
     {"success": false, "msg": "This user already has a user-server!"}
     ```
 
-  > Note: In development, this request does not actually do anything. It just returns the success message so the user can get logged in. You will have to manually start a local user-server before you can do anything after logging in. See the [Frontend](frontend.md) section for details on this.
-
-  > Another note: We have not implemented signature checking yet, so for now this request does *not* require a signature.
+  > Note: If you look in `app/server.js`, some of the code for this is already written, but it returns before it gets to that point. Parts that are not implemented are labeled with `TODO` comments.
 
 And main pages:
 
@@ -95,7 +93,79 @@ In summary: the root directory contains mostly configuration files and some help
 
 ### Storage
 
-User data is stored in a MySQL database... *Documentation coming soon*
+User data is stored in a MySQL database. It has the following tables: `photos`, `posts`, `profile_info`, and `following`. Schemas are below:
+
+- `photos`
+  ```
+  +------+--------+
+  |  id  |  path  |
+  +------+--------+
+  ```
+
+  - `id` is an int that auto-increments
+  - `path` is a string path to the photo (e.g. a URL to its location)
+
+- `posts`
+  ```
+  +------+-----------+-----------+
+  |  id  |  photoId  | timestamp |
+  +------+-----------+-----------+
+  ```
+
+  - `id` is an int that auto-increments
+  - `photoId` is a foreign key into the `photos` table
+  - `timestamp` is a string timestamp (JSON formatted) representing the time this post was made.
+
+- `profile_info`
+  ```
+  +------+--------+-------------+-----+---------------+--------------+
+  |  id  |  bsid  | displayName | bio | profileInfoId | coverPhotoId |
+  +------+--------+-------------+-----+---------------+--------------+
+  ```
+
+  - `id` is an int that auto-increments
+  - `bsid` is the Blockstack ID for this user
+  - `displayName` is the user's full name
+  - `bio` is an optional bio of the user
+  - `profilePhotoId` is a foreign key into `photos`, which is the profile photo
+  - `coverPhotoId` is also a foreign key into `photos`, and is the cover photo
+
+- `following`
+  ```
+  +------+--------+
+  |  id  |  bsid  |
+  +------+--------+
+  ```
+
+  - `id` is an int that auto-increments
+  - `bsid` is a string Blockstack ID of the user that this user follows
+
+The actual SQL queries used to insert/select entries are abstracted in a data-access layer written in Node. It's located in `lib/dal.js`, and it defines the following operations to the database.
+
+Put requests (none of these have return values):
+
+- `followUser(bsid, callback)`: Adds `bsid` (string Blockstack ID) to the `following` table.
+- `addPhoto(path, callback)`: Adds a photo to the `photos` table, given its string `path`.
+- `addPost(photoId, timestamp, callback)`: Adds a post to the `posts` table, given a `photoId` (int id into `photos` table) and a `timestamp` (string in JSON timestamp format).
+- `updateProfileInfo(bsid, profile, callback)`: Overwrites the entry in the `profile_info` table for `bsid` (string Blockstack ID) with new profile info in the `profile` object. `profile` can contain any of the attributes: `displayName`, `bio`, `profilePhotoId`, and `coverPhotoId` (analogous to the columns of the table).
+- `setOwner(bsid, callback)`: Sets the owner of this user-server to `bsid` (string Blockstack ID) by initializing their entry in the `profile_info` table. Note this must be called before calling `updateProfileInfo()`.
+
+
+Get requests:
+
+- `getPhoto(photoId, callback)`: Retrieves the entry in the `photos` table given its id `photoId`. Returns the following object to the callback:
+  - If it exists: `{success: true, id: 26, path: 'path/to/photo.png'}`
+  - If not: `{success: false}`
+- `getPosts(callback)`: Retrieves all entries in the `posts` table. Returns an array of them to the callback.
+- `getProfileInfo(callback)`: Retrieves the owner's profile info from the `profile_info` table. Returns to the callback an object whose attributes are the columns of the table.
+- `getFollowing(callback)`: Retrieves all entries in the `following` table. Returns an array of them to the callback.
+
+The DAL also defines three other functions: one that creates the database and the table shown above (for initialization); one that closes the connection to the database; and one that clears the database (helpful when writing tests).
+
+- `createDatabase(callback)`: Creates the directory's database and the table shown above. Calls the callback when done.
+- `closeConnection([callback])`: Closes the DAL's current connection to the database. You should call this before any code that uses the DAL terminates; otherwise, it will hang at the end. You can still continue to make queries after calling this, though; a new connection will be made for the next query. `callback` is optional, but if one is present, nothing is passed to it when it is called.
+  > Note that you do *not* need to call this in the server, since it does not terminate, and thus can use a persistent connection.
+- `clearDatabase(callback)`: Clears the contents of all tables in the database. (Nothing is passed to the callback.)
 
 ### Web API
 
@@ -160,25 +230,13 @@ Storage is implemented in a MySQL database. It has one table called `user_server
 
 - `id` is an int that auto-increments
 - `bsid` is a string. It holds the user's Blockstack ID (e.g. alice.id)
-- `ip` is a 32-bit unsigned int. It holds the user's IP address.
-
-Storing IP addresses as integers is convenient for storage, but not so much for reading/writing, since we have to convert from the usual decimal notation (e.g. 192.168.0.1) to the corresponding integer. But we can do this pretty easily in MySQL. e.g.
-
-- Insert: `INSERT INTO user_servers (bsid, ip) VALUES ("alice.id", INET_ATON("192.168.0.1"));`
-- Select: `SELECT bsid, INET_NTOA(ip) AS ip FROM user_servers WHERE bsid = "alice.id";`. This will return something like:
-  ```
-  +-----------+-----------------+
-  | bsid      |  ip             |
-  +-----------+-----------------+
-  | alice.id  |  192.168.0.1    |
-  +-----------+-----------------+
-  ```
+- `ip` is the URL of the user-server (e.g. https://example.herokuapp.com). Sorry for the name `ip`; it was originally designed as an IP address, but it was changed to a URL and the name `ip` was grandfathered in because other components use this convention. Perhaps we can change this at a later time.
 
 The actual SQL queries used to insert/select entries are abstracted in a data-access layer written in Node. It's located in `lib/dal.js`, and it defines the two main operations we make to the database:
 
 - `get(bsid, callback)`: Gets the IP address corresponding to `bsid` (string user name).
   - Returned to callback: JS object in format `{success: true, ip: "192.168.0.1"}` if there is an entry for that user, or `{success: false}` if not.
-- `put(bsid, ip, callback)`: Adds a mapping from `bsid` (string user name) to `ip` (string IP address in decimal notation), or overwrites the entry for `bsid` if there already is one.
+- `put(bsid, ip, callback)`: Adds a mapping from `bsid` (string user name) to `ip` (string URL of the user-server), or overwrites the entry for `bsid` if there already is one.
   - Returned to callback: `{success: true}`
 
 It also defines three other functions: one that creates the database and the table shown above (for initialization); one that closes the connection to the database; and one that clears the database (helpful when writing tests).

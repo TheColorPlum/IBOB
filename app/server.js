@@ -105,21 +105,18 @@ app.get(urls.initialization, function(req, res, next) {
  * given user. Requires a signature.  See docs for details.
  */
 app.post(urls.createUserServer, function(req, res, next) {
-    // Verify request
-    // TODO: For simplicity of the first implementation, we are not requiring
-    // that this request is signed. That will be implemented later.
-
+    // TODO: Verify signature
     var bsid = req.query.requester;
     debug.log('Got request for ' + bsid);
 
-    // For now while we deploy to gather performance metrics, just
-    // return here without doing anything
-    res.json({success: true});
+    // For now, just return here without doing anything
+    res.json({success: false, msg: 'Request not implemented'});
     return;
 
     //--------------------------------------------------------------------------
 
-    // THIS SECTION DOES NOT RUN. WE WILL REIMPLEMENT THIS LATER.
+    // TODO: This section does not run, though most of it is implemented. Some
+    // parts are still missing, and are marked with TODOs.
     var body = JSON.parse(req.body);
 
     // Check that a user-server has not already been created for this user
@@ -136,15 +133,13 @@ app.post(urls.createUserServer, function(req, res, next) {
         }
 
 
-        // Spin up user-server
-        // TODO: In production, we will do this. In development, we don't. You
-        // will just have to manually start up user-server. See docs.
+        // TODO: Spin up user-server
         debug.log('Spinning up user-server for ' + bsid + '...');
-        var ip = '127.0.0.1';
+        var url = 'https://example.herokuapp.com'; // hard-coded URL for now
 
         // Add entry to the directory for the new user-server
-        debug.log('Adding entry (' + bsid + ', ' + ip + ') to directory...');
-        var data = {bsid: bsid, ip: ip, timestamp: requests.makeTimestamp()};
+        debug.log('Adding entry (' + bsid + ', ' + url + ') to directory...');
+        var data = {bsid: bsid, ip: url, timestamp: requests.makeTimestamp()};
         var reqBody = requests.makeBody(data, privateKey);
         axios.post(constants.directoryBaseUrl + '/api/put?requester=' + bsid, reqBody)
         .then(resp => {
@@ -161,7 +156,7 @@ app.post(urls.createUserServer, function(req, res, next) {
 
             // All done!
             debug.log('All done! Responding success');
-            res.json({success: true, ip: ip});
+            res.json({success: true, url: url});
 
 
         }).catch(err => { // failed to put entry into directory

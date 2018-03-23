@@ -280,9 +280,6 @@ var setOwner = function(bsid, callback) {
  * Get requests interface to the database
  **********************************************************/
 
-// Returns the photo with id photoId as an object:
-//   {success: true, id: 26, path: '/path/to/photo.png'}  (if it exists)
-//   {success: false}                                     (if it doesn't exist)
 var getPhoto = function(photoId, callback) {
     var sql = "SELECT * FROM photos WHERE id = " + mysql.escape(photoId);
     var msg = "Retrieved photo " + photoId;
